@@ -1,0 +1,2008 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!-- saved from url=(0109)https://www.engr.colostate.edu/~ramirez/ce_old/classes/cive322-Ramirez/CE322_Web/Example_MuskingumRouting.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	
+	<meta name="GENERATOR" content="Visual Page 2.0 for Windows">
+	<title>Muskingum Routing Example</title>
+</head>
+
+<body>
+
+<p><b>CE322 Basic Hydrology</b> <br>
+Jorge A. Ramirez <br>
+<b>Muskingum Routing - Example</b></p>
+
+<p>The inflow and outflow hydrographs of a river reach are tabulated below.
+</p><center>
+
+<table border="1" cellpadding="7" width="216">
+	<tbody><tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">Time (h)</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">Inflow (m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">Outflow (m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">1</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">93</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">85</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">2</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">137</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">91</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">3</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">208</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">114</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">4</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">320</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">159</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">5</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">442</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">233</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">6</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">546</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">324</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">7</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">630</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">420</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">8</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">678</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">509</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">9</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">691</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">578</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">10</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">675</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">623</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">11</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">634</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">642</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">12</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">571</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">635</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">13</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">477</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">603</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">14</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">390</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">546</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">15</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">329</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">479</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">16</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">247</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">413</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">17</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">184</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">341</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">18</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">134</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">274</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">19</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">108</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">215</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">20</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">90</font>
+		</p></td>
+		<td width="33%" valign="TOP">
+			<p align="CENTER"><font size="2">170</font>
+		</p></td>
+	</tr>
+</tbody></table>
+</center>
+The Muskingum routing procedure is used for systems that have Storage - Discharge relationships that are hysteretic.
+That is, for systems for which the outflow is not a unique function of storage. The <i>S vs. O</i> relationship
+for the river reach under consideration is graphed below.<p></p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image307.gif" width="472" height="301" align="BOTTOM" border="0"></p>
+<p><br>
+<br>
+<br>
+</p>
+<p><b>A. Parameter Estimation</b></p>
+<p>Use these observations to obtain the Muskingum routing parameters <i>k</i> and <i>x</i> for this river reach.
+The initial storage in the system is 715,000 m<sup>3</sup>.</p>
+<p><b>Graphical Procedure:</b></p>
+<p>The graphical procedure consists in generating graphs of <i>[xI + (1-x)O] vs. S</i> for different values of
+<i>x</i>, arbitrarily selected such that 0 &lt; <i>x</i> &lt; 0.5. The optimal value of <i>x</i> is selected as
+that which produces the narrowest and straightest loop graph of <i>[xI + (1-x)O] vs. S</i>. The slope of the least
+squares linear fit to the resulting points is the estimate of <i>k</i>.</p>
+<p>a) Generate accumulated storage in the system. Use continuity equation as follows: <br>
+&nbsp; <br>
+&nbsp; <br>
+&nbsp; <br>
+&nbsp; <br>
+&nbsp;
+</p><center>
+
+<table border="1" cellpadding="7" width="648">
+	<tbody><tr>
+		<td width="11%" valign="TOP" rowspan="2">
+			<p align="CENTER"><font size="2">1</font>
+		</p></td>
+		<td width="11%" valign="TOP" rowspan="2">
+			<p align="CENTER"><font size="2">2</font>
+		</p></td>
+		<td width="11%" valign="TOP" rowspan="2">
+			<p align="CENTER"><font size="2">3</font>
+		</p></td>
+		<td width="11%" valign="TOP" rowspan="2">
+			<p align="CENTER"><font size="2">4</font>
+		</p></td>
+		<td width="11%" valign="TOP" rowspan="2">
+			<p align="CENTER"><font size="2">5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">6</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">7</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">8</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">9</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">x=0.25</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">x=0.35</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">x=0.1</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">x=0.15</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">Inflow, I</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">Outflow,O</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">Ave. Inflow</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">Ave. Outflow</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">Storage</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">)</font>
+		</p></td>
+		<td valign="TOP" colspan="4">
+			<p align="CENTER"><font size="2">Weighted Average Flux</font></p>
+			<p align="CENTER"><font size="2">xI + (1-x)O</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">93</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">85</font>
+		</p></td>
+		<td width="11%" valign="TOP">&nbsp;</td>
+		<td width="11%" valign="TOP">&nbsp;</td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">715000</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">87</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">87.8</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">85.8</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">86.21204</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">137</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">91</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">115</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">88</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">812200</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">102.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">107.1</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">95.6</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">97.96922</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">208</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">114</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">172.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">102.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">1064200</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">137.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">146.9</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">123.4</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">128.2414</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">320</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">159</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">264</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">136.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">1523200</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">199.25</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">215.35</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">175.1</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">183.3923</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">442</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">233</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">381</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">196</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">2189200</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">285.25</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">306.15</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">253.9</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">264.6645</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">546</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">324</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">494</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">278.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">2965000</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">379.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">401.7</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">346.2</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">357.634</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">630</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">420</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">588</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">372</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">3742600</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">472.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">493.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">441</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">451.816</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">678</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">509</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">654</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">464.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">4424800</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">551.25</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">568.15</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">525.9</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">534.6043</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">691</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">578</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">684.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">543.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">4932400</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">606.25</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">617.55</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">589.3</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">595.1201</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">675</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">623</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">683</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">600.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">5229400</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">636</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">641.2</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">628.2</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">630.8782</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">634</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">642</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">654.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">632.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">5308600</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">640</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">639.2</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">641.2</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">640.788</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">571</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">635</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">602.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">638.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">5179000</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">619</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">612.6</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">628.6</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">625.3037</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">477</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">603</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">524</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">619</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">4837000</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">571.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">558.9</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">590.4</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">583.9104</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">390</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">546</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">433.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">574.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">4329400</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">507</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">491.4</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">530.4</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">522.3653</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">329</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">479</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">359.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">512.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">3778600</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">441.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">426.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">464</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">456.2743</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">247</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">413</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">288</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">446</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">3209800</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">371.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">354.9</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">396.4</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">387.8502</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">184</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">341</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">215.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">377</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">2628400</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">301.75</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">286.05</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">325.3</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">317.2138</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">134</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">274</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">159</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">307.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">2093800</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">239</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">225</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">260</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">252.7894</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">108</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">215</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">121</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">244.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">1649200</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">188.25</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">177.55</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">204.3</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">198.789</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">90</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">170</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">99</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">192.5</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">1312600</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">150</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">142</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">162</font>
+		</p></td>
+		<td width="11%" valign="TOP">
+			<p align="CENTER"><font size="2">157.8796</font>
+		</p></td>
+	</tr>
+</tbody></table>
+</center>
+Columns 1 &amp; 2 are given.<p></p>
+<p>Columns 3 &amp; 4 are the average inflow flux (I<sub>i+1</sub> + I<sub>i</sub>)/2 and outflow flux (O<sub>i+1</sub>
++ O<sub>i</sub>)/2, respectively.</p>
+<p>Column 5 is the cumulative storage in the system obtained using the continuity equation below.</p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image308.gif" width="482" height="76" align="BOTTOM" border="0"></p>
+<p>Columns 6 - 9 are the values of the weighted average flux <i>[xI + (1-x)O]</i> for different values of <i>x</i>.
+The graph of Columns 6 - 9 vs. Column 5 is shown below.</p>
+<p>Based on these results, a value of <i>x</i> = 0.15 is selected. The best least squares fit to the corresponding
+points yields a value of <i>k</i> = 2.3 h.</p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image309.gif" width="472" height="301" align="BOTTOM" border="0"></p>
+<p><b>Least Squares Procedure</b> <br>
+&nbsp;
+</p><center>
+
+<table border="1" cellpadding="7" width="565">
+	<tbody><tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">Inflow</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">Outflow</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">Storage</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">O</font><sup><font size="2">2</font></sup></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font><sup><font size="2">2</font></sup>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">I</font><sup><font size="2">2</font></sup></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font><sup><font size="2">2</font></sup>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">OI</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">3</font></sup><font size="2">/s)</font><sup><font size="2">2</font></sup>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">SO</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">6</font></sup><font size="2">/s)</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">SI</font></p>
+
+			<p align="CENTER"><font size="2">(m</font><sup><font size="2">6</font></sup><font size="2">/s)</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">93</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">85</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">715000</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">7225</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">8649</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">7905</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">60775000</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">66495000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">137</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">91</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">812200</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">8281</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">18769</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">12467</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">73910200</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">111271400</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">208</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">114</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">1064200</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">12996</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">43264</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">23712</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">121318800</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">221353600</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">320</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">159</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">1523200</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">25281</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">102400</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">50880</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">242188800</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">487424000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">442</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">233</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">2189200</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">54289</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">195364</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">102986</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">510083600</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">967626400</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">546</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">324</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">2965000</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">104976</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">298116</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">176904</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">960660000</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">1618890000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">630</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">420</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">3742600</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">176400</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">396900</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">264600</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">1571892000</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">2357838000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">678</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">509</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">4424800</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">259081</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">459684</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">345102</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">2252223200</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">3000014400</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">691</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">578</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">4932400</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">334084</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">477481</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">399398</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">2850927200</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">3408288400</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">675</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">623</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">5229400</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">388129</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">455625</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">420525</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">3257916200</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">3529845000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">634</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">642</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">5308600</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">412164</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">401956</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">407028</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">3408121200</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">3365652400</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">571</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">635</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">5179000</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">403225</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">326041</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">362585</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">3288665000</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">2957209000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">477</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">603</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">4837000</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">363609</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">227529</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">287631</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">2916711000</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">2307249000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">390</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">546</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">4329400</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">298116</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">152100</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">212940</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">2363852400</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">1688466000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">329</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">479</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">3778600</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">229441</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">108241</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">157591</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">1809949400</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">1243159400</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">247</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">413</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">3209800</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">170569</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">61009</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">102011</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">1325647400</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">792820600</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">184</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">341</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">2628400</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">116281</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">33856</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">62744</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">896284400</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">483625600</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">134</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">274</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">2093800</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">75076</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">17956</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">36716</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">573701200</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">280569200</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">108</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">215</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">1649200</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">46225</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">11664</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">23220</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">354578000</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">178113600</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">90</font>
+		</p></td>
+		<td width="10%" valign="TOP">
+			<p align="CENTER"><font size="2">170</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">1312600</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">28900</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">8100</font>
+		</p></td>
+		<td width="12%" valign="TOP">
+			<p align="CENTER"><font size="2">15300</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">223142000</font>
+		</p></td>
+		<td width="16%" valign="TOP">
+			<p align="CENTER"><font size="2">118134000</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="10%" valign="TOP">&nbsp;</td>
+		<td width="10%" valign="TOP">&nbsp;</td>
+		<td width="12%" valign="TOP">&nbsp;</td>
+		<td width="12%" valign="TOP">
+			<div align="RIGHT">
+				<p><font size="2" face="Symbol">S</font><font size="2">O</font><sup><font size="2">2</font></sup><font size="2">
+				=</font></p>
+
+				<p><font size="2">3514348</font>
+			</p></div>
+		</td>
+		<td width="12%" valign="TOP">
+			<div align="RIGHT">
+				<p><font size="2" face="Symbol">S</font><font size="2">I</font><sup><font size="2">2</font></sup><font size="2">
+				=</font></p>
+
+				<p><font size="2">3804704</font>
+			</p></div>
+		</td>
+		<td width="12%" valign="TOP">
+			<div align="RIGHT">
+				<p><font size="2" face="Symbol">SI</font><font size="2">O =</font></p>
+
+				<p><font size="2">3472245</font>
+			</p></div>
+		</td>
+		<td width="16%" valign="TOP">
+			<div align="RIGHT">
+				<p><font size="2" face="Symbol">S</font><font size="2">SO =</font></p>
+
+				<p><font size="2">29062547000</font>
+			</p></div>
+		</td>
+		<td width="16%" valign="TOP">
+			<div align="RIGHT">
+				<p><font size="2" face="Symbol">S</font><font size="2">SI =</font></p>
+
+				<p><font size="2">29184045000</font>
+			</p></div>
+		</td>
+	</tr>
+</tbody></table>
+</center>
+<img src="./Muskingum Routing Example_files/image310.gif" width="433" height="168" align="BOTTOM" border="0"><p></p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image311.gif" width="425" height="168" align="BOTTOM" border="0"></p>
+<p>Using the above equations yields:</p>
+<p>A = 1255.626164 s</p>
+<p>B = 7029.100513 s</p>
+<p><i>k</i> = A+B = 8284.726677 s = 2.3 h</p>
+<p><i>x</i> = A/(A + B) = 0.151559154</p>
+<p>Observe that these results for <i>k</i> and <i>x</i> are the same as those of the graphical procedure. For comparison
+purposes, the observed outflow hydrograph and that predicted using the estimated values of <i>k</i> and <i>x</i>
+are graphed below.</p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image312.gif" width="472" height="301" align="BOTTOM" border="0"></p>
+<p><b>B. Muskingum Routing</b></p>
+<p>Use the Muskingum routing procedure to route the hydrograph tabulated below through the same river reach of
+Part A</p>
+<p>Select a <font face="Symbol">D</font>t = 1 h, as suggested by the inflow data. However, check that with the
+selected <font face="Symbol">D</font>t, parameter values meet restrictions:</p>
+<p><i>x</i> &lt; 0.5 <i><font face="Symbol">D</font>t/k</i> &lt; 1 - <i>x</i></p>
+<p>For this case: 0.1515 &lt; (0.5) (3600)/8284.73 &lt; 1 - 0.1515 Thus, OK. Proceed with routing, by obtaining
+C<sub>o</sub>, C<sub>1</sub>, and C<sub>2</sub>.</p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image313.gif" width="265" height="82" align="BOTTOM" border="0"></p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image314.gif" width="261" height="82" align="BOTTOM" border="0"></p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image315.gif" width="265" height="82" align="BOTTOM" border="0"></p>
+<p>This yields: C<sub>o</sub> = 0.061787; C<sub>1</sub> = 0.346074; and C<sub>2</sub> = 0.592139. Using these values
+in the Muskingum routing equation:</p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image316.gif" width="325" height="40" align="BOTTOM" border="0"></p>
+<p>obtain the outflow hydrograph as tabulated below. The resulting hydrographs are also graphed below. <br>
+.
+</p><center>
+
+<table border="1" cellpadding="7" width="432">
+	<tbody><tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">Time (h)</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">Inflow (m3/s)</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">C</font><sub><font size="2">o</font></sub><font size="2"> x I</font><sub><font size="2">i+1</font></sub></p>
+
+			<p align="CENTER"><font size="2">(m3/s)</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">C</font><sub><font size="2">1</font></sub><font size="2"> x I</font><sub><font size="2">i</font></sub></p>
+
+			<p align="CENTER"><font size="2">(m3/s)</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">C</font><sub><font size="2">2</font></sub><font size="2"> x O</font><sub><font size="2">i</font></sub></p>
+
+			<p align="CENTER"><font size="2">(m3/s)</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">Outflow (m3/s)</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">1</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">50</font>
+		</p></td>
+		<td width="17%" valign="TOP">&nbsp;</td>
+		<td width="17%" valign="TOP">&nbsp;</td>
+		<td width="17%" valign="TOP">&nbsp;</td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">50</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">2</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">100</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">6.1787</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">17.3037</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">29.60695</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">53.08935</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">3</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">200</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">12.3574</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">34.6074</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">31.43627</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">78.40107</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">4</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">325</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">20.08078</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">69.2148</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">46.42433</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">135.7199</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">5</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">450</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">27.80415</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">112.4741</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">80.36505</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">220.6433</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">6</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">600</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">37.0722</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">155.7333</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">130.6515</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">323.457</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">7</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">700</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">43.2509</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">207.6444</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">191.5315</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">442.4268</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">8</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">780</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">48.19386</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">242.2518</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">261.9782</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">552.4238</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">9</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">790</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">48.81173</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">269.9377</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">327.1117</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">645.8611</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">10</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">775</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">47.88493</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">273.3985</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">382.4396</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">703.723</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">11</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">750</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">46.34025</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">268.2074</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">416.7018</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">731.2494</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">12</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">680</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">42.01516</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">259.5555</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">433.0013</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">734.572</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">13</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">590</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">36.45433</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">235.3303</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">434.9687</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">706.7534</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">14</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">500</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">30.8935</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">204.1837</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">418.4962</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">653.5734</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">15</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">420</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">25.95054</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">173.037</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">387.0063</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">585.9938</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">16</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">350</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">21.62545</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">145.3511</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">346.9898</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">513.9663</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">17</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">300</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">18.5361</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">121.1259</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">304.3395</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">444.0015</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">18</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">250</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">15.44675</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">103.8222</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">262.9106</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">382.1796</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">19</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">225</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">13.90208</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">86.5185</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">226.3034</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">326.724</font>
+		</p></td>
+	</tr>
+	<tr>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">20</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">200</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">12.3574</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">77.86665</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">193.466</font>
+		</p></td>
+		<td width="17%" valign="TOP">
+			<p align="CENTER"><font size="2">283.6901</font>
+		</p></td>
+	</tr>
+</tbody></table>
+</center>
+<br>
+&nbsp;<p></p>
+<p align="CENTER"><img src="./Muskingum Routing Example_files/image317.gif" width="472" height="301" align="BOTTOM" border="0">
+
+
+
+</p></body></html>
