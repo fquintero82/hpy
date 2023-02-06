@@ -172,7 +172,7 @@ def runoff1(states:pd.DataFrame,
     #rainfall = pd_forcings.loc[mylink,'precipitation'] * c_1 #rainfall. from [mm/hr] to [m/min]
     forcings['precipitation']*=c_1
     #e_pot = pd_forcings.loc[mylink,'et'] * (1e-3 / (30.0*24.0*60.0)) #potential et[mm/month] -> [m/min]
-    forcings['et']*=(1e-3 / (30.0*24.0*60.0)) #potential et[mm/month] -> [m/min]
+    #forcings['et']*=(1e-3 / (30.0*24.0*60.0)) #potential et[mm/month] -> [m/min]
     #temperature = pd_forcings.loc[mylink,'temperature'] # daily temperature in Celsius
     #temp_thres=pd_params.loc[mylink,'temp_thres'] # celsius degrees
     #melt_factor = pd_params.loc[mylink,'melt_factor'] *(1/(24*60.0)) *(1/1000.0) # mm/day/degree to m/min/degree
@@ -221,8 +221,9 @@ def runoff1(states:pd.DataFrame,
     #end_STATIC=h1
     #Hu = pd_params.loc[mylink,'max_storage']/1000 # max available storage in static tank [mm] to [m]
     #x2 = max(0,x1 + h1 - Hu ) # excedance flow to the second storage [m] [m/min] check units
-    n = len(params['max_storage'])# number of rows
-    x2=pd.DataFrame({0,
+    #n = len(params['max_storage'])# number of rows
+    x2=pd.DataFrame({
+        0,
         x1 + states['static'] - params['max_storage']/1000
     }).max(axis=1)
         #if ground is frozen, x1 goes directly to the surface
@@ -233,24 +234,36 @@ def runoff1(states:pd.DataFrame,
     x2[wh] = x1[wh]
     d1 = x1 - x2 # the input to static tank [m/min]
     #out1 = min(e_pot, h1) # evaporation from the static tank. it cannot evaporate more than h1 [m]
-    out1= pd.DataFrame({forcings['evapotranspiration'],
-        states['static']}).min(axis=1)
+    out1= pd.DataFrame({
+        forcings['et']*(1e-3 / (30.0*24.0*60.0)), #mm/month to m/min
+        states['static']
+        }).min(axis=1)
     #end_STATIC += (d1 - out1) # equation of static storage
     states['static']+= (d1 - out1)
-    
-        #surface storage
-        end_SURFACE=h2
-        infiltration = pd_params.loc[mylink,'infiltration'] * c_1 #infiltration rate [m/min]
-        if(frozen_ground == 1):
-            infiltration = 0
-        x3 = min(x2, infiltration) #water that infiltrates to gravitational storage [m/min]
-        d2 = x2 - x3 # the input to surface storage [m] check units
-        out2=0
-        alfa2 = pd_params.loc[mylink,'alfa2'] # velocity in m/s
-        w = alfa2 * L / A_h  * 60 # [1/min]
-        w = min(1,w) #water can take less than 1 min (dt) to leave surface
-        out2  = h2 * w #direct runoff [m/min]
-        end_SURFACE  += (d2 - out2) # 
+
+    #surface storage
+    #end_SURFACE=h2
+    infiltration = params['infiltration'] * c_1 #infiltration rate [m/min]
+    #if(frozen_ground == 1):
+    #    infiltration = 0
+    wh = forcings['frozen_ground']==1
+    infiltration[wh]=0
+    #x3 = min(x2, infiltration) #water that infiltrates to gravitational storage [m/min]
+    x3 = pd.DataFrame({
+        x2,
+        infiltration
+    }).min(axis=1)
+    d2 = x2 - x3 # the input to surface storage [m] check units
+    #out2=0
+    #alfa2 = pd_params.loc[mylink,'alfa2'] # velocity in m/s
+    #w = alfa2 * L / A_h  * 60 # [1/min]
+    w=params['velocity'] * network['channel_length'] / network['area_hillslope'] * 60
+    #w = min(1,w) #water can take less than 1 min (dt) to leave surface
+    w=pd.DataFrame({1,w}).min(axis=1)
+    #out2  = h2 * w #direct runoff [m/min]
+    out2 = states['surface']*w
+    #end_SURFACE  += (d2 - out2) # 
+    states['surface']+= (d2 - out2)
 
         #SUBSURFACE storage
         end_SUBSUR = h3
