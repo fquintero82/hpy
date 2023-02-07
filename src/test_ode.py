@@ -54,26 +54,25 @@ def test3():
 
 def test3():
     #channel 1 and 2 drain to 3
-    def fun(t,q,v0,lambda1,lambda2,A_i,L_i):
+    def fun(t,q,v0,invtau,index_up1,index_up2):
         #invtau = (v0*A_i**lambda2) /((1.0 - lambda1)*L_i)
-        invtau = np.divide(np.multiply(v0,np.power(A_i,lambda2)),np.multiply(np.subtract(1,lambda1),L_i))
-        print(q.shape)
-        return np.multiply(np.power(np.multiply(invtau,q),lambda1),(-1*q))
-"""         return [invtau*(q[0]**lambda1)*(-1*q[0]),
-                invtau*(q[1]**lambda1)*(-1*q[1]),
-                invtau*(q[2]**lambda1)*(-1*q[2]+q[0]+q[1])
-        ]
- """        
-    v0=np.array([.3, .4 , .5])
-    lambda1=np.array([0.33,.33,.33])
-    lambda2=np.array([.1,.1,.1])
-    A_i=np.array([100,100,100])    #km2
-    L_i = np.array([100,100,100])   #m
-    #invtau = np.divide(np.multiply(v0,np.power(A_i,lambda2)),np.multiply(np.subtract(1,lambda1),L_i)) 
+        #invtau = np.divide(np.multiply(v0,np.power(A_i,lambda2)),np.multiply(np.subtract(1,lambda1),L_i))
+        #print(q.shape)
+        return np.multiply(np.power(np.multiply(invtau,q),lambda1),(-1*q+q[index_up1]+q[index_up2]))
+
+
+    v0=np.array([0, .3, .4 , .5])
+    lambda1=np.array([0, 0.33,.33,.33])
+    lambda2=np.array([0, .1,.1,.1])
+    A_i=np.array([0, 100,100,100])    #km2
+    L_i = np.array([0, 100,100,100])   #m
+    invtau = np.divide(np.multiply(v0,np.power(A_i,lambda2)),np.multiply(np.subtract(1,lambda1),L_i)) 
     args1 = (v0,lambda1,lambda2,A_i,L_i)
     args2=(.3,.33,.1,100,200)
-    res = solve_ivp(fun,t_span=(0,0.1),y0=[100,110,100],args=args1,)
-    res = solve_ivp(fun,t_span=(0,0.1),y0=[100,110,100],args=args2,)
+    index_up1 = [0,0,0,1]
+    index_up2 = [0,0,0,2]
+    res = solve_ivp(fun,t_span=(0,0.1),y0=[0,100,110,100],args=args1,)
+    res = solve_ivp(fun,t_span=(0,0.1),y0=[0,100,110,100],args=args2,)
     plt.plot(res['t'],res['y'][0])
     plt.plot(res['t'],res['y'][1])
     plt.plot(res['t'],res['y'][2])
