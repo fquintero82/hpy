@@ -157,26 +157,26 @@ def solve_one_link(pd_states,pd_forcings,pd_params,pd_network,mylink):
 def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
     params:pd.DataFrame,
-    network:pd.DataFrame):
+    network:pd.DataFrame,
+    DT:int):
     #test only
     # pd_states= instance.pd_states
     # pd_params=instance.pd_params
     # pd_forcings=instance.pd_forcings
     # pd_network=instance.pd_network
     
-        
-    #L = pd_params.loc[mylink,'length']
-    #A_h = pd_params.loc[mylink,'area_hillslope']
-    #A_i = pd_params.loc[mylink,'drainage_area']
-    c_1 = (1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
+    N = len(network.index)
+    CF_MMHR_M_MIN = (1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
+    CF_MELTFACTOR= (1/(24*60.0)) *(1/1000.0) # mm/day/degree to m/min/degree
+    CF_ET = (1e-3 / (30.0*24.0*60.0))
     #rainfall = pd_forcings.loc[mylink,'precipitation'] * c_1 #rainfall. from [mm/hr] to [m/min]
-    forcings['precipitation']*=c_1
+    #forcings['precipitation']*CF_MMHR_M_MIN #rainfall. from [mm/hr] to [m/min]
     #e_pot = pd_forcings.loc[mylink,'et'] * (1e-3 / (30.0*24.0*60.0)) #potential et[mm/month] -> [m/min]
     #forcings['et']*=(1e-3 / (30.0*24.0*60.0)) #potential et[mm/month] -> [m/min]
     #temperature = pd_forcings.loc[mylink,'temperature'] # daily temperature in Celsius
     #temp_thres=pd_params.loc[mylink,'temp_thres'] # celsius degrees
     #melt_factor = pd_params.loc[mylink,'melt_factor'] *(1/(24*60.0)) *(1/1000.0) # mm/day/degree to m/min/degree
-    params['melt_factor']*= (1/(24*60.0)) *(1/1000.0) # mm/day/degree to m/min/degree
+    #params['melt_factor']*= (1/(24*60.0)) *(1/1000.0) # mm/day/degree to m/min/degree
     #frozen_ground = pd_forcings.loc[mylink,'frozen_ground'] # 1 if ground is frozen, 0 if not frozen 
                 
 
@@ -189,32 +189,34 @@ def runoff1(states:pd.DataFrame,
     #q =  pd_states.loc[mylink,'discharge']  # discharge [m^3/s]
 
     #snow storage
-    x1 = forcings['rainfall']*0
+    #x1 = forcings['rainfall']*0
+    x1=pd.DataFrame({0},index=np.arange(N))
     #end_SNOW=h5
-    end_SNOW = states['snow']
     #temperature =0 is the flag for no forcing the variable. no snow process
     #if(temperature==0):
         #x1 = rainfall
-    x1[forcings['temperature']==0] = forcings['rainfall']
+    x1[forcings['temperature']==0] = forcings['precipitation'] * CF_MMHR_M_MIN
             #self.end_SNOW +=0 #no changes to snow
     #else:
         #if(temperature>=temp_thres):
         #    snowmelt = min(h5,temperature * melt_factor)# in [m]
         #    end_SNOW -= snowmelt #melting outs of snow storage
         #    x1 = rainfall + snowmelt # in [m]
-    snowmelt = forcings['rainfall']*0 #create column of same length
+    #snowmelt = forcings['rainfall']*0 #create column of same length
+    snowmelt=pd.DataFrame({0},index=np.arange(N))
     wh = forcings['temperature']>=params['temp_threshold'] #indices where true
-    snowmelt[wh] = pd.Dataframe({states['snow'][wh],
-                (forcings['temperature']*params['melt_factor'])[wh]
-                }).min(axis=1)
-    states['snow'][wh] -= snowmelt[wh]
-    x1[wh] = forcings['precipitation'][wh] + snowmelt[wh]
+    snowmelt[wh] = pd.Dataframe({
+            states['snow'][wh],
+            (forcings['temperature']*params['melt_factor']*CF_MELTFACTOR)[wh]
+        }).min(axis=1) #[m/min]
+    states['snow'][wh] -= snowmelt[wh]*DT #[m]
+    x1[wh] = (CF_MMHR_M_MIN*DT*forcings['precipitation'])[wh] + (DT*snowmelt)[wh] #[m]
 
     #if(temperature != 0 and temperature <temp_thres):
         #end_snow += rainfall #all precipitation is stored in the snow storage
         #x1=0
     wh = (forcings['temperature'] !=0) & (forcings['temperature']<params['temp_threshold']) 
-    states['snow'][wh] += forcings['precipitation'][wh]
+    states['snow'][wh] += (CF_MMHR_M_MIN*DT*forcings['precipitation'])[wh] #[m]
     x1[wh] = 0
     
     #static storage
@@ -234,8 +236,9 @@ def runoff1(states:pd.DataFrame,
     x2[wh] = x1[wh]
     d1 = x1 - x2 # the input to static tank [m/min]
     #out1 = min(e_pot, h1) # evaporation from the static tank. it cannot evaporate more than h1 [m]
+
     out1= pd.DataFrame({
-        forcings['et']*(1e-3 / (30.0*24.0*60.0)), #mm/month to m/min
+        forcings['et']*cf_et, #mm/month to m/min
         states['static']
         }).min(axis=1)
     #end_STATIC += (d1 - out1) # equation of static storage
@@ -255,6 +258,7 @@ def runoff1(states:pd.DataFrame,
     }).min(axis=1)
     d2 = x2 - x3 # the input to surface storage [m] check units
     #out2=0
+    #out2= pd.DataFrame({0},index=np.arange(N))
     #alfa2 = pd_params.loc[mylink,'alfa2'] # velocity in m/s
     #w = alfa2 * L / A_h  * 60 # [1/min]
     w=params['velocity'] * network['channel_length'] / network['area_hillslope'] * 60
@@ -265,26 +269,38 @@ def runoff1(states:pd.DataFrame,
     #end_SURFACE  += (d2 - out2) # 
     states['surface']+= (d2 - out2)
 
-        #SUBSURFACE storage
-        end_SUBSUR = h3
-        percolation = pd_params.loc[mylink,'percolation']*c_1 # percolation rate to aquifer [m/min]
-        x4 = min(x3,percolation) #water that percolates to aquifer storage [m/min]
-        d3 = x3 - x4 # input to gravitational storage [m/min]
-        out3=0
-        alfa3 = pd_params.loc[mylink,'alfa3']* 24*60 #residence time [days] to [min].
-        if(alfa3>=1):
-            out3 = h3/alfa3 #interflow [m/min]
-        end_SUBSUR += (d3 - out3) #differential equation for gravitational storage
+    #SUBSURFACE storage
+    #end_SUBSUR = h3
+    #percolation = pd_params.loc[mylink,'percolation']*c_1 # percolation rate to aquifer [m/min]
+    percolation = params['percolation'] * c_1 # percolation rate to aquifer [m/min]
+    #x4 = min(x3,percolation) #water that percolates to aquifer storage [m/min]
+    x4 = pd.DataFrame({
+        x3,
+        percolation
+    }).min(axis=1)
+    d3 = x3 - x4 # input to gravitational storage [m/min]
+    #out3=0
+    out3=pd.DataFrame({0}, index=np.arange(n))
+    #alfa3 = pd_params.loc[mylink,'alfa3']* 24*60 #residence time [days] to [min].
+    alfa3 = params['alfa3']* 24*60 #residence time [days] to [min].
+    #if(alfa3>=1):
+    #    out3 = h3/alfa3 #interflow [m/min]
+    out3[alfa3>=1] = states['subsurface'] / alfa3
+    #end_SUBSUR += (d3 - out3) #differential equation for gravitational storage
+    states['subsurface'] += (d3 - out3)
 
-		#aquifer storage
-        end_GW = h4
-        d4 = x4
-        out4=0
-        alfa4 = pd_params.loc[mylink,'alfa4']* 24*60 #residence time [days] to [min].
-        if(alfa4>=1):
-            out4 = h4/alfa4 # base flow [m/min]
-        end_GW  += (d4 - out4) #differential equation for aquifer storage
-
+	#aquifer storage
+    #end_GW = h4
+    d4 = x4
+    out4=pd.DataFrame({0},index=np.arange(N))
+    #alfa4 = pd_params.loc[mylink,'alfa4']* 24*60 #residence time [days] to [min].
+    alfa4 = params['alfa4']* 24*60 #residence time [days] to [min].
+    #if(alfa4>=1):
+    #    out4 = h4/alfa4 # base flow [m/min]
+    out4[alfa4>=1]=states['groundwater'] / alfa4
+    #end_GW  += (d4 - out4) #differential equation for aquifer storage
+    states['groundwater'] += (d4 - out4)
+        
         #channel storage
         lambda_1 = pd_params.loc[mylink,'lambda1']
         lambda_2 = pd_params.loc[mylink,'lambda2']
