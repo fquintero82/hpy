@@ -10045,3 +10045,5 @@ venv/lib/python3.9/site-packages/mpl_toolkits/tests/__pycache__/test_axisartist_
 venv/lib/python3.9/site-packages/mpl_toolkits/tests/__pycache__/test_axisartist_grid_finder.cpython-39.pyc
 venv/lib/python3.9/site-packages/mpl_toolkits/tests/__pycache__/test_axisartist_grid_helper_curvelinear.cpython-39.pyc
 venv/lib/python3.9/site-packages/mpl_toolkits/tests/__pycache__/test_mplot3d.cpython-39.pyc
+src/__pycache__/__init__.cpython-39.pyc
+src/__pycache__/test_dataframes.cpython-39.pyc
