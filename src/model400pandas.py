@@ -26,27 +26,31 @@ def runoff1(states:pd.DataFrame,
             'val2':forcings['temperature'][wh]*params['melt_factor'][wh]*CF_MELTFACTOR * DT
         },dtype=np.float16).min(axis=1) #[m]
     states.loc[wh,'snow'] -= snowmelt['val'][wh] #[m]
-    x1.loc[wh,'val'] = (CF_MMHR_M_MIN*DT*forcings['precipitation'][wh]) + (snowmelt)[wh] #[m]
+    x1.loc[wh,'val'] = (CF_MMHR_M_MIN*DT*forcings['precipitation'][wh]) + snowmelt['val'][wh] #[m]
     #if(temperature != 0 and temperature <temp_thres):
     wh = (forcings['temperature'] !=0) & (forcings['temperature']<params['temp_threshold']) 
     states.loc[wh,'snow'] += CF_MMHR_M_MIN*DT*forcings['precipitation'][wh] #[m]
-    x1[wh] = 0
-    
+    x1.loc[wh,'val'] = 0
+    del snowmelt #garbage collection
+
     #static storage
     x2=pd.DataFrame({
-        0,
-        x1 + states['static'] - params['max_storage']/1000
-    }).max(axis=1) #[m]
+        'val1':0,
+        'val2': x1['val'] + states['static'] - params['max_storage']/1000
+    },dtype=np.float16).max(axis=1) #[m]
+    x2 = pd.DataFrame({'val':x2},dtype=np.float16)
     #if ground is frozen, x1 goes directly to the surface
     #therefore nothing is diverted to static tank
     wh = forcings['frozen_ground']==1
     x2[wh] = x1[wh]
     d1 = x1 - x2 # the input to static tank [m/min]
     out1= pd.DataFrame({
-        forcings['et']*CF_ET*DT, #mm/month to m/min to m
-        states['static']
-        }).min(axis=1) #[m]
-    states['static']+= (d1 - out1)
+        'val1':forcings['evapotranspiration']*CF_ET*DT, #mm/month to m/min to m
+        'val2':states['static']
+        },dtype=np.float16).min(axis=1) #[m]
+    out1=pd.DataFrame({'val':out1})
+    states['static'] += d1['val'] - out1['val']
+    del d1,x1
 
     #surface storage
     infiltration = params['infiltration'] * CF_MMHR_M_MIN * DT #infiltration rate [m/min] to [m]
@@ -54,11 +58,11 @@ def runoff1(states:pd.DataFrame,
     wh = forcings['frozen_ground']==1
     infiltration[wh]=0
     x3 = pd.DataFrame({
-        x2,
-        infiltration
-    }).min(axis=1) #[m]
-    d2 = x2 - x3 # the input to surface storage [m]
-    w=params['velocity'] * network['channel_length'] / network['area_hillslope'] * 60 #[1/min]
+       'val1' : x2['val'],
+        'val2':infiltration
+    },dtype=np.float16).min(axis=1) #[m]
+    d2 = x2['val'] - x3 # the input to surface storage [m]
+    w=params['surface_velocity'] * network['channel_length'] / network['area_hillslope'] * 60 #[1/min]
     # water can take less than 1 min (dt) to leave surface
     w=pd.DataFrame({1,w}).min(axis=1)
     out2 = states['surface']* w * DT #[m]
