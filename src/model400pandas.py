@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from test_dataframes import getTestDF1
+from src.test_dataframes import getTestDF1
 
 def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
@@ -9,26 +9,27 @@ def runoff1(states:pd.DataFrame,
     DT:int):
     
     N = len(network.index)
-    CF_MMHR_M_MIN = (1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
-    CF_MELTFACTOR= (1/(24*60.0)) *(1/1000.0) # mm/day/degree to m/min/degree
-    CF_ET = (1e-3 / (30.0*24.0*60.0))
+    CF_MMHR_M_MIN = np.float16(1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
+    CF_MELTFACTOR= np.float16((1/(24*60.0)) *(1/1000.0)) # mm/day/degree to m/min/degree
+    CF_ET = np.float16((1e-3 / (30.0*24.0*60.0)))
     
     #snow storage
-    x1=pd.DataFrame({0},dtype=np.float16,index=np.arange(N))
+    x1=pd.DataFrame({'val':0},dtype=np.float16,index=network.index)
     #temperature =0 is the flag for no forcing the variable. no snow process
-    x1[forcings['temperature']==0] = forcings['precipitation'] * CF_MMHR_M_MIN * DT #[m]
+    wh = forcings['temperature']==0
+    x1.loc[wh,'val'] = forcings['precipitation'][wh] * CF_MMHR_M_MIN * DT #[m]
     #if(temperature>=temp_thres):
-    snowmelt=pd.DataFrame({0},dtype=np.float16,index=np.arange(N))
+    snowmelt=pd.DataFrame({'val':0},dtype=np.float16,index=network.index)
     wh = forcings['temperature']>=params['temp_threshold'] #indices where true
-    snowmelt[wh] = pd.Dataframe({
-            states['snow'][wh],
-            (forcings['temperature']*params['melt_factor']*CF_MELTFACTOR * DT)[wh]
-        }).min(axis=1) #[m]
-    states['snow'][wh] -= snowmelt[wh] #[m]
-    x1[wh] = (CF_MMHR_M_MIN*DT*forcings['precipitation'])[wh] + (snowmelt)[wh] #[m]
+    snowmelt.loc[wh,'val'] = pd.DataFrame({
+            'val1':states['snow'][wh],
+            'val2':forcings['temperature'][wh]*params['melt_factor'][wh]*CF_MELTFACTOR * DT
+        },dtype=np.float16).min(axis=1) #[m]
+    states.loc[wh,'snow'] -= snowmelt['val'][wh] #[m]
+    x1.loc[wh,'val'] = (CF_MMHR_M_MIN*DT*forcings['precipitation'][wh]) + (snowmelt)[wh] #[m]
     #if(temperature != 0 and temperature <temp_thres):
     wh = (forcings['temperature'] !=0) & (forcings['temperature']<params['temp_threshold']) 
-    states['snow'][wh] += (CF_MMHR_M_MIN*DT*forcings['precipitation'])[wh] #[m]
+    states.loc[wh,'snow'] += CF_MMHR_M_MIN*DT*forcings['precipitation'][wh] #[m]
     x1[wh] = 0
     
     #static storage

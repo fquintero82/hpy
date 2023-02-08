@@ -17,7 +17,7 @@ def getTestDF1(mycase):
             'length', 'area_hillslope','drainage_area',
             'v0','lambda1','lambda2','max_storage','infiltration',
             'percolation','alfa2','alfa3','alfa4',
-            'temp_thres','melt_factor'])
+            'temp_threshold','melt_factor'])
             out['link_id']=np.array([1,2,3])
             out.index = out['link_id']
             return out
@@ -28,6 +28,9 @@ def getTestDF1(mycase):
             'precipitation','evapotranspiration','temperature',
             'frozen_ground','discharge'])
             out['link_id']=np.array([1,2,3])
+            out['temperature']=np.float16([1,0,0])
+            out['precipitation']=np.float16([1,0,0])
+            out['frozen_ground']=np.float16([1,0,0])
             out.index = out['link_id']
             return out
         elif mycase=='network':
