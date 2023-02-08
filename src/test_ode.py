@@ -1,6 +1,9 @@
 from scipy.integrate import solve_ivp
 from matplotlib import pyplot as plt
 import numpy as np
+from test_dataframes import getTestDF1
+import pandas as pd
+
 def test1():
     '''
     #v[0] = V11'(s) = -12*v12(s)**2 
@@ -78,4 +81,22 @@ def test3():
     plt.plot(res['t'],res['y'][2])
     plt.show()
 
+def test4():
+    states= getTestDF1('states')
+    states['discharge'] = [100,110,100]
+    q_aux = np.append(np.float16(0),states['discharge'])
+    q_aux = pd.concat([
+            pd.Series(0,index=[0]),
+            pd.Series(states['discharge'])
+        ])
+    params= getTestDF1('params')
+    network= getTestDF1('network')
+    states['discharge'][network['upstream_link'].to_numpy()]
+    q_aux[[1,2]]
+    q_aux[network['upstream_link'][3]]
+    q_aux[network['upstream_link'][3]].sum()
+    q_aux[network['upstream_link'][:]].sum()
+    q_aux[network['upstream_link'][:]]
 
+
+    sumQ = [np.sum(q_aux[x]) for x in network['upstream_link']]

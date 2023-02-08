@@ -22,7 +22,7 @@ def runoff1(states:pd.DataFrame,
     #snow storage
     x1=pd.DataFrame({'val':0},dtype=np.float16,index=network.index)
     #temperature =0 is the flag for no forcing the variable. no snow process
-    wh = forcings['temperature']==0
+    wh = forcings['temperature']==0 #maybe i should trigger this condition with temperature = none
     x1.loc[wh,'val'] = forcings['precipitation'][wh] * CF_MMHR_M_MIN * DT #[m]
     #if(temperature>=temp_thres):
     snowmelt=pd.DataFrame({'val':0},dtype=np.float16,index=network.index)
@@ -154,6 +154,22 @@ def check_input_values(states:pd.DataFrame,
     if flag==False:
         print("Error Parameter alfa4 has zeros")
         return False
+    flag = states['link_id'].to_numpy().all()
+    if flag==False:
+        print("Error States cannot have linkid zero")
+        return False
+    flag = params['link_id'].to_numpy().all()
+    if flag==False:
+        print("Error Params cannot have linkid zero")
+        return False
+    flag = forcings['link_id'].to_numpy().all()
+    if flag==False:
+        print("Error Forcings cannot have linkid zero")
+        return False
+    flag = network['link_id'].to_numpy().all()
+    if flag==False:
+        print("Error Network cannot have linkid zero")
+        return False
     return flag
 
 
@@ -168,7 +184,7 @@ def test_runoff1():
     forcings=forcings,
     params=params,
     network=network,
-    DT=60)
+    DT=1440)
     print('old')
     print(old_states)
     print('new')

@@ -10,6 +10,7 @@ def getTestDF1(mycase):
             columns=STATES_NAMES)
             out['link_id']=np.array([1,2,3])
             out.index = out['link_id']
+            out['static'] = 0
             out['surface']=0.1
             out['subsurface']=0.1
             out['groundwater']=0.1
@@ -26,6 +27,8 @@ def getTestDF1(mycase):
             out['alfa3']=1
             out['alfa4']=1
             out['temp_threshold']=0
+            out['melt_factor']=10
+            out['max_storage']=200
 
             return out
         elif mycase == 'forcings':
@@ -33,14 +36,14 @@ def getTestDF1(mycase):
             data=np.zeros((3,len(FORCINGS_NAMES))),
             columns=FORCINGS_NAMES)
             out['link_id']=np.array([1,2,3])
-            out['temperature']=np.float16([-10,0,0])
+            out['temperature']=np.float16([-10,10,0])
             out['precipitation']=np.float16([10,0,0])
             out['frozen_ground']=np.float16([1,0,0])
             out.index = out['link_id']
             return out
         elif mycase=='network':
             out = pd.DataFrame(
-            data=np.array([[1,3,None],[2,3,None],[3,None,[1,2]]],
+            data=np.array([[1,3,0],[2,3,0],[3,0,[1,2]]],
             dtype=object),
             columns=NETWORK_NAMES)
             out.index = out['link_id']

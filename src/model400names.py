@@ -4,5 +4,5 @@ PARAM_NAMES = ['link_id','channel_length', 'area_hillslope','drainage_area',
             'percolation','surface_velocity','alfa3','alfa4',
             'temp_threshold','melt_factor']
 NETWORK_NAMES = ['link_id','downstream_link','upstream_link']
-STATES_NAMES = ['link_id','snow','static','surface','subsurface','groundwater']
+STATES_NAMES = ['link_id','snow','static','surface','subsurface','groundwater','discharge']
 FORCINGS_NAMES=['link_id','precipitation','evapotranspiration','temperature','frozen_ground','discharge']
