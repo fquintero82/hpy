@@ -16,7 +16,7 @@ def getTestDF1(mycase):
             columns=['link_id',
             'length', 'area_hillslope','drainage_area',
             'v0','lambda1','lambda2','max_storage','infiltration',
-            'percolation','alfa2','alfa3','alfa4',
+            'percolation','surface_velocity','alfa3','alfa4',
             'temp_threshold','melt_factor'])
             out['link_id']=np.array([1,2,3])
             out.index = out['link_id']
