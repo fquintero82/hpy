@@ -1,12 +1,18 @@
 import pandas as pd
 import numpy as np
-from src.test_dataframes import getTestDF1
+from test_dataframes import getTestDF1
+from model400names import *
 
 def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame,
     DT:int):
+    
+    if check_input_names(states=states,forcings=forcings,params=params,network=network)==False:
+        return
+    if check_input_values(states=states,forcings=forcings,params=params,network=network,DT=DT)==False:
+        return
     
     N = len(network.index)
     CF_MMHR_M_MIN = np.float16(1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
@@ -62,73 +68,94 @@ def runoff1(states:pd.DataFrame,
         'val2':infiltration
     },dtype=np.float16).min(axis=1) #[m]
     d2 = x2['val'] - x3 # the input to surface storage [m]
-    w=params['surface_velocity'] * network['channel_length'] / network['area_hillslope'] * 60 #[1/min]
+    w=pd.Series(params['surface_velocity'] * params['channel_length'] / params['area_hillslope'] * 60,dtype=np.float16) #[1/min]
     # water can take less than 1 min (dt) to leave surface
-    w=pd.DataFrame({1,w}).min(axis=1)
-    out2 = states['surface']* w * DT #[m]
+    w=pd.DataFrame({'val1':1,
+        'val2':w},dtype=np.float16).min(axis=1)
+    out2 = pd.Series((states['surface'] * w * DT), dtype=np.float16)  #[m]
     states['surface']+= (d2 - out2) #[m]
+    del x2,w,d2,infiltration
 
     #subsurface storage
-    percolation = params['percolation'] * CF_MMHR_M_MIN * DT # percolation rate to aquifer [m/min] to [m]
+    percolation = pd.Series(params['percolation'] * CF_MMHR_M_MIN * DT,dtype=np.float16) # percolation rate to aquifer [m/min] to [m]
     x4 = pd.DataFrame({
-        x3,
-        percolation
-    }).min(axis=1) #[m]
+        'val1':x3,
+        'val2':percolation
+    },dtype=np.float16).min(axis=1) #[m]
     d3 = x3 - x4 # input to gravitational storage [m]
-    out3=pd.DataFrame({0}, dtype=np.float16,index=np.arange(N))
-    alfa3 = params['alfa3']* 24*60 #residence time [days] to [min].
-    out3[alfa3>=1] = DT * states['subsurface'] / alfa3 #[m]
+    #out3=pd.DataFrame({0}, dtype=np.float16,index=np.arange(N))
+    out3  = pd.Series(DT * states['subsurface'] / (params['alfa3']* 24*60),dtype=np.float16) #[m]
     states['subsurface'] += (d3 - out3) #[m]
+    del x3,percolation,d3
 
 	#aquifer storage
     d4 = x4
-    out4=pd.DataFrame({0},dtype=np.float16,index=np.arange(N))
-    alfa4 = params['alfa4']* 24*60 #residence time [days] to [min].
-    out4[alfa4>=1]= DT * states['groundwater'] / alfa4 #[m]
+    out4= pd.Series(DT * states['groundwater'] / (params['alfa4']* 24*60),dtype=np.float16) #[m]
     states['groundwater'] += (d4 - out4)
+    del x4,d4
+    print('run completed')
 
-def check_variables(states:pd.DataFrame,
+def check_input_names(states:pd.DataFrame,
     forcings:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame):
     flag = True
-    
-    name_states = ['link_id','snow','static','surface','subsurface','groundwater']
-    for i in name_states:
+
+    for i in STATES_NAMES:
         if(i not in states.columns):
             flag = False
             print('column {} in dataframe state was not found'.format(i))
             return flag
     
-    name_params=['link_id',
-            'length', 'area_hillslope','drainage_area',
-            'v0','lambda1','lambda2','max_storage','infiltration',
-            'percolation','alfa2','alfa3','alfa4',
-            'temp_thres','melt_factor']
-    for i in name_params:
+    for i in PARAM_NAMES:
         if(i not in params.columns):
             flag = False
             print('column {} in dataframe params was not found'.format(i))
             return flag
     
-    name_forcings=['link_id',
-            'precipitation','evapotranspiration','temperature',
-            'frozen_ground','discharge']
-    for i in name_forcings:
+    for i in FORCINGS_NAMES:
         if(i not in forcings.columns):
             flag = False
             print('column {} in dataframe forcings was not found'.format(i))
             return flag
     
-    name_network=['link_id',
-            'downstream_link','upstream_link']
-    for i in name_network:
+    for i in NETWORK_NAMES:
         if(i not in network.columns):
             flag = False
             print('column {} in dataframe network was not found'.format(i))
             return flag
     
     return flag
+
+def check_input_values(states:pd.DataFrame,
+    forcings:pd.DataFrame,
+    params:pd.DataFrame,
+    network:pd.DataFrame,
+    DT:int):
+    flag=True
+    
+    flag = (DT==0)
+    if flag==True:
+        print("Error DT is zero")
+        return False
+    flag = params['channel_length'].to_numpy().all()
+    if flag==False:
+        print("Error Parameter channel_length has zeros")
+        return False
+    flag = params['area_hillslope'].to_numpy().all()
+    if flag==False:
+        print("Error Parameter area_hillslope has zeros")
+        return False
+    flag = params['alfa3'].to_numpy().all()
+    if flag==False:
+        print("Error Parameter alfa3 has zeros")
+        return False
+    flag = params['alfa4'].to_numpy().all()
+    if flag==False:
+        print("Error Parameter alfa4 has zeros")
+        return False
+    return flag
+
 
 def test_runoff1():
     states= getTestDF1('states')
@@ -141,7 +168,11 @@ def test_runoff1():
     forcings=forcings,
     params=params,
     network=network,
-    DT=1)
+    DT=60)
+    print('old')
+    print(old_states)
+    print('new')
+    print(states)
 
 
 test_runoff1()
