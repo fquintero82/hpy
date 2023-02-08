@@ -84,19 +84,24 @@ def test3():
 def test4():
     states= getTestDF1('states')
     states['discharge'] = [100,110,100]
-    q_aux = np.append(np.float16(0),states['discharge'])
     q_aux = pd.concat([
             pd.Series(0,index=[0]),
             pd.Series(states['discharge'])
         ])
     params= getTestDF1('params')
     network= getTestDF1('network')
-    states['discharge'][network['upstream_link'].to_numpy()]
-    q_aux[[1,2]]
-    q_aux[network['upstream_link'][3]]
-    q_aux[network['upstream_link'][3]].sum()
-    q_aux[network['upstream_link'][:]].sum()
-    q_aux[network['upstream_link'][:]]
-
-
-    sumQ = [np.sum(q_aux[x]) for x in network['upstream_link']]
+    q_upstream = [np.sum(q_aux[x]) for x in network['upstream_link']]
+    invtau = np.divide(
+        np.multiply(params['river_velocity'],np.power(params['drainage_area'],params['lambda2'])),
+        np.multiply(np.subtract(1,params['lambda1']),params['channel_length'])
+    )
+    def fun(t,q,invtau,q_upstream,lambda1):
+        dq_dt = invtau*np.power(q,lambda1)*(-1*q + q_upstream)
+        return dq_dt
+    
+    res = solve_ivp(fun,y0=states['discharge'],
+        t_span=(0,0.1),invtau=invtau,q_upstream=q_upstream,lambda1= params['lambda1'])
+    plt.plot(res['t'],res['y'][0])
+    plt.plot(res['t'],res['y'][1])
+    plt.plot(res['t'],res['y'][2])
+    plt.show()
