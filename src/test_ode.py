@@ -95,12 +95,24 @@ def test4():
         np.multiply(params['river_velocity'],np.power(params['drainage_area'],params['lambda2'])),
         np.multiply(np.subtract(1,params['lambda1']),params['channel_length'])
     )
-    def fun(t,q,invtau,q_upstream,lambda1):
+    def fun1(t,q,invtau,q_upstream,lambda1): #doesnt work
         dq_dt = invtau*np.power(q,lambda1)*(-1*q + q_upstream)
+        #q_aux = np.append
+        #dq_dt = invtau*np.power(q,lambda1)*(-1*q + [np.sum(q_aux[x]) for x in network['upstream_link']])
         return dq_dt
     
-    res = solve_ivp(fun,y0=states['discharge'],
-        t_span=(0,0.1),invtau=invtau,q_upstream=q_upstream,lambda1= params['lambda1'])
+    def fun(t,q,invtau,idx_up,lambda1):
+        q_aux = pd.concat([
+            pd.Series(0,index=[0]),
+            pd.Series(q)
+        ])
+        q_upstream = [np.sum(q_aux[x]) for x in idx_up]
+        dq_dt = invtau*np.power(q,lambda1)*(-1*q + q_upstream)
+        return dq_dt
+
+    res = solve_ivp(fun,t_span=(0,100),y0=states['discharge'],
+        args=(invtau,network['upstream_link'],params['lambda1'])
+        )
     plt.plot(res['t'],res['y'][0])
     plt.plot(res['t'],res['y'][1])
     plt.plot(res['t'],res['y'][2])
