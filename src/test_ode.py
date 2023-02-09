@@ -86,6 +86,7 @@ def test4():
     #0.007096536682661702
     states= getTestDF1('states')
     states['discharge'] = [100,110,100]
+    q = states['discharge']
     q_aux = pd.concat([
             pd.Series(0,index=[0]),
             pd.Series(states['discharge'])
@@ -94,8 +95,14 @@ def test4():
     network= getTestDF1('network')
     #q_upstream = [np.sum(q_aux[x]) for x in network['upstream_link']]
     invtau = np.divide(
-        np.multiply(params['river_velocity'],np.power(params['drainage_area'],params['lambda2'])),
-        np.multiply(np.subtract(1,params['lambda1']),params['channel_length'])
+                np.multiply(
+                    params['river_velocity'],
+                    np.power(params['drainage_area'],params['lambda2'])
+                ),
+                np.multiply(
+                    np.subtract(1,params['lambda1'])
+                    ,params['channel_length']
+                )
     )
     def fun1(t,q,invtau,q_upstream,lambda1): #doesnt work
         dq_dt = invtau*np.power(q,lambda1)*(-1*q + q_upstream)
@@ -104,30 +111,21 @@ def test4():
         return dq_dt
     
     def fun(t,q,invtau,idx_up,lambda1):
-        # q_aux = pd.concat([
-        #     pd.Series(0,index=[0]),
-        #     pd.Series(q)
-        # ])
-        # q_upstream = [np.sum(q_aux[x]) for x in idx_up]
-        # dq_dt = invtau*np.power(q,lambda1)*(-1*q + q_upstream)
-        dq_dt = invtau*np.power(pd.concat([
-            pd.Series(0,index=[0]),
-            pd.Series(q)
-        ]),lambda1)*(-1*pd.concat([
-            pd.Series(0,index=[0]),
-            pd.Series(q)
-        ]) + [np.sum(pd.concat([
-            pd.Series(0,index=[0]),
-            pd.Series(q)
-        ])[x]) for x in idx_up])
+        q_aux = pd.concat([
+             pd.Series(0,index=[0]),
+             pd.Series(q)
+        ]).to_numpy() #it is important to convert this pd df into a nparray
+        q_upstream = np.array([np.sum(q_aux[x]) for x in idx_up])
+        #q_aux = q_aux[1:]
+        #dq_dt = invtau*np.power(q_aux.iloc[1:],lambda1)*(-1*q_aux.iloc[1:] + q_upstream)
+        #dq_dt = invtau*q_aux.iloc[1:]**lambda1*(-1*q_aux.iloc[1:] + q_upstream)
+        dq_dt = invtau*q_aux[1:]**lambda1*(-1*q_aux[1:] + q_upstream)
+        #dq_dt = invtau*np.power(pd.concat([pd.Series(0,index=[0]),pd.Series(q)]),lambda1)*(-1*pd.concat([pd.Series(0,index=[0]),pd.Series(q)]) + [np.sum(pd.concat([pd.Series(0,index=[0]),pd.Series(q)])[x]) for x in idx_up])
         return dq_dt
 
-    q = np.append([0,states['discharge'].to_numpy()])
     idx_up = network['upstream_link']
     lambda1 =params['lambda1']
-    res = solve_ivp(fun,t_span=(0,100),y0=,
-        args=(invtau,idx_up,lambda1)
-        )
+    res = solve_ivp(fun,t_span=(0,1000),y0=q,args=(invtau,idx_up,lambda1))
     plt.plot(res['t'],res['y'][0])
     plt.plot(res['t'],res['y'][1])
     plt.plot(res['t'],res['y'][2])

@@ -31,8 +31,9 @@ def getTestDF1(mycase):
             out['melt_factor']=10
             out['max_storage']=200
             out['lambda2'] = .1
-            out['river_velocity']=.33
+            out['river_velocity']=.3
             out['lambda1'] = .33
+            out['lambda2'] = 0.1
 
             return out
         elif mycase == 'forcings':
