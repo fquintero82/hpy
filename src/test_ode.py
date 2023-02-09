@@ -36,8 +36,8 @@ def test2():
                 invtau*(q[1]**lambda1)*(-1*q[1]),
                 invtau*(q[2]**lambda1)*(-1*q[2]+q[0]+q[1])
         ]
-
-    res = solve_ivp(fun,t_span=(0,100),y0=[100,110,100])
+    q =[100,110,100]
+    res = solve_ivp(fun,t_span=(0,100),y0=q)
     plt.plot(res['t'],res['y'][0])
     plt.plot(res['t'],res['y'][1])
     plt.plot(res['t'],res['y'][2])
@@ -82,6 +82,8 @@ def test3():
     plt.show()
 
 def test4():
+    #[-3.243743104813389, -3.6821266577313194, 3.568117415294728]
+    #0.007096536682661702
     states= getTestDF1('states')
     states['discharge'] = [100,110,100]
     q_aux = pd.concat([
@@ -90,7 +92,7 @@ def test4():
         ])
     params= getTestDF1('params')
     network= getTestDF1('network')
-    q_upstream = [np.sum(q_aux[x]) for x in network['upstream_link']]
+    #q_upstream = [np.sum(q_aux[x]) for x in network['upstream_link']]
     invtau = np.divide(
         np.multiply(params['river_velocity'],np.power(params['drainage_area'],params['lambda2'])),
         np.multiply(np.subtract(1,params['lambda1']),params['channel_length'])
@@ -102,16 +104,29 @@ def test4():
         return dq_dt
     
     def fun(t,q,invtau,idx_up,lambda1):
-        q_aux = pd.concat([
+        # q_aux = pd.concat([
+        #     pd.Series(0,index=[0]),
+        #     pd.Series(q)
+        # ])
+        # q_upstream = [np.sum(q_aux[x]) for x in idx_up]
+        # dq_dt = invtau*np.power(q,lambda1)*(-1*q + q_upstream)
+        dq_dt = invtau*np.power(pd.concat([
             pd.Series(0,index=[0]),
             pd.Series(q)
-        ])
-        q_upstream = [np.sum(q_aux[x]) for x in idx_up]
-        dq_dt = invtau*np.power(q,lambda1)*(-1*q + q_upstream)
+        ]),lambda1)*(-1*pd.concat([
+            pd.Series(0,index=[0]),
+            pd.Series(q)
+        ]) + [np.sum(pd.concat([
+            pd.Series(0,index=[0]),
+            pd.Series(q)
+        ])[x]) for x in idx_up])
         return dq_dt
 
-    res = solve_ivp(fun,t_span=(0,100),y0=states['discharge'],
-        args=(invtau,network['upstream_link'],params['lambda1'])
+    q = np.append([0,states['discharge'].to_numpy()])
+    idx_up = network['upstream_link']
+    lambda1 =params['lambda1']
+    res = solve_ivp(fun,t_span=(0,100),y0=,
+        args=(invtau,idx_up,lambda1)
         )
     plt.plot(res['t'],res['y'][0])
     plt.plot(res['t'],res['y'][1])
