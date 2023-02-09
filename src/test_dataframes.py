@@ -22,13 +22,17 @@ def getTestDF1(mycase):
             columns=PARAM_NAMES)
             out['link_id']=np.array([1,2,3])
             out.index = out['link_id']
-            out['area_hillslope']=1
-            out['channel_length']=1
+            out['area_hillslope']=100
+            out['channel_length']=100
+            out['drainage_area']=100
             out['alfa3']=1
             out['alfa4']=1
             out['temp_threshold']=0
             out['melt_factor']=10
             out['max_storage']=200
+            out['lambda2'] = .1
+            out['river_velocity']=.33
+            out['lambda1'] = .33
 
             return out
         elif mycase == 'forcings':
