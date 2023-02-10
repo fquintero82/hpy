@@ -18,3 +18,20 @@ inflow2=rep(x=50,length(time2))
 inflow=c(inflow1,inflow2)
 time=c(time1,time2)
 plot(time,inflow)
+
+DX=25 #miles
+DT=6 #hours
+celerity = 1 #m/s?
+K=DX/celerity
+getX=function(q,S,celerity,DX){
+  return (
+    0.5*(1-(q/(S*celerity*DX)))
+    )
+  
+}
+courant=  celerity*DT/DX
+reynolds= (qref/S)/(celerity*DX)
+
+C1 = ((DT/K)+2*X)/(2*(1-X)+(DT/K))
+C2=((DT/K)-2*X)/(2*(1-X)+(DT/k))
+C3=(2*(1-X)-DT/K)/(2*(1-X)+DT/K)

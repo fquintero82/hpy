@@ -3,6 +3,7 @@ import numpy as np
 from test_dataframes import getTestDF1
 from model400names import *
 
+
 def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
     params:pd.DataFrame,
@@ -73,7 +74,7 @@ def runoff1(states:pd.DataFrame,
     w=pd.DataFrame({'val1':1,
         'val2':w},dtype=np.float16).min(axis=1)
     out2 = pd.Series((states['surface'] * w * DT), dtype=np.float16)  #[m]
-    states['surface']+= (d2 - out2) #[m]
+    states['surface']+= d2 - out2 #[m]
     del x2,w,d2,infiltration
 
     #subsurface storage
@@ -83,17 +84,20 @@ def runoff1(states:pd.DataFrame,
         'val2':percolation
     },dtype=np.float16).min(axis=1) #[m]
     d3 = x3 - x4 # input to gravitational storage [m]
-    #out3=pd.DataFrame({0}, dtype=np.float16,index=np.arange(N))
     out3  = pd.Series(DT * states['subsurface'] / (params['alfa3']* 24*60),dtype=np.float16) #[m]
-    states['subsurface'] += (d3 - out3) #[m]
+    states['subsurface'] += d3 - out3 #[m]
     del x3,percolation,d3
 
 	#aquifer storage
     d4 = x4
-    out4= pd.Series(DT * states['groundwater'] / (params['alfa4']* 24*60),dtype=np.float16) #[m]
-    states['groundwater'] += (d4 - out4)
+    out4= pd.Series(DT * states['groundwater'] / (params['alfa4']* 24 * 60),dtype=np.float16) #[m]
+    states['groundwater'] += d4 - out4
     del x4,d4
-    print('run completed')
+
+    #channel update
+    segs_in_DT = DT * 60.
+    states['discharge'] += (out2 + out3 + out4) * params['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
+    #print('run completed')
 
 def check_input_names(states:pd.DataFrame,
     forcings:pd.DataFrame,
@@ -173,22 +177,3 @@ def check_input_values(states:pd.DataFrame,
     return flag
 
 
-def test_runoff1():
-    states= getTestDF1('states')
-    params= getTestDF1('params')
-    forcings= getTestDF1('forcings')
-    network= getTestDF1('network')
-
-    old_states = states.copy()
-    runoff1(states=states,
-    forcings=forcings,
-    params=params,
-    network=network,
-    DT=1440)
-    print('old')
-    print(old_states)
-    print('new')
-    print(states)
-
-
-test_runoff1()
