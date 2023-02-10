@@ -15,6 +15,7 @@ def getTestDF1(mycase):
         out['subsurface']=0.1
         out['groundwater']=0.1
         out['snow'] = 0.1
+        out['discharge']=100
         return out
     elif mycase =='params':
         out = pd.DataFrame(
@@ -31,9 +32,9 @@ def getTestDF1(mycase):
         out['melt_factor']=10
         out['max_storage']=200
         out['lambda2'] = .1
-        out['river_velocity']=.3
-        out['lambda1'] = .33
-        out['lambda2'] = 0.1
+        out['river_velocity']=.05
+        out['lambda1'] = 0
+        out['lambda2'] = 0
 
         return out
     elif mycase == 'forcings':
@@ -95,7 +96,7 @@ def getTestDF2(mycase):
         columns=FORCINGS_NAMES)
         out['link_id']=np.arange(N)+1
         out['temperature']=10
-        out['precipitation']=10
+        out['precipitation']=0
         out['frozen_ground']=1
         out.index = out['link_id']
         return out

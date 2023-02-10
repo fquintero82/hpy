@@ -26,21 +26,23 @@ def test1():
 def test2():
     #channel 1 and 2 drain to 3
     def fun(t,q):
-        v0=0.3
-        lambda1=0.33
-        lambda2=0.1
-        A_i=100     #km2
-        L_i = 100   #m
+        v0=0.05 #[m/s]
+        lambda1= 0.0#0.33
+        lambda2= 0#0.1
+        A_i=1     #[km2]
+        L_i = 100   #[m]
         invtau = (v0*A_i**lambda2) /((1.0 - lambda1)*L_i)
         return [invtau*(q[0]**lambda1)*(-1*q[0]),
                 invtau*(q[1]**lambda1)*(-1*q[1]),
                 invtau*(q[2]**lambda1)*(-1*q[2]+q[0]+q[1])
         ]
     q =[100,110,100]
-    res = solve_ivp(fun,t_span=(0,100),y0=q)
+    DT = 60 #min
+    t_end = DT * 60 #seg
+    res = solve_ivp(fun,t_span=(0,t_end),y0=q)
     plt.plot(res['t'],res['y'][0])
-    plt.plot(res['t'],res['y'][1])
-    plt.plot(res['t'],res['y'][2])
+    #plt.plot(res['t'],res['y'][1])
+    #plt.plot(res['t'],res['y'][2])
     plt.show()
 
 def test3():
@@ -159,7 +161,11 @@ def test5():
 
     idx_up = network['upstream_link']
     lambda1 =params['lambda1']
-    res = solve_ivp(fun,t_span=(0,1000),y0=q,args=(invtau,idx_up,lambda1))
+    DT = 60
+    t_end = DT*60 #secs
+    res = solve_ivp(fun,t_span=(0,t_end),y0=q,args=(invtau,idx_up,lambda1))
+    n_eval = res.t.shape[0] 
+    y_1 = res.y[:,n_eval-1]
     for x in range(5):
         plt.plot(res['t'],res['y'][x],label=str(x+1))
     plt.legend()
