@@ -69,7 +69,7 @@ def runoff1(states:pd.DataFrame,
         'val2':infiltration
     },dtype=np.float16).min(axis=1) #[m]
     d2 = x2['val'] - x3 # the input to surface storage [m]
-    w=pd.Series(params['surface_velocity'] * params['channel_length'] / params['area_hillslope'] * 60,dtype=np.float16) #[1/min]
+    w=pd.Series(params['surface_velocity'] * network['channel_length'] / network['area_hillslope'] * 60,dtype=np.float16) #[1/min]
     # water can take less than 1 min (dt) to leave surface
     w=pd.DataFrame({'val1':1,
         'val2':w},dtype=np.float16).min(axis=1)
@@ -96,7 +96,7 @@ def runoff1(states:pd.DataFrame,
 
     #channel update
     segs_in_DT = DT * 60.
-    states['discharge'] += (out2 + out3 + out4) * params['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
+    states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
     #print('run completed')
 
 def check_input_names(states:pd.DataFrame,
@@ -142,11 +142,11 @@ def check_input_values(states:pd.DataFrame,
     if flag==True:
         print("Error DT is zero")
         return False
-    flag = params['channel_length'].to_numpy().all()
+    flag = network['channel_length'].to_numpy().all()
     if flag==False:
         print("Error Parameter channel_length has zeros")
         return False
-    flag = params['area_hillslope'].to_numpy().all()
+    flag = network['area_hillslope'].to_numpy().all()
     if flag==False:
         print("Error Parameter area_hillslope has zeros")
         return False

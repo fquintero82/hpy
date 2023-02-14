@@ -2,6 +2,27 @@ import numpy as np
 import pandas as pd
 from model400names import PARAM_NAMES , NETWORK_NAMES,STATES_NAMES,FORCINGS_NAMES
 
+def getDF_by_size(mycase,nlinks):
+    out = None
+    if mycase =='states':
+        out = pd.DataFrame(
+        data = np.zeros(shape=(nlinks,len(STATES_NAMES))),
+        columns=STATES_NAMES)
+    elif mycase =='params':
+        out = pd.DataFrame(
+        data=np.zeros((nlinks,len(PARAM_NAMES))),
+        columns=PARAM_NAMES)
+    elif mycase == 'forcings':
+        out = pd.DataFrame(
+        data=np.zeros((nlinks,len(FORCINGS_NAMES))),
+        columns=FORCINGS_NAMES)
+    elif mycase=='network':
+        out = pd.DataFrame(
+        data=np.zeros((nlinks,len(NETWORK_NAMES))),
+        dtype=object,
+        columns=NETWORK_NAMES)
+    return out
+    
 def getTestDF1(mycase):
     if mycase =='states':
         out = pd.DataFrame(
@@ -107,3 +128,21 @@ def getTestDF2(mycase):
         columns=NETWORK_NAMES)
         out.index = out['link_id']
         return out
+
+def test_multiplication():
+    df1 = pd.DataFrame({'val':[1,2,3],'link_id':[1,2,3]})
+    df1.index = df1['link_id']
+    df2 = pd.DataFrame({'val':[1,2,3],'link_id':[4,5,6]})
+    df2.index = df2['link_id']
+    out = df1 * df2
+    print(out)
+    
+    df2 = pd.DataFrame({'val':[1,2,3],'link_id':[3,4,5]})
+    df2.index = df2['link_id']
+    out = df1 * df2
+    print(out)
+
+    df2 = pd.DataFrame({'val':[1,2,3],'link_id':[3,4,5]})
+    df2.index = df2['link_id']
+    out = df1 * df2
+    print(out)
