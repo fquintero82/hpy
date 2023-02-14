@@ -19,13 +19,18 @@ def network_from_rvr_file(inputfile):
     df = pd.DataFrame(data=np.zeros(shape=(nlines,3)),
         columns=NETWORK_NAMES,
         dtype=object
+        #dtype=np.int32
+        #dtype={NETWORK_NAMES[0]:np.uint32,
+        #    NETWORK_NAMES[1]:np.uint32,
+        #    NETWORK_NAMES[2]:np.uint32
+        #}
     )
     for ii in range(nlines):
         _lid,_up = _process_line(f)
         df.iloc[ii] = [_lid,0,_up]
     f.close()
     df.index = df[NETWORK_NAMES[0]]
-    return df   
+    return df
 
 inputfile ='../examples/cedarrapids1/367813.rvr'
 df = network_from_rvr_file(inputfile)
