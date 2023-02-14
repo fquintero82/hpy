@@ -22,7 +22,7 @@ def getDF_by_size(mycase,nlinks):
         dtype=object,
         columns=NETWORK_NAMES)
     return out
-    
+
 def getTestDF1(mycase):
     if mycase =='states':
         out = pd.DataFrame(
@@ -44,9 +44,6 @@ def getTestDF1(mycase):
         columns=PARAM_NAMES)
         out['link_id']=np.array([1,2,3])
         out.index = out['link_id']
-        out['area_hillslope']=100
-        out['channel_length']=100
-        out['drainage_area']=100
         out['alfa3']=1
         out['alfa4']=1
         out['temp_threshold']=0
@@ -74,6 +71,10 @@ def getTestDF1(mycase):
         dtype=object),
         columns=NETWORK_NAMES)
         out.index = out['link_id']
+        out['area_hillslope']=100
+        out['channel_length']=100
+        out['drainage_area']=100
+        
         return out
 
 def getTestDF2(mycase):
@@ -97,9 +98,6 @@ def getTestDF2(mycase):
         columns=PARAM_NAMES)
         out['link_id']=np.arange(N)+1
         out.index = out['link_id']
-        out['area_hillslope']=100
-        out['channel_length']=100
-        out['drainage_area']=100
         out['alfa3']=1
         out['alfa4']=1
         out['temp_threshold']=0
@@ -127,6 +125,9 @@ def getTestDF2(mycase):
         dtype=object),
         columns=NETWORK_NAMES)
         out.index = out['link_id']
+        out['area_hillslope']=100
+        out['channel_length']=100
+        out['drainage_area']=100
         return out
 
 def test_multiplication():
