@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from model400names import NETWORK_NAMES
-
+from utils.params.params_from_prm_file import params_from_prm_file
 def _process_line(f):
     line = f.readline()
     items = line.split()
@@ -30,10 +30,23 @@ def network_from_rvr_file(inputfile):
         df.iloc[ii] = [_lid,0,_up]
     f.close()
     df.index = df[NETWORK_NAMES[0]]
+    df.info()
     return df
 
-inputfile ='../examples/cedarrapids1/367813.rvr'
-df = network_from_rvr_file(inputfile)
+def test1():
+    rvr_file ='../examples/cedarrapids1/367813.rvr'
+    df = network_from_rvr_file(rvr_file)
+    prm_file ='../examples/cedarrapids1/367813.prm'
+    df = combine_rvr_prm(prm_file,rvr_file)
+
+def combine_rvr_prm(prm_file,rvr_file):
+    df1 = network_from_rvr_file(rvr_file)
+    df2 = params_from_prm_file(prm_file)
+    df1.merge(df2,left_index=True,right_index=True,suffixes=[None,None])
+    #df1.merge(df2,how='left',on='link_id')
+    return df1
+
+
 
 """     #deprecated. growing df row by row is slow
 def network_from_rvr_file1(inputfile):
