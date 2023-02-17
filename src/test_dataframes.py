@@ -3,25 +3,27 @@ import pandas as pd
 from model400names import PARAM_NAMES , NETWORK_NAMES,STATES_NAMES,FORCINGS_NAMES
 
 def getDF_by_size(mycase,nlinks):
-    out = None
     if mycase =='states':
         out = pd.DataFrame(
         data = np.zeros(shape=(nlinks,len(STATES_NAMES))),
         columns=STATES_NAMES)
+        return out
     elif mycase =='params':
         out = pd.DataFrame(
         data=np.zeros((nlinks,len(PARAM_NAMES))),
         columns=PARAM_NAMES)
+        return out
     elif mycase == 'forcings':
         out = pd.DataFrame(
         data=np.zeros((nlinks,len(FORCINGS_NAMES))),
         columns=FORCINGS_NAMES)
+        return out
     elif mycase=='network':
         out = pd.DataFrame(
         data=np.zeros((nlinks,len(NETWORK_NAMES))),
         dtype=object,
         columns=NETWORK_NAMES)
-    return out
+        return out
 
 def getTestDF1(mycase):
     if mycase =='states':
@@ -67,7 +69,7 @@ def getTestDF1(mycase):
         return out
     elif mycase=='network':
         out = pd.DataFrame(
-        data=np.array([[1,3,0],[2,3,0],[3,0,[1,2]]],
+        data=np.array([[1,3,0,0,0,0],[2,3,0,0,0,0],[3,0,[1,2],0,0,0]],
         dtype=object),
         columns=NETWORK_NAMES)
         out.index = out['link_id']

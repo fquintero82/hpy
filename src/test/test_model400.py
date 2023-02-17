@@ -3,7 +3,7 @@ import numpy as np
 from test_dataframes import getTestDF1
 from model400names import *
 from model400pandas import runoff1
-from routingMantilla import linear_velocity
+from routing import linear_velocity
 
 def test_runoff1():
     states= getTestDF1('states')

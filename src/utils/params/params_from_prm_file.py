@@ -17,8 +17,11 @@ def params_from_prm_file(inputfile):
         },
     )
     df.index = df['link_id']
+    df['channel_length'] *= 1000 # from km to m
+    df['area_hillslope'] *=1000 #from km2 to m2
     df.info()
     return df
 
-inputfile ='../examples/cedarrapids1/367813.prm'
-df = params_from_prm_file(inputfile)
+def test():
+    inputfile ='../examples/cedarrapids1/367813.prm'
+    df = params_from_prm_file(inputfile)
