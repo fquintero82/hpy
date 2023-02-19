@@ -73,6 +73,6 @@ def linear_velocity(states:pd.DataFrame,
     print("--- %s seconds ---" % (time.time() - start_time))
     #takes 90 seconds run one hour
     n_eval = res.t.shape[0] 
-    y_1 = res.y[:,n_eval-1]
+    y_1 = res.y[:,n_eval-1]/3600. #m3/h to m3/s
     states['discharge'] = y_1
 

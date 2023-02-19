@@ -212,6 +212,8 @@ def test6():
     plt.legend()
     plt.show()
 
+#https://github.com/Nicholaswogan/NumbaLSODA
+
 def test7():
     #test vectorization
     def fun(t,q,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
