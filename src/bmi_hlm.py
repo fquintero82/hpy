@@ -27,6 +27,7 @@ class BmiHLM(Bmi):
         recommended. A template of a model's configuration file
         with placeholder values is used by the BMI.
         """
+        self._model.from_file(config_file)
         
 
     #@abstractmethod
