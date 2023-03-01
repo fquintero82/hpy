@@ -4,6 +4,7 @@ from test_dataframes import getDF_by_size
 from model400names import STATES_NAMES
 import pandas as pd
 import numpy as np
+from matplotlib import pyplot as plt
 
 def test1():
     rvr_file ='../examples/cedarrapids1/367813.rvr'
@@ -27,11 +28,18 @@ def test1():
 
 def test2():
     NSTEPS = 480
+    NGAGE =1
+    _X = 367813
     sites = {
         'id':['05464500','05464315','05458900','05463050','05458500'],
         'link':[367813,367697,406874,367567,522980],
         'area':[6492,6022,852,4714,1675]
     }
+    out = np.zeros(shape=(NGAGE,NSTEPS))
     for tt in range(NSTEPS):
-        f = '../examples/cedarrapids1/{}.pkl'.format(tt)
+        f = '../examples/cedarrapids1/out/{}.pkl'.format(tt)
         states = pd.read_pickle(f)
+        out[0,tt] = states[_X]
+    
+    plt.plot(out[0,:])
+    plt.show()

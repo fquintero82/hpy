@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from test_dataframes import getTestDF1
 from model400names import *
-
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
@@ -24,16 +25,16 @@ def runoff1(states:pd.DataFrame,
     x1=pd.DataFrame({'val':0},dtype=np.float16,index=network.index)
     #temperature =0 is the flag for no forcing the variable. no snow process
     wh = forcings['temperature']==0 #maybe i should trigger this condition with temperature = none
-    x1.loc[wh,'val'] = forcings['precipitation'][wh] * CF_MMHR_M_MIN * DT #[m]
+    x1.loc[wh,'val'] = forcings['precipitation'][wh] * CF_MMHR_M_MIN * DT #[m]      #FF
     #if(temperature>=temp_thres):
     snowmelt=pd.DataFrame({'val':0},dtype=np.float16,index=network.index)
     wh = forcings['temperature']>=params['temp_threshold'] #indices where true
-    snowmelt.loc[wh,'val'] = pd.DataFrame({
+    snowmelt.loc[wh,'val'] = pd.DataFrame({                                         #FF
             'val1':states['snow'][wh],
             'val2':forcings['temperature'][wh]*params['melt_factor'][wh]*CF_MELTFACTOR * DT
         },dtype=np.float16).min(axis=1) #[m]
     states.loc[wh,'snow'] -= snowmelt['val'][wh] #[m]
-    x1.loc[wh,'val'] = (CF_MMHR_M_MIN*DT*forcings['precipitation'][wh]) + snowmelt['val'][wh] #[m]
+    x1.loc[wh,'val'] = (CF_MMHR_M_MIN*DT*forcings['precipitation'][wh]) + snowmelt['val'][wh] #[m]      #FF
     #if(temperature != 0 and temperature <temp_thres):
     wh = (forcings['temperature'] !=0) & (forcings['temperature']<params['temp_threshold']) 
     states.loc[wh,'snow'] += CF_MMHR_M_MIN*DT*forcings['precipitation'][wh] #[m]
@@ -158,21 +159,21 @@ def check_input_values(states:pd.DataFrame,
     if flag==False:
         print("Error Parameter alfa4 has zeros")
         return False
-    flag = states['link_id'].to_numpy().all()
+    flag = states.index.to_numpy().all()
     if flag==False:
-        print("Error States cannot have linkid zero")
+        print("Error States cannot have linkid index zero")
         return False
-    flag = params['link_id'].to_numpy().all()
+    flag = params.index.to_numpy().all()
     if flag==False:
-        print("Error Params cannot have linkid zero")
+        print("Error Params cannot have linkid index zero")
         return False
-    flag = forcings['link_id'].to_numpy().all()
+    flag = forcings.index.to_numpy().all()
     if flag==False:
-        print("Error Forcings cannot have linkid zero")
+        print("Error Forcings cannot have linkid index zero")
         return False
-    flag = network['link_id'].to_numpy().all()
+    flag = network.index.to_numpy().all()
     if flag==False:
-        print("Error Network cannot have linkid zero")
+        print("Error Network cannot have linkid index zero")
         return False
     return flag
 

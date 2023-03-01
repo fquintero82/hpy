@@ -200,7 +200,7 @@ def test6():
     channel_len_m = np.array(network['channel_length'])
     start_time = time.time()
     res = solve_ivp(fun,
-            t_span=(0,240),
+            t_span=(0,1),
             y0=q*60*60,
             args=(velocity,channel_len_m,idx_up),
             vectorized=False
@@ -217,7 +217,7 @@ def test6():
 def test7():
     #test vectorization
     def fun(t,q,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
-        print(q.shape)
+        #print(q.shape)
         #q=q.reshape(q.shape[0],1)
         _a = np.array([0])
         _a = _a.reshape(1,1)
@@ -227,6 +227,47 @@ def test7():
         q_upstream = q_upstream.reshape(q.shape[0],1)
         velocity *=60*60 #m/s to m/h
         channel_len_m = channel_len_m.reshape(channel_len_m.shape[0],1)
+        dq_dt = (1/channel_len_m )* velocity * (-1*q_aux[1:] + q_upstream)
+        #using np operators does not improve performance
+        #dq_dt= np.multiply(np.divide(1,channel_len_m) ,velocity)
+        #dq_dt= np.multiply(dq_dt,np.add(np.multiply(-1,q),q_upstream))
+        return dq_dt
+
+    rvr_file ='../examples/cedarrapids1/367813.rvr'
+    prm_file ='../examples/cedarrapids1/367813.prm'
+    network = combine_rvr_prm(prm_file,rvr_file)
+    nlinks = network.shape[0]
+    states = pd.DataFrame(
+        data = np.zeros(shape=(nlinks,len(STATES_NAMES))),
+        columns=STATES_NAMES)
+    states['link_id'] = network['link_id'].to_numpy()
+    states.index = states['link_id'].to_numpy()
+    states['discharge']=1
+    velocity = 0.1 #m/s
+    idx_up = network['idx_upstream_link'].to_numpy()
+    q = np.array(states['discharge'])
+    channel_len_m = np.array(network['channel_length'])
+    start_time = time.time()
+    res = solve_ivp(fun,
+            t_span=(0,1),
+            y0=q*60*60,
+            args=(velocity,channel_len_m,idx_up),
+            vectorized=True
+        )
+    print("--- %s seconds ---" % (time.time() - start_time))
+    wh = np.where(network['link_id']==367813)[0][0]
+    qout = res['y'][wh]/3600. #m3/h to m3/s
+    plt.plot(res['t'],qout,label='outlet')
+    plt.legend()
+    plt.show()
+
+def test_odeint1():
+    def fun(q,t,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
+        #print(type(q))
+        q_aux = np.concatenate(([0],q))
+        q_upstream = np.zeros(q.shape)
+        q_upstream = np.array([np.sum(q_aux[x]) for x in idx_up]) #m3/h
+        velocity *=60*60 #m/s to m/h
         dq_dt = (1/channel_len_m )* velocity * (-1*q_aux[1:] + q_upstream)
         return dq_dt
 
@@ -249,7 +290,7 @@ def test7():
             t_span=(0,1),
             y0=q*60*60,
             args=(velocity,channel_len_m,idx_up),
-            vectorized=True
+            vectorized=False
         )
     print("--- %s seconds ---" % (time.time() - start_time))
     wh = np.where(network['link_id']==367813)[0][0]

@@ -69,6 +69,9 @@ def linear_velocity(states:pd.DataFrame,
             t_span=(0,1),
             y0=q*60*60, #m3/s to m3/h
             args=(velocity,channel_len_m,idx_up),
+            method='RK23',
+            atol=1e-2,
+            rtol=1e-2
         )
     print("--- %s seconds ---" % (time.time() - start_time))
     #takes 90 seconds run one hour

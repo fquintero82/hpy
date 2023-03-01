@@ -1,0 +1,20 @@
+---
+network: 367813.rvr
+parameters: 367813.prm
+init_time: 0
+end_time: 480
+time_step: 60
+forcings:
+ precipitation:
+  script: src/utils/forcings/read_binary.py
+  path: examples/cedarrapids1/forcings/precipitation
+ evaporation:
+  script: src/utils/forcings/read_mon_file.py
+  path: examples/cedarrapids1/forcings/evaporation/evap.mon
+ temperature:
+  script: 0
+  path: 0
+ frozen_ground:
+  script: 0
+  path: 0
+
