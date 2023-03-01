@@ -1,6 +1,8 @@
 ---
-network: 367813.rvr
-parameters: 367813.prm
+description: experiment to test hlm with yaml files
+network: examples/cedarrapids1/367813.rvr
+parameters: examples/cedarrapids1/367813.prm
+initial_states: examples/cedarrapids1/state0.csv
 init_time: 0
 end_time: 480
 time_step: 60
@@ -17,4 +19,5 @@ forcings:
  frozen_ground:
   script: 0
   path: 0
+
 
