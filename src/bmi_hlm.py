@@ -1,13 +1,14 @@
+from abc import abstractmethod
 import bmipy as Bmi
 
 from hlm import HLM
-
+import numpy as np
 class BmiHLM(Bmi):
-    #@abstractmethod
+    @abstractmethod
     def __init__(self) -> None:
        """Create a HLM model that is ready for initialization.""" 
-       self._model=None
-       
+       self._model= HLM()
+
 
     def initialize(self, config_file: str) -> None:
         """Perform startup tasks for the model.
@@ -27,10 +28,10 @@ class BmiHLM(Bmi):
         recommended. A template of a model's configuration file
         with placeholder values is used by the BMI.
         """
-        self._model.from_file(config_file)
+        self._model.init_from_file(config_file)
         
 
-    #@abstractmethod
+    @abstractmethod
     def update(self) -> None:
         """Advance model state by one time step.
         Perform all tasks that take place within one pass through the model's
@@ -39,9 +40,9 @@ class BmiHLM(Bmi):
         then they can be computed by the :func:`initialize` method and this
         method can return with no action.
         """
-        ...
+        self._model.advance_one_step()
 
-    #@abstractmethod
+    @abstractmethod
     def update_until(self, time: float) -> None:
         """Advance model state until the given time.
         Parameters
@@ -49,7 +50,7 @@ class BmiHLM(Bmi):
         time : float
             A model time later than the current model time.
         """
-        ...
+        self._model.advance(time)
 
     @abstractmethod
     def finalize(self) -> None:
@@ -58,7 +59,8 @@ class BmiHLM(Bmi):
         loop. This typically includes deallocating memory, closing files and
         printing reports.
         """
-        ...
+        self._model.finalize()
+        #self._model = None
 
     @abstractmethod
     def get_component_name(self) -> str:
@@ -68,9 +70,10 @@ class BmiHLM(Bmi):
         str
             The name of the component.
         """
+        return self._model.description
         ...
 
-    @abstractmethod
+    #@abstractmethod
     def get_input_item_count(self) -> int:
         """Count of a model's input variables.
         Returns
@@ -147,7 +150,7 @@ class BmiHLM(Bmi):
         str
             The Python variable type; e.g., ``str``, ``int``, ``float``.
         """
-        ...
+        return self._model.get_var_type(name)
 
     @abstractmethod
     def get_var_units(self, name: str) -> str:
@@ -172,7 +175,7 @@ class BmiHLM(Bmi):
         CSDMS uses the `UDUNITS`_ standard from Unidata.
         .. _UDUNITS: http://www.unidata.ucar.edu/software/udunits
         """
-        ...
+        return self._model.get_var_units(name)
 
     @abstractmethod
     def get_var_itemsize(self, name: str) -> int:
@@ -229,7 +232,7 @@ class BmiHLM(Bmi):
         CSDMS uses the `ugrid conventions`_ to define unstructured grids.
         .. _ugrid conventions: http://ugrid-conventions.github.io/ugrid-conventions
         """
-        ...
+        return self._model.get_var_location(name)
 
     @abstractmethod
     def get_current_time(self) -> float:
@@ -239,7 +242,7 @@ class BmiHLM(Bmi):
         float
             The current model time.
         """
-        ...
+        return float(self._model.time)
 
     @abstractmethod
     def get_start_time(self) -> float:
@@ -250,7 +253,7 @@ class BmiHLM(Bmi):
         float
             The model start time.
         """
-        ...
+        return float(self._model.init_time)
 
     @abstractmethod
     def get_end_time(self) -> float:
@@ -260,7 +263,7 @@ class BmiHLM(Bmi):
         float
             The maximum model time.
         """
-        ...
+        return float(self._model.end_time)
 
     @abstractmethod
     def get_time_units(self) -> str:
@@ -273,7 +276,7 @@ class BmiHLM(Bmi):
         -----
         CSDMS uses the UDUNITS standard from Unidata.
         """
-        ...
+        return 'hours'
 
     @abstractmethod
     def get_time_step(self) -> float:
@@ -284,7 +287,7 @@ class BmiHLM(Bmi):
         float
             The time step used in model.
         """
-        ...
+        return float(self._model.time_step)
 
     @abstractmethod
     def get_value(self, name: str, dest: np.ndarray) -> np.ndarray:
@@ -303,7 +306,7 @@ class BmiHLM(Bmi):
         ndarray
             The same numpy array that was passed as an input buffer.
         """
-        ...
+        dest[:] = self._model.get_values(name)
 
     @abstractmethod
     def get_value_ptr(self, name: str) -> np.ndarray:
@@ -320,7 +323,7 @@ class BmiHLM(Bmi):
         array_like
             A reference to a model variable.
         """
-        ...
+        return self._model.get_value_ptr(name,linkids=None).to_numpy()
 
     @abstractmethod
     def get_value_at_indices(
@@ -340,7 +343,7 @@ class BmiHLM(Bmi):
         array_like
             Value of the model variable at the given location.
         """
-        ...
+        dest[:] = self._model.get_values(var_name=name,linkids=inds)
 
     @abstractmethod
     def set_value(self, name: str, src: np.ndarray) -> None:
@@ -356,7 +359,8 @@ class BmiHLM(Bmi):
         src : array_like
             The new value for the specified variable.
         """
-        ...
+        self._model.set_values(name,src)
+        
 
     @abstractmethod
     def set_value_at_indices(
@@ -372,7 +376,7 @@ class BmiHLM(Bmi):
         src : array_like
             The new value for the specified variable.
         """
-        ...
+        self._model.set_values(var_name=name,values=src,linkids=inds)
 
     # Grid information
     @abstractmethod
