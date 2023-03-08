@@ -112,3 +112,27 @@ def linear_velocity2(states:pd.DataFrame,
     y_1 = res.y[:,n_eval-1]/3600. #m3/h to m3/s
     states['discharge'] = y_1
 
+def transfer0(states:pd.DataFrame,
+    params:pd.DataFrame,
+    network:pd.DataFrame,DT:int):
+
+    nlinks = network.shape[0]
+    routing_order = network.loc[:,['link_id','idx_downstream_link','drainage_area','channel_length']]
+    routing_order['idx_upstream_link']=np.arange(nlinks)
+    routing_order['river_velocity']= params['river_velocity']
+    routing_order = routing_order.sort_values(by=['drainage_area'])
+
+    idxd = routing_order['idx_downstream_link'].to_numpy()
+    idxu = routing_order['idx_upstream_link'].to_numpy()
+    vel = routing_order['river_velocity'].to_numpy()
+    vel[:] = 0.01 #m/s
+    len1 = routing_order['channel_length'].to_numpy()
+    q=states['discharge'].to_numpy() #q is a pointer. changing q results in changing states['discharge']
+
+
+    for ii in np.arange(nlinks):
+        #dq = np.min([q[idxu[ii]] , q[idxu[ii]] * vel[ii] / len1[ii] * DT*60 ])
+        dq = q[idxu[ii]]
+        if(idxd[ii])>=0:
+            q[idxd[ii]] += dq
+            q[idxu[ii]] -= dq 

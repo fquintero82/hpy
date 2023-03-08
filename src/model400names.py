@@ -5,7 +5,16 @@ PARAM_NAMES = ['link_id','river_velocity','lambda1','lambda2','max_storage','inf
 
 
 
-STATES_NAMES = ['link_id','snow','static','surface','subsurface','groundwater','discharge']
+STATES_NAMES0 = ['link_id','snow','static','surface','subsurface','groundwater','discharge']
+STATES_NAMES = {'link_id':np.uint32,
+                'snow':np.float16,
+                'static':np.float16,
+                'surface':np.float16,
+                'subsurface':np.float16,
+                'groundwater':np.float16,
+                'discharge':np.float16
+                }
+
 FORCINGS_NAMES=['link_id','precipitation','evapotranspiration','temperature','frozen_ground','discharge']
 
 CF_NAMES ={

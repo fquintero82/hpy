@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from model400pandas import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import linear_velocity1
+from routing import linear_velocity1,transfer0
 from yaml import Loader
 import yaml
 from utils.network.network import combine_rvr_prm
@@ -13,7 +13,7 @@ from utils.params.params_default import get_default_params
 from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
 from utils.network.network import get_default_network
-from utils.serialization import save_to_netcdf
+from utils.serialization import save_to_pickle
 
 class HLM(object):
     """Creates a new HLM model """
@@ -71,8 +71,9 @@ class HLM(object):
     
     def advance_one_step(self):
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step)
-        linear_velocity1(self.states,self.params,self.network,self.time_step)
-        save_to_netcdf(self.states,self.time)
+        #linear_velocity1(self.states,self.params,self.network,self.time_step)
+        transfer0(self.states,self.params,self.network,self.time_step)
+        save_to_pickle(self.states,self.time)
         self.time += self.time_step*60
 
     def advance(self,time_to_advance:float):

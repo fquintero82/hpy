@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from model400names import PARAM_NAMES , NETWORK_NAMES,STATES_NAMES,FORCINGS_NAMES
+from model400names import PARAM_NAMES ,STATES_NAMES,FORCINGS_NAMES
+from utils.network.network import NETWORK_NAMES
 
 def getDF_by_size(mycase,nlinks):
     if mycase =='states':
