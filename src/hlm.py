@@ -13,7 +13,7 @@ from utils.params.params_default import get_default_params
 from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
 from utils.network.network import get_default_network
-from utils.save_results import save_to_netcdf
+from utils.serialization import save_to_netcdf
 
 class HLM(object):
     """Creates a new HLM model """

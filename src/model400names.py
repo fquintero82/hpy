@@ -2,15 +2,8 @@ import numpy as np
 
 PARAM_NAMES = ['link_id','river_velocity','lambda1','lambda2','max_storage','infiltration',
             'percolation','surface_velocity','alfa3','alfa4','temp_threshold','melt_factor']
-NETWORK_NAMES ={'link_id':np.uint32,
-                'downstream_link':np.uint32,
-                'idx_downstream_link':np.uint32,
-                'upstream_link':np.uint32,
-                'idx_upstream_link':object,
-                'channel_length':np.float16,
-                'area_hillslope':np.float16,
-                'drainage_area':np.float16,
-                }
+
+
 
 STATES_NAMES = ['link_id','snow','static','surface','subsurface','groundwater','discharge']
 FORCINGS_NAMES=['link_id','precipitation','evapotranspiration','temperature','frozen_ground','discharge']
