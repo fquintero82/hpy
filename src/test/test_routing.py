@@ -60,28 +60,30 @@ def test3():
     idxu = routing_order['idx_upstream_link'].to_numpy()
     vel = routing_order['river_velocity'].to_numpy()
     len1 = routing_order['channel_length'].to_numpy()
-    routing_order.describe()
-    states['discharge']=1
+    #routing_order.describe()
+    states['discharge']=np.float16(1.0)
     q=states['discharge'].to_numpy()
 
+    NGAGE = 1
+    NSTEPS = 10
+    _X = 32714
 
-    for ii in np.arange(nlinks):
-        dq = np.min([q[idxu[ii]] , q[idxu[ii]] * vel[ii] / len1[ii] * DT ])
-        #dq = q[idxu[ii]]
-        if(idxd[ii])>=0:
-            q[idxd[ii]] += dq
-            q[idxu[ii]] -= dq 
-    
-    states['discharge']=q
-    states.describe()
-    NSTEPS = 480
-    DT = 60 #min
-    velocity = 0.1 #m/s
-    for tt in range(NSTEPS):
+    out = np.zeros(shape=(NGAGE,NSTEPS))
+    for tt in np.arange(NSTEPS):
         print(tt)
-        linear_velocity(states,velocity,network,DT)
-        f = '../examples/cedarrapids1/out/{}.pkl'.format(tt)
-        states['discharge'].to_pickle(f)
+        for ii in np.arange(nlinks):
+            #dq = np.min([q[idxu[ii]] , q[idxu[ii]] * vel[ii] / len1[ii] * DT ])
+            dq = q[idxu[ii]] * np.float16(0.1)
+            if(idxd[ii])>=0:
+                q[idxu[ii]] -= dq 
+                q[idxd[ii]] += dq
+
+            out[0,tt] = states.loc[_X,'discharge']
+    
+    plt.plot(out[0,:])
+    plt.show()
+    
+    
 
 def test3():
     q = 1 #m3/s
