@@ -6,8 +6,11 @@ from utils.network.network import NETWORK_NAMES
 def getDF_by_size(mycase,nlinks):
     if mycase =='states':
         out = pd.DataFrame(
-        data = np.zeros(shape=(nlinks,len(STATES_NAMES))),
-        columns=STATES_NAMES)
+        data = np.zeros(shape=(nlinks,
+            len(STATES_NAMES.keys())
+            )
+            ),
+        columns=list(STATES_NAMES.keys()))
         return out
     elif mycase =='params':
         out = pd.DataFrame(
@@ -126,7 +129,7 @@ def getTestDF2(mycase):
         out = pd.DataFrame(
         data=np.array([[1,0,[2,3]],[2,1,[4,5]],[3,1,0],[4,2,0],[5,2,0]],
         dtype=object),
-        columns=NETWORK_NAMES)
+        columns=['link_id','downstream_link','upstream_link'])
         out.index = out['link_id']
         out['area_hillslope']=100
         out['channel_length']=100

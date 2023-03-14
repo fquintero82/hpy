@@ -61,24 +61,25 @@ def test3():
     vel = routing_order['river_velocity'].to_numpy()
     len1 = routing_order['channel_length'].to_numpy()
     #routing_order.describe()
-    states['discharge']=np.float16(1.0)
+    states['discharge']=np.float16(0.1)
     q=states['discharge'].to_numpy()
 
     NGAGE = 1
-    NSTEPS = 10
-    _X = 32714
+    NSTEPS = 100
+    _X = 367813
 
     out = np.zeros(shape=(NGAGE,NSTEPS))
     for tt in np.arange(NSTEPS):
         print(tt)
         for ii in np.arange(nlinks):
-            #dq = np.min([q[idxu[ii]] , q[idxu[ii]] * vel[ii] / len1[ii] * DT ])
-            dq = q[idxu[ii]] * np.float16(0.1)
+            out[0,tt] = states.loc[_X,'discharge']
+            dq = np.float16(np.min([q[idxu[ii]] , q[idxu[ii]] * vel[ii] / len1[ii] * DT ]))
+            #dq = q[idxu[ii]] * np.float16(0.25)
+            q[idxu[ii]] -= dq 
             if(idxd[ii])>=0:
-                q[idxu[ii]] -= dq 
                 q[idxd[ii]] += dq
 
-            out[0,tt] = states.loc[_X,'discharge']
+            
     
     plt.plot(out[0,:])
     plt.show()

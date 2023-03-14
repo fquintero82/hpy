@@ -6,6 +6,8 @@ import pandas as pd
 from utils.network.network_from_rvr_file import combine_rvr_prm
 from model400names import STATES_NAMES
 import time
+import tensorflow as tf
+import tensorflow_probability as tfp
 
 def test1():
     '''
@@ -298,3 +300,26 @@ def test_odeint1():
     plt.plot(res['t'],qout,label='outlet')
     plt.legend()
     plt.show()
+
+def test_tf1():
+    #https://computationalmindset.com/en/neural-networks/ordinary-differential-equation-solvers.html
+    t_init, t0, t1 = 0., 0.5, 1.
+    y_init = tf.constant([1., 1.], dtype=tf.float64)
+    A = tf.constant([[-1., -2.], [-3., -4.]], dtype=tf.float64)
+
+    def ode_fn(t, y):
+        return tf.linalg.matvec(A, y)
+
+    results = tfp.math.ode.BDF().solve(ode_fn, t_init, y_init,
+                                   solution_times=[t0, t1])
+    y0 = results.states[0]  # == dot(matrix_exp(A * t0), y_init)
+    y1 = results.states[1]  # == dot(matrix_exp(A * t1), y_init)
+def test_tf2():
+    def fun(q,t,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
+    #print(type(q))
+    q_aux = np.concatenate(([0],q))
+    q_upstream = np.zeros(q.shape)
+    q_upstream = np.array([np.sum(q_aux[x]) for x in idx_up]) #m3/h
+    velocity *=60*60 #m/s to m/h
+    dq_dt = (1/channel_len_m )* velocity * (-1*q_aux[1:] + q_upstream)
+    return dq_dt

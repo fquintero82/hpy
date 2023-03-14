@@ -2,7 +2,7 @@
 #""" bmi compatible version of Hillslope Link Model"""
 import pandas as pd
 import numpy as np
-from model400pandas import runoff1
+from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
 from routing import linear_velocity1,transfer0
 from yaml import Loader
@@ -14,6 +14,8 @@ from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
 from utils.network.network import get_default_network
 from utils.serialization import save_to_pickle
+#from io3.forcing import check_forcings
+import importlib.util
 
 class HLM(object):
     """Creates a new HLM model """
@@ -30,6 +32,7 @@ class HLM(object):
         self.forcings= None
         self.network= None
         self.outputfile =None
+        self.configuration = None
 
     
     def init_from_file(self,config_file:str):
@@ -39,7 +42,8 @@ class HLM(object):
             except yaml.YAMLError as e:
                 print(e)
                 return
-            
+        
+        self.configuration = d
         self.description = d['description']
         self.time = d['init_time']
         self.init_time = d['init_time']
@@ -68,6 +72,22 @@ class HLM(object):
     def set_time_step(self,time_step:int):
         self.time_step=time_step
 
+    def set_forcings(self):
+        modelforcings = list(self.forcings.columns)[1:]
+        config_forcings = list(self.configuration['forcings'].keys())
+        for ii in range(len(modelforcings)):
+            if modelforcings[ii] in config_forcings:
+                modname = self.configuration['forcings'][modelforcings[ii]]['script']
+                spec = importlib.util.spec_from_file_location('mod',modname)
+                foo = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(foo)
+
+            lid, values = foo.get_values(self.time)
+            self.set_values(
+                var_name='forcings.'+ modelforcings[ii],
+                linkids = lid,
+                values= values
+            )
     
     def advance_one_step(self):
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step)
@@ -84,17 +104,19 @@ class HLM(object):
         self = None
 
     def check_var_exists(self,variable:str)->bool:
-        flag =True
-        flag = flag and (variable in self.params.columns)
-        flag = flag and (variable in self.forcings.columns)
-        flag = flag and (variable in self.states.columns)
-        flag = flag and (variable in self.network.columns)
+        flag =False
+        flag = flag or (variable in self.params.columns)
+        flag = flag or (variable in self.forcings.columns)
+        flag = flag or (variable in self.states.columns)
+        flag = flag or (variable in self.network.columns)
         return flag
 
     def get_value_ptr(self,var_name:str):
+        print(var_name)
         items = var_name.split('.')
-        group = items[1]
-        variable = items[2]
+        print(items)
+        group = items[0]
+        variable = items[1]
         if self.check_var_exists(variable)==False:
             print('{} not exists in HLM variables'.format(var_name))
             return
@@ -109,10 +131,12 @@ class HLM(object):
 
     def set_values(self,var_name:str,values:np.ndarray,linkids=None):
         var = self.get_value_ptr(var_name)
-        if linkids == None:
+        
+        if linkids.any() == None:
             var[:] = values
         else:
-            var.loc[linkids] = values
+            var[:]=0
+            var.loc[linkids] = values #do intersection ?
 
     def get_values(self,var_name: str,linkids=None)->np.ndarray:
         var = self.get_value_ptr(var_name)

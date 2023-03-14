@@ -14,6 +14,17 @@ NETWORK_NAMES ={
     'drainage_area':np.float32
     }
 
+NETWORK_UNITS ={
+    'link_id':'',
+    'downstream_link':'',
+    'idx_downstream_link':'',
+    'upstream_link':'',
+    'idx_upstream_link':'',
+    'channel_length':'',
+    'area_hillslope':'m2',
+    'drainage_area':'m2'
+    }
+
 def get_default_network():
     f = 'examples/cedarrapids1/367813_network.pkl'
     if os.path.isfile(f)==False:
