@@ -3,21 +3,19 @@ description: experiment to test hlm with yaml files
 network: examples/cedarrapids1/367813.rvr
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
-init_time: 0
+init_time: 1579291200
 end_time: 480
 time_step: 60
 forcings:
  precipitation:
-  script: src/utils/forcings/read_binary.py
-  path: examples/cedarrapids1/forcings/precipitation
+  script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
  evaporation:
-  script: src/utils/forcings/read_mon_file.py
-  path: examples/cedarrapids1/forcings/evaporation/evap.mon
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
  temperature:
-  script: 0
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
   path: 0
  frozen_ground:
-  script: 0
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
   path: 0
 output_file: examples/cedarapids1/out/
 
