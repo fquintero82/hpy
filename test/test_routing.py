@@ -100,3 +100,5 @@ def test3():
         out[0,tt] = tt
     plt.plot(out[0,:],out[1,:])
     plt.show()
+
+   # https://www.weather.gov/media/owp/oh/hrl/docs/24sarroute.pdf

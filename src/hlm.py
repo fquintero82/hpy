@@ -76,18 +76,21 @@ class HLM(object):
         modelforcings = list(self.forcings.columns)[1:]
         config_forcings = list(self.configuration['forcings'].keys())
         for ii in range(len(modelforcings)):
+            if modelforcings[ii] not in config_forcings:
+                print(modelforcings[ii]+ ' not found in yaml file')
             if modelforcings[ii] in config_forcings:
-                modname = self.configuration['forcings'][modelforcings[ii]]['script']
+                options = self.configuration['forcings'][modelforcings[ii]]
+                modname = options['script']
                 spec = importlib.util.spec_from_file_location('mod',modname)
                 foo = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(foo)
-
-            lid, values = foo.get_values(self.time)
-            self.set_values(
-                var_name='forcings.'+ modelforcings[ii],
-                linkids = lid,
-                values= values
-            )
+                
+                lid, values = foo.get_values(self.time,options)
+                self.set_values(
+                    var_name='forcings.'+ modelforcings[ii],
+                    linkids = lid,
+                    values= values
+                )
     
     def advance_one_step(self):
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step)
@@ -132,10 +135,10 @@ class HLM(object):
     def set_values(self,var_name:str,values:np.ndarray,linkids=None):
         var = self.get_value_ptr(var_name)
         
-        if linkids.any() == None:
-            var[:] = values
+        if linkids is None:
+            var.loc[:] = values
         else:
-            var[:]=0
+            var.loc[:]=0
             var.loc[linkids] = values #do intersection ?
 
     def get_values(self,var_name: str,linkids=None)->np.ndarray:

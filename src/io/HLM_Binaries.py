@@ -3,14 +3,24 @@ import numpy as np
 
     
 dir = '/Users/felipe/hio/hio/examples/HLM_Binaries'
+prefix = ''
 def get_values(time: int,options=None):
-    if options !=None:
+    if options is not None:
         dir = options['path']
-    filein = os.path.join(dir,str(time))
-    with open(file=filein,mode='rb') as myfile:
-        file  = open(file=filein,mode='rb')
-        data = read_bin(file)
-        return data['lid'] , data['val']
+    if 'prefix' in list(options.keys()):
+        prefix = options['prefix']
+    filein = os.path.join(dir,prefix+str(time))
+    lid = None
+    val = 0
+    try:
+        with open(file=filein,mode='rb') as myfile:
+            file  = open(file=filein,mode='rb')
+            data = read_bin(file)
+            lid = data['lid']
+            val = data['val']
+    except FileNotFoundError as e:
+        print(e)
+    return lid , val
 
 
 def read_bin(path):
