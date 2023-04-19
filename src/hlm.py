@@ -93,9 +93,11 @@ class HLM(object):
                 )
     
     def advance_one_step(self):
+        print(self.time)
+        self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step)
-        #linear_velocity1(self.states,self.params,self.network,self.time_step)
-        transfer0(self.states,self.params,self.network,self.time_step)
+        linear_velocity1(self.states,self.params,self.network,self.time_step)
+        #transfer0(self.states,self.params,self.network,self.time_step)
         save_to_pickle(self.states,self.time)
         self.time += self.time_step*60
 
@@ -115,6 +117,9 @@ class HLM(object):
         return flag
 
     def get_value_ptr(self,var_name:str):
+        #this method is still having some issues.
+        #it should return a view (pointer) to the variable
+        #not a copy
         print(var_name)
         items = var_name.split('.')
         print(items)
@@ -124,22 +129,45 @@ class HLM(object):
             print('{} not exists in HLM variables'.format(var_name))
             return
         if group == 'params':
-            return self.params[variable]
+            return self.params[[variable]]
         elif group == 'forcings':
-            return self.forcings[variable]
+            #return self.forcings[variable] #this return series
+            #return self.forcings.loc[:,variable] #this return series
+
+            #doing [[variable]] returns datafarame instead of series
+            #doing .loc[:] returns view instead of copy
+            return self.forcings[[variable]].loc[:] #this returns dataframe
         elif group == 'states':
-            return self.states[variable]
+            return self.states[[variable]]
         elif group == 'network':
-            return self.network[variable]
+            return self.network[[variable]]
 
     def set_values(self,var_name:str,values:np.ndarray,linkids=None):
-        var = self.get_value_ptr(var_name)
+        #var = self.get_value_ptr(var_name)
+        #print(var_name)
+        items = var_name.split('.')
+        #print(items)
+        group = items[0]
+        variable = items[1]
+        if self.check_var_exists(variable)==False:
+            print('{} not exists in HLM variables'.format(var_name))
+            return
+        if group == 'params':
+            pass
+        elif group == 'forcings':
+            if linkids is None:
+                self.forcings.loc[:,variable] = values
+            else:
+                self.forcings.loc[:,variable]=0
+                df = pd.DataFrame({'val':values},index=linkids)
+                ix = self.forcings.index.intersection(df.index)
+                self.forcings.loc[ix,variable] = df.loc[ix,'val']
+                del df, ix
+        elif group == 'states':
+            pass
+        elif group == 'network':
+            pass
         
-        if linkids is None:
-            var.loc[:] = values
-        else:
-            var.loc[:]=0
-            var.loc[linkids] = values #do intersection ?
 
     def get_values(self,var_name: str,linkids=None)->np.ndarray:
         var = self.get_value_ptr(var_name)

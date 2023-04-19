@@ -3,15 +3,15 @@ description: experiment to test hlm with yaml files
 network: examples/cedarrapids1/367813.rvr
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
-init_time: 1579291200
-end_time: 1199145600
+init_time: 1204344000
+end_time: 1212278400
 time_step: 60
 forcings:
  precipitation:
   script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
   path: /Users/felipe/tmp/st4_2008/
   prefix: iowa_
- evaporation:
+ evapotranspiration:
   script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
   path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv
  temperature:
@@ -20,6 +20,8 @@ forcings:
  frozen_ground:
   script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
   path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
-output_file: examples/cedarapids1/out/
+output_file: 
+  script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
+  path: examples/cedarapids1/out/test.ncdf
 
 

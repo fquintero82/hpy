@@ -102,3 +102,4 @@ def test3():
     plt.show()
 
    # https://www.weather.gov/media/owp/oh/hrl/docs/24sarroute.pdf
+#parallel musk   https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016650
