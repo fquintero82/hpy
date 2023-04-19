@@ -4,6 +4,7 @@ import pandas as pd
 import multiprocessing as mp
 import time
 
+#calculates routing using Mantilla 2005 equation, using lambda1 and lambda 2 parameters
 def nonlinear_velocity(states:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame,DT:int):
@@ -44,6 +45,8 @@ def nonlinear_velocity(states:pd.DataFrame,
     y_1 = res.y[:,n_eval-1]
     states['discharge'] = y_1
 
+#calculates routing using Mantilla 2005 equation, simplification with lamdbda 1 and 2 equal zero, 
+#meaning constant velocity over time, varying on channel length
 def linear_velocity1(states:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame,
@@ -79,6 +82,7 @@ def linear_velocity1(states:pd.DataFrame,
     y_1 = res.y[:,n_eval-1]/3600. #m3/h to m3/s
     states['discharge'] = y_1
 
+
 def linear_velocity2(states:pd.DataFrame,
     velocity:np.float16,
     network:pd.DataFrame,DT:int):
@@ -112,6 +116,8 @@ def linear_velocity2(states:pd.DataFrame,
     y_1 = res.y[:,n_eval-1]/3600. #m3/h to m3/s
     states['discharge'] = y_1
 
+#calclates routing as linear transfer from upstream to downstream link
+
 def transfer0(states:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame,DT:int):
@@ -136,3 +142,22 @@ def transfer0(states:pd.DataFrame,
         if(idxd[ii])>=0:
             q[idxd[ii]] += dq
             q[idxu[ii]] -= dq 
+
+#routing model compatible with model1
+def transfer1(states:pd.DataFrame,
+    params:pd.DataFrame,
+    network:pd.DataFrame,DT:int):
+    nlinks = network.shape[0]
+    routing_order = network.loc[:,['link_id','idx_downstream_link','drainage_area','channel_length']]
+    routing_order['idx_upstream_link']=np.arange(nlinks)
+    routing_order['river_velocity']= params['river_velocity']
+    routing_order = routing_order.sort_values(by=['drainage_area'])
+    idxd = routing_order['idx_downstream_link'].to_numpy()
+    idxu = routing_order['idx_upstream_link'].to_numpy()
+    q=states['volume'].to_numpy()
+    result = q.copy()
+    for ii in np.arange(nlinks):
+        qout = q[idxu[ii]]
+        result[idxd[ii]] += qout
+
+    states['mean_areal_runoff'] = result / network['drainage_area'] * 1000

@@ -86,7 +86,7 @@ def test3():
     
     
 
-def test3():
+def test4():
     q = 1 #m3/s
     v = 1 #m/s
     l = 100 #m
@@ -103,3 +103,30 @@ def test3():
 
    # https://www.weather.gov/media/owp/oh/hrl/docs/24sarroute.pdf
 #parallel musk   https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014WR016650
+
+def test5():
+    def transfer1(states:pd.DataFrame,
+    params:pd.DataFrame,
+    network:pd.DataFrame,DT:int):
+        nlinks = network.shape[0]
+        routing_order = network.loc[:,['link_id','idx_downstream_link','drainage_area','channel_length']]
+        routing_order['idx_upstream_link']=np.arange(nlinks)
+        routing_order['river_velocity']= params['river_velocity']
+        routing_order = routing_order.sort_values(by=['drainage_area'])
+        idxd = routing_order['idx_downstream_link'].to_numpy()
+        idxu = routing_order['idx_upstream_link'].to_numpy()
+        q=states['volume'].to_numpy()
+        result = q.copy()
+        for ii in np.arange(nlinks):
+            qout = q[idxu[ii]]
+            result[idxd[ii]] += qout
+
+        states['mean_areal_runoff'] = result / network['drainage_area'] * 1000
+    
+    network = pd.read_pickle('../examples/cedarrapids1/367813_network.pkl')
+
+    nlinks = network.shape[0]
+    states = get_default_states(network)
+    params = get_default_params(network)
+
+test5()

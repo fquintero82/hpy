@@ -60,6 +60,8 @@ def get_idx_up_down(df):
             df.loc[_up,'downstream_link'] = _mylink #the downstream link of those uplinks is the ii-th linkid
             df.loc[_up,'idx_downstream_link'] = _mylink_idx#and the idx_downstream is ii
 
+def get_adjacency_matrix():
+    pass
 
 
 def network_from_rvr_file(rvr_file):
