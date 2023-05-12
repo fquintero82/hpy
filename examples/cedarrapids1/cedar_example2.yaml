@@ -1,0 +1,19 @@
+---
+description: experiment to test hlm with yaml files
+network: examples/cedarrapids1/367813.rvr
+parameters: examples/cedarrapids1/367813.prm
+initial_states: examples/cedarrapids1/state0.pkl
+init_time: 0
+end_time: 432000
+time_step: 60
+forcings:
+  precipitation:
+  temperature:
+  evapotranspiration:
+  frozen_ground:
+  discharge:
+output_file: 
+  script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
+  path: /Users/felipe/hpy/hpy/examples/cedarrapids1/out/test.nc
+
+

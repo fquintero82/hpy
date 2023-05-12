@@ -7,6 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from utils.params.params_default import get_default_params
 from utils.states.states_default import get_default_states
+
 def test1():
     rvr_file ='../examples/cedarrapids1/367813.rvr'
     prm_file ='../examples/cedarrapids1/367813.prm'
@@ -106,27 +107,30 @@ def test4():
 
 def test5():
     def transfer1(states:pd.DataFrame,
-    params:pd.DataFrame,
-    network:pd.DataFrame,DT:int):
+    network:pd.DataFrame):
         nlinks = network.shape[0]
-        routing_order = network.loc[:,['link_id','idx_downstream_link','drainage_area','channel_length']]
-        routing_order['idx_upstream_link']=np.arange(nlinks)
-        routing_order['river_velocity']= params['river_velocity']
+        #method1
+        routing_order = network.loc[:,['link_id','downstream_link','drainage_area']]
         routing_order = routing_order.sort_values(by=['drainage_area'])
-        idxd = routing_order['idx_downstream_link'].to_numpy()
-        idxu = routing_order['idx_upstream_link'].to_numpy()
-        q=states['volume'].to_numpy()
-        result = q.copy()
+        #idxd = routing_order['idx_downstream_link'].to_numpy()
+        #idxu = routing_order['idx_upstream_link'].to_numpy()
+        #q=states['volume'].to_numpy()
+        states['mean_areal_runoff'] = states['volume']
         for ii in np.arange(nlinks):
-            qout = q[idxu[ii]]
-            result[idxd[ii]] += qout
-
-        states['mean_areal_runoff'] = result / network['drainage_area'] * 1000
+            _a = routing_order.iloc[ii]
+            if int(_a['downstream_link']) !=-1:
+                states.loc[int(_a['downstream_link']),'mean_areal_runoff'] += states.loc[int(_a['link_id']),'mean_areal_runoff']
+        
+        #method2
+        routing_order = network.loc[:,['link_id','downstream_link','drainage_area']]
+        routing_order = routing_order.sort_values(by=['drainage_area'])
     
-    network = pd.read_pickle('../examples/cedarrapids1/367813_network.pkl')
+    network = pd.read_pickle('examples/cedarrapids1/367813_network.pkl')
 
     nlinks = network.shape[0]
     states = get_default_states(network)
+    states['volume']=1
     params = get_default_params(network)
 
-test5()
+
+
