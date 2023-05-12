@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import linear_velocity1,transfer0
+from routing import linear_velocity1,transfer1,transfer2
 from yaml import Loader
 import yaml
 from utils.network.network import combine_rvr_prm
@@ -12,10 +12,11 @@ from utils.params.params_from_prm_file import params_from_prm_file
 from utils.params.params_default import get_default_params
 from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
-from utils.network.network import get_default_network
-from utils.serialization import save_to_pickle
+from utils.network.network import get_default_network, get_adjacency_matrix
+from utils.serialization import save_to_pickle,save_to_netcdf
 #from io3.forcing import check_forcings
 import importlib.util
+from utils.check_yaml import check_yaml1
 
 class HLM(object):
     """Creates a new HLM model """
@@ -31,6 +32,7 @@ class HLM(object):
         self.params= None
         self.forcings= None
         self.network= None
+        self.adjmatrix=None
         self.outputfile =None
         self.configuration = None
 
@@ -42,20 +44,20 @@ class HLM(object):
             except yaml.YAMLError as e:
                 print(e)
                 return
-        
+        check_yaml1(d)
         self.configuration = d
         self.description = d['description']
         self.time = d['init_time']
         self.init_time = d['init_time']
         self.end_time = d['end_time']
         self.time_step= d['time_step']
-        #self.network = combine_rvr_prm(d['parameters'],d['network'])
         self.network = get_default_network()
+        self.adjmatrix = get_adjacency_matrix(self.network,default=True)
         self.states = get_default_states(self.network)
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
-        self.outputfile = d['output_file']
-
+        self.outputfile = d['output_file']['path']
+        
 
         ...
 
@@ -73,6 +75,7 @@ class HLM(object):
         self.time_step=time_step
 
     def set_forcings(self):
+        print('reading forcings')
         modelforcings = list(self.forcings.columns)[1:]
         config_forcings = list(self.configuration['forcings'].keys())
         for ii in range(len(modelforcings)):
@@ -80,25 +83,34 @@ class HLM(object):
                 print(modelforcings[ii]+ ' not found in yaml file')
             if modelforcings[ii] in config_forcings:
                 options = self.configuration['forcings'][modelforcings[ii]]
-                modname = options['script']
-                spec = importlib.util.spec_from_file_location('mod',modname)
-                foo = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(foo)
+                if options is not None:
+                    try:
+                        modname = options['script']
+                        spec = importlib.util.spec_from_file_location('mod',modname)
+                        foo = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(foo)
+                        lid, values = foo.get_values(self.time,options)
+                        self.set_values(
+                            var_name='forcings.'+ modelforcings[ii],
+                            linkids = lid,
+                            values= values
+                        )
+                    except Exception as e:
+                        print(e)
+                        quit()
+        print('forcings loaded')
                 
-                lid, values = foo.get_values(self.time,options)
-                self.set_values(
-                    var_name='forcings.'+ modelforcings[ii],
-                    linkids = lid,
-                    values= values
-                )
     
     def advance_one_step(self):
         print(self.time)
         self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step)
-        linear_velocity1(self.states,self.params,self.network,self.time_step)
+        #linear_velocity1(self.states,self.params,self.network,self.time_step)
         #transfer0(self.states,self.params,self.network,self.time_step)
-        save_to_pickle(self.states,self.time)
+        transfer2(self)
+        transfer1(self)
+        save_to_netcdf(self.states,self.time,self.outputfile)
+        #save_to_pickle(self.states,self.time)
         self.time += self.time_step*60
 
     def advance(self,time_to_advance:float):

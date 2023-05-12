@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 import multiprocessing as mp
 import time
+from numpy.linalg import inv
+import time
+from scipy.linalg import solve
 
 #calculates routing using Mantilla 2005 equation, using lambda1 and lambda 2 parameters
 def nonlinear_velocity(states:pd.DataFrame,
@@ -116,7 +119,7 @@ def linear_velocity2(states:pd.DataFrame,
     y_1 = res.y[:,n_eval-1]/3600. #m3/h to m3/s
     states['discharge'] = y_1
 
-#calclates routing as linear transfer from upstream to downstream link
+#calculates routing as linear transfer from upstream to downstream link
 
 def transfer0(states:pd.DataFrame,
     params:pd.DataFrame,
@@ -143,21 +146,78 @@ def transfer0(states:pd.DataFrame,
             q[idxd[ii]] += dq
             q[idxu[ii]] -= dq 
 
-#routing model compatible with model1
-def transfer1(states:pd.DataFrame,
-    params:pd.DataFrame,
-    network:pd.DataFrame,DT:int):
-    nlinks = network.shape[0]
-    routing_order = network.loc[:,['link_id','idx_downstream_link','drainage_area','channel_length']]
-    routing_order['idx_upstream_link']=np.arange(nlinks)
-    routing_order['river_velocity']= params['river_velocity']
+
+def transfer1(hlm_object):
+    t = time.time()
+    nlinks = hlm_object.network.shape[0]
+    routing_order = hlm_object.network.loc[:,['idx','idx_downstream_link','drainage_area']].copy()
     routing_order = routing_order.sort_values(by=['drainage_area'])
     idxd = routing_order['idx_downstream_link'].to_numpy()
-    idxu = routing_order['idx_upstream_link'].to_numpy()
-    q=states['volume'].to_numpy()
-    result = q.copy()
-    for ii in np.arange(nlinks):
-        qout = q[idxu[ii]]
-        result[idxd[ii]] += qout
+    idxu = routing_order['idx'].to_numpy()
+    da = np.array(hlm_object.network['drainage_area']*1e6,dtype=np.float32)
+    bp=np.array(hlm_object.states['basin_precipitation']* hlm_object.network['area_hillslope'],dtype=np.float32)
+    bet=np.array(hlm_object.states['basin_evapotranspiration']* hlm_object.network['area_hillslope'],dtype=np.float32)
+    bswe=np.array(hlm_object.states['basin_swe']* hlm_object.network['area_hillslope'],dtype=np.float32)
+    bsf=np.array(hlm_object.states['basin_surface']* hlm_object.network['area_hillslope'],dtype=np.float32)
+    bsub=np.array(hlm_object.states['basin_subsurface']* hlm_object.network['area_hillslope'],dtype=np.float32)
+    bgw=np.array(hlm_object.states['basin_groundwater']* hlm_object.network['area_hillslope'],dtype=np.float32)
 
-    states['mean_areal_runoff'] = result / network['drainage_area'] * 1000
+    for ii in np.arange(nlinks):
+        if idxd[ii]!=-1:
+            bp[idxd[ii]-1]+= bp[idxu[ii]-1]
+            bet[idxd[ii]-1]+= bet[idxu[ii]-1]
+            bswe[idxd[ii]-1]+= bswe[idxu[ii]-1]
+            bsf[idxd[ii]-1]+= bsf[idxu[ii]-1]
+            bsub[idxd[ii]-1]+= bsub[idxu[ii]-1]
+            bgw[idxd[ii]-1]+= bgw[idxu[ii]-1]
+    bp /= da
+    bet /= da
+    bswe /= da
+    bswe /= da
+    bsf /= da
+    bsub /= da
+    bgw /= da
+
+    hlm_object.states['basin_precipitation'] = bp
+    hlm_object.states['basin_evapotranspiration'] = bet
+    hlm_object.states['basin_swe'] = bswe
+    hlm_object.states['basin_surface'] = bsf
+    hlm_object.states['basin_subsurface'] = bsub
+    hlm_object.states['basin_groundwater'] = bgw
+    del bp,bet,bswe,bsf,bsub,bgw,routing_order,idxd,idxu
+    print(time.time()-t)
+
+def transfer2(hlm_object):
+    #transfer discharge volume
+    #print('transfer volume')
+    #q0 = np.array(hlm_object.states['volume'],dtype=np.float32)
+    #q0 = hlm_object.states['volume'].copy()
+    q0 = hlm_object.states['volume'].to_numpy()
+    A = hlm_object.adjmatrix
+    #A = np.array(hlm_object.adjmatrix,dtype=np.float32)
+    f = np.array(hlm_object.params['river_velocity'] * (1.0 / hlm_object.network['channel_length']) * hlm_object.time_step*60,dtype=np.float32)
+    t = time.time()
+    # aux = q0 + sgemm(alpha=1,a=A,b=(f*q0))
+    output = np.multiply(f,q0)
+    output = np.minimum(output,q0) #output cant be larger than the current volume
+    hlm_object.states['volume'] = q0 + np.matmul(A,output)
+    #print(time.time()-t)
+    #print('complete transfer volume')
+    #assuming channel of 1m width
+    # discharge  = area wet section x river velocity
+    #[m3/s] = [m3] / [m] * [m/s]
+    hlm_object.states['discharge'] = np.array(
+        hlm_object.states['volume'] / hlm_object.network['channel_length'] * hlm_object.params['river_velocity']
+        ,dtype=np.float32)
+    del q0,f,output
+
+    #cancelled the approach below because the inverse of A
+    #takes forever to be estimated, even pre-processed
+    # A = -1*A
+    # #transfer basin accumulation states
+    # print('transfer precip')
+    # t = time.time()
+    # q0= hlm_object.states['basin_precipitation'].copy()
+    # hlm_object.states['basin_precipitation'] = solve(A,q0)
+    # print(time.time()-t)
+    

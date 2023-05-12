@@ -2,9 +2,12 @@ import pandas as pd
 import numpy as np
 from utils.params.params_from_prm_file import params_from_prm_file
 import os
+import pickle
+
 
 NETWORK_NAMES ={
     'link_id':np.uint32,
+    'idx':np.uint32,
     'downstream_link':np.int32,
     'idx_downstream_link':np.int32,
     'upstream_link':object,
@@ -16,6 +19,7 @@ NETWORK_NAMES ={
 
 NETWORK_UNITS ={
     'link_id':'',
+    'idx':'',
     'downstream_link':'',
     'idx_downstream_link':'',
     'upstream_link':'',
@@ -39,29 +43,47 @@ def _process_line(f):
     items = line.split()
     _lid = int(items[0])
     _n = int(items[1])
-    _uplinks = 0
+    _uplinks = -1
     if(_n>0):
         _uplinks = np.array(items[2:],dtype=np.int32)
     return _lid,_uplinks
 
 def get_idx_up_down(df):
-    seq = np.arange(df.shape[0])+1
-    d2 = pd.DataFrame({'link_id':df['link_id'],'idx':seq})
-    #df.loc[:,'idx_downstream_link']=np.NAN
-    #df.loc[:,'downstream_link']= np.NAN
-    #df.loc[:,'idx_upstream_link']=None #i need zeros for the ode solver
-    for ii in np.arange(df.shape[0]):
-        _up = df.iloc[ii]['upstream_link'] #get linkids upstream
-        _mylink = df.iloc[ii]['link_id']
-        _mylink_idx = ii
-        if(np.array([_up !=0]).any()): #if there are no zeros in the linkids upstream
-            _idx = d2.loc[_up]['idx'].to_numpy() #find the indices of those linkids
-            df.iloc[ii]['idx_upstream_link']=_idx #and write them in the idx_upstream column
-            df.loc[_up,'downstream_link'] = _mylink #the downstream link of those uplinks is the ii-th linkid
-            df.loc[_up,'idx_downstream_link'] = _mylink_idx#and the idx_downstream is ii
+    #seq = np.arange(df.shape[0])+1
+#    seq = df['idx']
 
-def get_adjacency_matrix():
-    pass
+    for ii in np.arange(df.shape[0]):
+        #get  upstream linkids
+        _up = df.iloc[ii]['upstream_link'] 
+        #get  my linkid
+        _mylink = df.iloc[ii]['link_id']
+        #get my index
+        _myidx = df.iloc[ii]['idx']
+        if(np.array([_up !=-1]).any()): #if there are no zeros in the linkids upstream
+             #get the index of upstream links
+            _upidx = df.loc[_up]['idx'].to_numpy()
+            # for mylink, set the idx_upstream column
+            df.iloc[ii]['idx_upstream_link']=_upidx 
+            #for the upstream links,set their downstream link (mylink)
+            df.loc[_up,'downstream_link'] = _mylink 
+            #for the upstream links, set  their idx_downstream
+            df.loc[_up,'idx_downstream_link'] = _myidx 
+
+def get_adjacency_matrix(network:pd.DataFrame,default=False):
+
+    if default==False:
+        nlinks = len(network)
+        #A = np.eye(nlinks,dtype=np.byte)*-1
+        A = np.eye(nlinks,dtype=np.float32)*-1
+        for ii in np.arange(nlinks):
+            idx_up = network.iloc[ii]['idx_upstream_link']
+            if np.array([idx_up !=-1]).any():
+                A[ii,(idx_up-1).tolist()]=1
+        return A
+    else:
+        file1 = open('examples/cedarrapids1/367813_adj.pkl','rb')
+        return pickle.load(file1)
+        file1.close()
 
 
 def network_from_rvr_file(rvr_file):
@@ -74,9 +96,9 @@ def network_from_rvr_file(rvr_file):
     df[:]=-1
     for ii in np.arange(nlines):
         _lid,_up = _process_line(f)
-        #df.iloc[ii] = [_lid,0,0,_up,0,0,0,0] #dangerous line
         df.iloc[ii]['link_id'] = _lid
         df.iloc[ii]['upstream_link'] = _up
+        df.iloc[ii]['idx']= ii + 1 #index starts at 1. idx 0 is needed for operations
 
     f.close()
     df.index = df[list(NETWORK_NAMES.keys())[0]]
@@ -89,7 +111,7 @@ def combine_rvr_prm(prm_file,rvr_file):
     print('indexing network')
     get_idx_up_down(df1)
     print('done indexing network')
-    df1 = df1.iloc[:,0:5]
+    df1 = df1.iloc[:,0:6]
     df2 = df2.iloc[:,1:4]
     df = df1.merge(df2,left_index=True,right_index=True)
     df = df.astype(NETWORK_NAMES)    
@@ -106,9 +128,28 @@ def combine_rvr_prm(prm_file,rvr_file):
 
 
 def test1():
-    rvr_file ='../examples/cedarrapids1/367813.rvr'
+    rvr_file ='examples/cedarrapids1/367813.rvr'
     #df = network_from_rvr_file(rvr_file)
-    prm_file ='../examples/cedarrapids1/367813.prm'
-    
+    prm_file ='examples/cedarrapids1/367813.prm'
     df = combine_rvr_prm(prm_file,rvr_file)
-    df.to_pickle('../examples/cedarrapids1/367813_network.pkl')
+    df.to_pickle('examples/cedarrapids1/367813_network.pkl')
+
+
+
+def test2():
+    rvr_file ='examples/small/small.rvr'
+    prm_file ='examples/small/small.prm'
+    df = combine_rvr_prm(prm_file,rvr_file)
+    df.to_pickle('examples/small/small.pkl')
+
+def testadjmat():
+    network = get_default_network()
+    A = get_adjacency_matrix(network,False)
+    file1 = open('examples/cedarrapids1/367813_adj.pkl','wb')
+    #file2 = open('examples/cedarrapids1/367813_adj.np','wb')
+    pickle.dump(A,file1)
+ #   np.save(file2,A) #same size as pkl
+    file1.close()
+#    file2.close()
+
+

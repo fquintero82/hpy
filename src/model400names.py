@@ -1,31 +1,54 @@
 import numpy as np
 
-PARAM_NAMES = ['link_id','river_velocity','lambda1','lambda2','max_storage','infiltration',
-            'percolation','surface_velocity','alfa3','alfa4','temp_threshold','melt_factor']
+PARAM_NAMES = {'link_id':np.uint32,'river_velocity':np.float32,'lambda1':np.float32,'lambda2':np.float32,'max_storage':np.float32,'infiltration':np.float32,
+            'percolation':np.float32,'surface_velocity':np.float32,'tr_subsurface':np.float32,'tr_groundwater':np.float32,'temp_threshold':np.float32,'melt_factor':np.float32}
 
+PARAM_DEFAULT_VALUES ={'link_id':1,'river_velocity':10,'lambda1':0,'lambda2':0,'max_storage':100,'infiltration':0,
+            'percolation':0,'surface_velocity':0.5,'tr_subsurface':0,'tr_groundwater':0,'temp_threshold':0,'melt_factor':0}
 
-
-STATES_NAMES0 = ['link_id','snow','static','surface','subsurface','groundwater','discharge']
+#STATES_NAMES0 = ['link_id','snow','static','surface','subsurface','groundwater','discharge']
 STATES_NAMES = {'link_id':np.uint32,
-                'snow':np.float16,
-                'static':np.float16,
-                'surface':np.float16,
-                'subsurface':np.float16,
-                'groundwater':np.float16,
-                'discharge':np.float16
+                'snow':np.float32,
+                'static':np.float32,
+                'surface':np.float32,
+                'subsurface':np.float32,
+                'groundwater':np.float32,
+                'volume':np.float32,
+                'discharge':np.float32,
+                'basin_precipitation':np.float32,
+                'basin_evapotranspiration':np.float32,
+                'basin_swe':np.float32,
+                'basin_surface':np.float32,
+                'basin_subsurface':np.float32,
+                'basin_groundwater':np.float32
+                }
+STATES_DEFAULT_VALUES = {'link_id':1,
+                'snow':0,
+                'static':100,
+                'surface':0,
+                'subsurface':0,
+                'groundwater':0,
+                'volume':1,
+                'discharge':0,
+                'basin_precipitation':1,
+                'basin_evapotranspiration':0,
+                'basin_swe':0,
+                'basin_surface':0,
+                'basin_subsurface':0,
+                'basin_groundwater':0
                 }
 
 FORCINGS_NAMES=['link_id','precipitation','evapotranspiration','temperature','frozen_ground','discharge']
 
-CF_NAMES ={
+CF_NAMES = {
     'params.river_velocity':'params.river_velocity',
     'params.lambda1':'params.lambda1',
     'params.lambda2':'params.lambda2',
     'params.max_storage':'params.max_storage',
     'params.infiltration':'params.infiltration',
     'params.percolation':'params.percolation',
-    'params.alfa3':'params.alfa3',
-    'params.alfa4':'params.alfa4',
+    'params.tr_subsurface':'params.tr_subsurface',
+    'params.tr_groundwater':'params.tr_groundwater',
     'params.temp_threshold':'params.temp_threshold',
     'params.melt_factor':'params.melt_factor',
     'forcings.precipitation':'precipitation_flux',
@@ -38,7 +61,14 @@ CF_NAMES ={
     'states.surface':'surface_runoff_amount',
     'states.subsurface':'subsurface_runoff_amount',
     'states.groundwater':'baseflow_amount',
-    'states.discharge':'water_volume_transport_into_sea_water_from_rivers'
+    'states.discharge':'water_volume_transport_into_sea_water_from_rivers',
+    'states.volume':'',
+    'states.basin_precipitation':'',
+    'states.basin_evapotranspiration':'',
+    'states.basin_swe':'',
+    'states.basin_surface':'',
+    'states.basin_subsurface':'',
+    'states.basin_groundwater':''
 }
 
 VAR_TYPES ={
@@ -48,8 +78,8 @@ VAR_TYPES ={
     'params.max_storage':'float',
     'params.infiltration':'float',
     'params.percolation':'float',
-    'params.alfa3':'float',
-    'params.alfa4':'float',
+    'params.tr_subsurface':'float',
+    'params.tr_groundwater':'float',
     'params.temp_threshold':'float',
     'params.melt_factor':'float',
     'forcings.precipitation':'float',
@@ -72,8 +102,8 @@ CF_UNITS={
     'params.max_storage':'mm',
     'params.infiltration':'mm h-1',
     'params.percolation':'mm h-1',
-    'params.alfa3':'',
-    'params.alfa4':'',
+    'params.tr_subsurface':'day',
+    'params.tr_groundwater':'day',
     'params.temp_threshold':'C',
     'params.melt_factor':'mm day-1 C-1',
     'forcings.precipitation':'mm h-1',
@@ -86,7 +116,15 @@ CF_UNITS={
     'states.surface':'m',
     'states.subsurface':'m',
     'states.groundwater':'m',
-    'states.discharge':'m3 s-1'
+    'states.discharge':'m3 s-1',
+    'states.volume':'m3',
+    'states.basin_precipitation':'mm',
+    'states.basin_evapotranspiration':'mm',
+    'states.basin_swe':'mm',
+    'states.basin_surface':'mm',
+    'states.basin_subsurface':'mm',
+    'states.basin_groundwater':'mm',
+    'states.link_id':''
 }
 
 CF_LOCATION={
@@ -96,8 +134,8 @@ CF_LOCATION={
     'params.max_storage':'face',
     'params.infiltration':'face',
     'params.percolation':'face',
-    'params.alfa3':'face',
-    'params.alfa4':'face',
+    'params.tr_subsurface':'face',
+    'params.tr_groundwater':'face',
     'params.temp_threshold':'face',
     'params.melt_factor':'face',
     'forcings.precipitation':'face',

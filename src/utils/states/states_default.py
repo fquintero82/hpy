@@ -1,5 +1,5 @@
 import pandas as pd
-from model400names import STATES_NAMES
+from model400names import STATES_NAMES, STATES_DEFAULT_VALUES
 import numpy as np
 
 def get_default_states(network:pd.DataFrame):
@@ -8,13 +8,10 @@ def get_default_states(network:pd.DataFrame):
         data = np.zeros(shape=(nlinks,len(STATES_NAMES))),
         columns=list(STATES_NAMES.keys()))
     df = df.astype(STATES_NAMES)
-    df.loc[:,'link_id'] = network['link_id'].to_numpy()
+    aux = list(STATES_NAMES.keys())
+    for ii in range(len(STATES_NAMES)):
+        df.loc[:,aux[ii]] = np.array(STATES_DEFAULT_VALUES[aux[ii]],dtype=STATES_NAMES[aux[ii]])
+    df['link_id'] = network['link_id'].to_numpy()
     df.index = network['link_id'].to_numpy()
-    df.loc[:,'snow'] = np.float16(0)
-    df.loc[:,'static']=np.float16(0)
-    df.loc[:,'surface']=np.float16(0)
-    df.loc[:,'subsurface']=np.float16(0)
-    df.loc[:,'groundwater']=np.float16(0.1)
-    df.loc[:,'discharge'] = np.float16(1)
     
     return df
