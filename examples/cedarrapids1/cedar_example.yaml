@@ -3,8 +3,8 @@ description: experiment to test hlm with yaml files
 network: examples/cedarrapids1/367813.rvr
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
-init_time: 1204344000
-end_time: 1212278400
+init_time: 1212278400
+end_time: 1212796800
 time_step: 60
 forcings:
  precipitation:
@@ -22,6 +22,6 @@ forcings:
   path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
 output_file: 
   script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
-  path: examples/cedarapids1/out/test.ncdf
+  path: /Users/felipe/hpy/hpy/examples/cedarrapids1/out/2008.nc
 
 

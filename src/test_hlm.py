@@ -28,8 +28,14 @@ def test1():
         print(ii)
         instance.advance_one_step()
 
+def test2():
+    instance = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    instance.init_from_file(config_file)
+    instance.advance()
+
 if __name__ == "__main__":
-    test1()
+    test2()
     #plot1()
 
     

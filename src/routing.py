@@ -158,6 +158,7 @@ def transfer1(hlm_object):
     bp=np.array(hlm_object.states['basin_precipitation']* hlm_object.network['area_hillslope'],dtype=np.float32)
     bet=np.array(hlm_object.states['basin_evapotranspiration']* hlm_object.network['area_hillslope'],dtype=np.float32)
     bswe=np.array(hlm_object.states['basin_swe']* hlm_object.network['area_hillslope'],dtype=np.float32)
+    bst=np.array(hlm_object.states['basin_static']* hlm_object.network['area_hillslope'],dtype=np.float32)
     bsf=np.array(hlm_object.states['basin_surface']* hlm_object.network['area_hillslope'],dtype=np.float32)
     bsub=np.array(hlm_object.states['basin_subsurface']* hlm_object.network['area_hillslope'],dtype=np.float32)
     bgw=np.array(hlm_object.states['basin_groundwater']* hlm_object.network['area_hillslope'],dtype=np.float32)
@@ -167,6 +168,7 @@ def transfer1(hlm_object):
             bp[idxd[ii]-1]+= bp[idxu[ii]-1]
             bet[idxd[ii]-1]+= bet[idxu[ii]-1]
             bswe[idxd[ii]-1]+= bswe[idxu[ii]-1]
+            bst[idxd[ii]-1]+= bst[idxu[ii]-1]
             bsf[idxd[ii]-1]+= bsf[idxu[ii]-1]
             bsub[idxd[ii]-1]+= bsub[idxu[ii]-1]
             bgw[idxd[ii]-1]+= bgw[idxu[ii]-1]
@@ -174,6 +176,7 @@ def transfer1(hlm_object):
     bet /= da
     bswe /= da
     bswe /= da
+    bst /= da
     bsf /= da
     bsub /= da
     bgw /= da
@@ -181,10 +184,11 @@ def transfer1(hlm_object):
     hlm_object.states['basin_precipitation'] = bp
     hlm_object.states['basin_evapotranspiration'] = bet
     hlm_object.states['basin_swe'] = bswe
+    hlm_object.states['basin_static'] = bst
     hlm_object.states['basin_surface'] = bsf
     hlm_object.states['basin_subsurface'] = bsub
     hlm_object.states['basin_groundwater'] = bgw
-    del bp,bet,bswe,bsf,bsub,bgw,routing_order,idxd,idxu
+    del bp,bet,bswe,bsf,bst,bsub,bgw,routing_order,idxd,idxu
     print(time.time()-t)
 
 def transfer2(hlm_object):

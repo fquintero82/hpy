@@ -52,7 +52,7 @@ class HLM(object):
         self.end_time = d['end_time']
         self.time_step= d['time_step']
         self.network = get_default_network()
-        self.adjmatrix = get_adjacency_matrix(self.network,default=True)
+        self.adjmatrix = get_adjacency_matrix(self.network,default=False)
         self.states = get_default_states(self.network)
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
@@ -113,7 +113,9 @@ class HLM(object):
         #save_to_pickle(self.states,self.time)
         self.time += self.time_step*60
 
-    def advance(self,time_to_advance:float):
+    def advance(self,time_to_advance:float=None):
+        if time_to_advance is None:
+            time_to_advance = self.end_time
         while self.time < time_to_advance:
             self.advance_one_step()
         
@@ -162,7 +164,7 @@ class HLM(object):
         group = items[0]
         variable = items[1]
         if self.check_var_exists(variable)==False:
-            print('{} not exists in HLM variables'.format(var_name))
+            print('{} not in HLM variables'.format(var_name))
             return
         if group == 'params':
             pass

@@ -16,13 +16,15 @@ def save_to_netcdf(states:pd.DataFrame,time:int,filename:str):
             #nstates = len(data.dimensions['statedim'])
             # Get the current length of the unlimited dimension
             current_len = len(unlimited_dim)
+            # add new time to file
+            data.variables['time'][current_len] = time
             # Add the new data to the existing variable
             #data.variables['state'][0:nlinks-1,0:nstates-1,0] = np.float32(1)
             n = np.array(states.columns,dtype=np.str_)
             for ii in range(1,len(states.columns)):
                 data.variables[n[ii]][current_len,:] = states[n[ii]]
     except OSError as e:
-        print('Error . NETCDF file is open by another program.')
+        print('Error NETCDF file is open by another program.')
         quit()
 
 def create_empty_ncdf(states:pd.DataFrame,filename:str):
@@ -31,7 +33,6 @@ def create_empty_ncdf(states:pd.DataFrame,filename:str):
     nlinks = states.shape[0]
     nstates = states.shape[1]
     root.createDimension('linkdim', nlinks)
-    #root.createDimension('statedim', nstates)
     root.createDimension('timedim', None)
     #var_state_name = root.createVariable('state_name', np.str_, ('statedim',))
     n = np.array(states.columns,dtype=np.str_)
@@ -46,9 +47,13 @@ def create_empty_ncdf(states:pd.DataFrame,filename:str):
                                     zlib=True
                                     )
         var_state.units = CF_UNITS['states.'+n[ii]]
-    #only for linkid
+    #linkid variable
     varlid = root.createVariable('link_id',np.uint32,('linkdim'),fill_value=-1,zlib=True)
     root['link_id'][:] = np.array(states['link_id'],dtype=STATES_NAMES['link_id'])
+
+    #time variable
+    vartime = root.createVariable('time',np.uint32,('timedim'),fill_value=0,zlib=True)
+    
     root.close()
 
 def save_to_pickle(states:pd.DataFrame,time:int):

@@ -40,14 +40,14 @@ def runoff1(states:pd.DataFrame,
     wh = (forcings['temperature'] !=0) & (forcings['temperature']<params['temp_threshold']) 
     states.loc[wh,'snow'] += CF_MMHR_M_MIN*DT*forcings['precipitation'][wh] #[m]
     x1.loc[wh,'val'] = 0
-    states['basin_precipitation'] = forcings['precipitation'].copy()
-    states['basin_swe'] = states['snow'].copy()
+    states['basin_precipitation'] = forcings['precipitation'].copy() #[mm]
+    states['basin_swe'] = 1000*states['snow'].copy() #[mm]
     del snowmelt #garbage collection
 
     #static storage
     x2=pd.DataFrame({
         'val1':0,
-        'val2': x1['val'] + states['static'] - params['max_storage']/1000
+        'val2': x1['val'] + states['static'] - params['max_storage']/1000.
     },dtype=np.float32).max(axis=1) #[m]
     x2 = pd.DataFrame({'val':x2},dtype=np.float32)
     #if ground is frozen, x1 goes directly to the surface
@@ -61,7 +61,9 @@ def runoff1(states:pd.DataFrame,
         },dtype=np.float32).min(axis=1) #[m]
     out1=pd.DataFrame({'val':out1})
     states['static'] += d1['val'] - out1['val']
-    states['basin_evapotranspiration'] = out1['val'].copy()
+    states['basin_evapotranspiration'] = 1000*out1['val'].copy() #[mm]
+    states['basin_static'] = 1000*states['static'].copy() # [mm]
+
     del d1,x1
 
     #surface storage
@@ -80,7 +82,7 @@ def runoff1(states:pd.DataFrame,
         'val2':w},dtype=np.float32).min(axis=1)
     out2 = pd.Series((states['surface'] * w * DT), dtype=np.float32)  #[m]
     states['surface']+= d2 - out2 #[m]
-    states['basin_surface'] = states['surface'].copy()
+    states['basin_surface'] = 1000*states['surface'].copy()
     del x2,w,d2,infiltration
 
     #subsurface storage
@@ -92,20 +94,20 @@ def runoff1(states:pd.DataFrame,
     d3 = x3 - x4 # input to gravitational storage [m]
     out3  = pd.Series(DT * states['subsurface'] / (params['tr_subsurface']* 24*60),dtype=np.float32) #[m]
     states['subsurface'] += d3 - out3 #[m]
-    states['basin_subsurface'] = states['subsurface'].copy()
+    states['basin_subsurface'] = 1000*states['subsurface'].copy()
     del x3,percolation,d3
 
 	#aquifer storage
     d4 = x4
     out4= pd.Series(DT * states['groundwater'] / (params['tr_groundwater']* 24 * 60),dtype=np.float32) #[m]
     states['groundwater'] += d4 - out4
-    states['basin_groundwater'] = states['groundwater'].copy()
+    states['basin_groundwater'] = 1000*states['groundwater'].copy()
     del x4,d4
 
     #channel update
     segs_in_DT = DT * 60.
     states['volume'] += (out2 + out3 + out4) * network['area_hillslope'] #[m]*[m2]  = [m3]
-    states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
+    #states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
     print('completed runoff')
 
 def check_input_names(states:pd.DataFrame,

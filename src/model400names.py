@@ -1,12 +1,32 @@
 import numpy as np
 
-PARAM_NAMES = {'link_id':np.uint32,'river_velocity':np.float32,'lambda1':np.float32,'lambda2':np.float32,'max_storage':np.float32,'infiltration':np.float32,
-            'percolation':np.float32,'surface_velocity':np.float32,'tr_subsurface':np.float32,'tr_groundwater':np.float32,'temp_threshold':np.float32,'melt_factor':np.float32}
+PARAM_NAMES = {'link_id':np.uint32,
+                'river_velocity':np.float32,
+                'lambda1':np.float32,
+                'lambda2':np.float32,
+                'max_storage':np.float32,
+                'infiltration':np.float32,
+                'percolation':np.float32,
+                'surface_velocity':np.float32,
+                'tr_subsurface':np.float32,
+                'tr_groundwater':np.float32,
+                'temp_threshold':np.float32,
+                'melt_factor':np.float32
+                }
 
-PARAM_DEFAULT_VALUES ={'link_id':1,'river_velocity':10,'lambda1':0,'lambda2':0,'max_storage':100,'infiltration':0,
-            'percolation':0,'surface_velocity':0.5,'tr_subsurface':0,'tr_groundwater':0,'temp_threshold':0,'melt_factor':0}
+PARAM_DEFAULT_VALUES ={'link_id':1,
+                       'river_velocity':0.3,
+                       'lambda1':0,
+                       'lambda2':0,
+                       'max_storage':100,
+                       'infiltration':5,
+                       'percolation':2,
+                       'surface_velocity':0.2,
+                       'tr_subsurface':3,
+                       'tr_groundwater':100,
+                       'temp_threshold':0,
+                       'melt_factor':5}
 
-#STATES_NAMES0 = ['link_id','snow','static','surface','subsurface','groundwater','discharge']
 STATES_NAMES = {'link_id':np.uint32,
                 'snow':np.float32,
                 'static':np.float32,
@@ -17,6 +37,7 @@ STATES_NAMES = {'link_id':np.uint32,
                 'discharge':np.float32,
                 'basin_precipitation':np.float32,
                 'basin_evapotranspiration':np.float32,
+                'basin_static':np.float32,
                 'basin_swe':np.float32,
                 'basin_surface':np.float32,
                 'basin_subsurface':np.float32,
@@ -27,11 +48,12 @@ STATES_DEFAULT_VALUES = {'link_id':1,
                 'static':100,
                 'surface':0,
                 'subsurface':0,
-                'groundwater':0,
+                'groundwater':0.1,
                 'volume':1,
                 'discharge':0,
-                'basin_precipitation':1,
+                'basin_precipitation':0,
                 'basin_evapotranspiration':0,
+                'basin_static':100,
                 'basin_swe':0,
                 'basin_surface':0,
                 'basin_subsurface':0,
@@ -124,6 +146,7 @@ CF_UNITS={
     'states.basin_surface':'mm',
     'states.basin_subsurface':'mm',
     'states.basin_groundwater':'mm',
+    'states.basin_static':'mm',
     'states.link_id':''
 }
 

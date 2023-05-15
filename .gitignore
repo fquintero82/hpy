@@ -1,1 +1,4 @@
 examples/cedarrapids1/out/*
+src/__pycache__/*
+
+

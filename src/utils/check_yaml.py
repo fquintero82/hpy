@@ -18,26 +18,34 @@ def check_yaml1(configuration):
                 quit()
                 
         if configuration['description'] is None:
-                sys.exit('description not included in configuration file')
-
+                print('description not included in configuration file')
+                quit()
+                
         if configuration['network'] is None:
-                sys.exit('network not included in configuration file')
+                print('network not included in configuration file')
+                quit()
 
         if configuration['parameters'] is None:
-                sys.exit('parameters not included in configuration file')
+                print('parameters not included in configuration file')
+                quit()
 
         if configuration['initial_states'] is None:
-                sys.exit('initial_states not included in configuration file')
+                print('initial_states not included in configuration file')
+                quit()
 
         if configuration['init_time'] is None:
-                sys.exit('init_time not included in configuration file')
+                print('init_time not included in configuration file')
+                quit()
 
         if configuration['end_time'] is None:
-                sys.exit('end_time not included in configuration file')
+                print('end_time not included in configuration file')
+                quit()
 
         if configuration['time_step'] is None:
-                sys.exit('time_step not included in configuration file')
+                print('time_step not included in configuration file')
+                quit()
 
         if configuration['output_file'] is None:
-                sys.exit('output_file not included in configuration file')
+                print('output_file not included in configuration file')
+                quit()
 
