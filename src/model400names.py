@@ -15,7 +15,7 @@ PARAM_NAMES = {'link_id':np.uint32,
                 }
 
 PARAM_DEFAULT_VALUES ={'link_id':1,
-                       'river_velocity':0.3,
+                       'river_velocity':1,
                        'lambda1':0,
                        'lambda2':0,
                        'max_storage':100,
@@ -45,7 +45,7 @@ STATES_NAMES = {'link_id':np.uint32,
                 }
 STATES_DEFAULT_VALUES = {'link_id':1,
                 'snow':0,
-                'static':100,
+                'static':0.1,
                 'surface':0,
                 'subsurface':0,
                 'groundwater':0.1,

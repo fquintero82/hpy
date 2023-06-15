@@ -12,7 +12,7 @@ NETWORK_NAMES ={
     'idx_downstream_link':np.int32,
     'upstream_link':object,
     'idx_upstream_link':object,
-    'channel_length':np.float16,
+    'channel_length':np.float32,
     'area_hillslope':np.float32,
     'drainage_area':np.float32
     }
@@ -59,11 +59,16 @@ def get_idx_up_down(df):
         _mylink = df.iloc[ii]['link_id']
         #get my index
         _myidx = df.iloc[ii]['idx']
+        if(np.array([_up ==-1]).any()):
+            # for mylink, set the idx_upstream column
+            #df.iloc[ii]['idx_upstream_link']=0 #this is necesary for ode evaluation
+            df.iloc[ii]['idx_upstream_link']=np.array([0],dtype=np.int32) #this is necesary for ode evaluation
         if(np.array([_up !=-1]).any()): #if there are no zeros in the linkids upstream
              #get the index of upstream links
             _upidx = df.loc[_up]['idx'].to_numpy()
             # for mylink, set the idx_upstream column
-            df.iloc[ii]['idx_upstream_link']=_upidx 
+            #df.iloc[ii]['idx_upstream_link']=_upidx 
+            df.iloc[ii]['idx_upstream_link']=np.array(_upidx ,dtype=np.int32)
             #for the upstream links,set their downstream link (mylink)
             df.loc[_up,'downstream_link'] = _mylink 
             #for the upstream links, set  their idx_downstream

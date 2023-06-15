@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import linear_velocity1,transfer1,transfer2
+from routing import transfer1,transfer0
 from yaml import Loader
 import yaml
 from utils.network.network import combine_rvr_prm
@@ -25,7 +25,7 @@ class HLM(object):
         self.name='HLM'
         self.description=None
         self.time=None
-        self.time_step=None
+        self.time_step_sec=None
         self.init_time=None
         self.end_time=None
         self.states= None
@@ -50,9 +50,9 @@ class HLM(object):
         self.time = d['init_time']
         self.init_time = d['init_time']
         self.end_time = d['end_time']
-        self.time_step= d['time_step']
+        self.time_step_sec= d['time_step']
         self.network = get_default_network()
-        self.adjmatrix = get_adjacency_matrix(self.network,default=False)
+        #self.adjmatrix = get_adjacency_matrix(self.network,default=False)
         self.states = get_default_states(self.network)
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
@@ -69,7 +69,7 @@ class HLM(object):
         self.time=t
     
     def get_time_step(self)->int:
-        return self.time_step
+        return self.time_step_sec
 
     def set_time_step(self,time_step:int):
         self.time_step=time_step
@@ -104,14 +104,15 @@ class HLM(object):
     def advance_one_step(self):
         print(self.time)
         self.set_forcings()
-        runoff1(self.states,self.forcings,self.params,self.network,self.time_step)
+        runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
         #linear_velocity1(self.states,self.params,self.network,self.time_step)
         #transfer0(self.states,self.params,self.network,self.time_step)
-        transfer2(self)
-        transfer1(self)
+        #transfer2(self) #volume and discharge
+        transfer1(self) #basin vars
+        transfer0(self) # volume, discharge with ode
         save_to_netcdf(self.states,self.time,self.outputfile)
         #save_to_pickle(self.states,self.time)
-        self.time += self.time_step*60
+        self.time += self.time_step_sec
 
     def advance(self,time_to_advance:float=None):
         if time_to_advance is None:

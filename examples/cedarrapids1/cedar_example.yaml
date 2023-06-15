@@ -4,8 +4,8 @@ network: examples/cedarrapids1/367813.rvr
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
 init_time: 1212278400
-end_time: 1212796800
-time_step: 60
+end_time: 1214870400
+time_step: 3600
 forcings:
  precipitation:
   script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py

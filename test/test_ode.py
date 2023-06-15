@@ -8,6 +8,8 @@ from model400names import STATES_NAMES
 import time
 import tensorflow as tf
 import tensorflow_probability as tfp
+from utils.network.network import get_default_network
+from hlm import HLM
 
 def test1():
     '''
@@ -46,8 +48,8 @@ def test2():
     t_end = DT * 60 #seg
     res = solve_ivp(fun,t_span=(0,t_end),y0=q)
     plt.plot(res['t'],res['y'][0])
-    #plt.plot(res['t'],res['y'][1])
-    #plt.plot(res['t'],res['y'][2])
+    plt.plot(res['t'],res['y'][1])
+    plt.plot(res['t'],res['y'][2])
     plt.show()
 
 def test3():
@@ -179,16 +181,17 @@ def test5():
 def test6():
     def fun(t,q,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
         #print(type(q))
-        q_aux = np.concatenate(([0],q))
-        q_upstream = np.zeros(q.shape)
-        q_upstream = np.array([np.sum(q_aux[x]) for x in idx_up]) #m3/h
+        q_aux = np.concatenate(([0],q),dtype=np.float32)
+        #q_upstream = np.zeros(q.shape)
+        q_upstream = np.array([np.sum(q_aux[x]) for x in idx_up],dtype=np.float32) #m3/h
         velocity *=60*60 #m/s to m/h
         dq_dt = (1/channel_len_m )* velocity * (-1*q_aux[1:] + q_upstream)
         return dq_dt
 
-    rvr_file ='../examples/cedarrapids1/367813.rvr'
-    prm_file ='../examples/cedarrapids1/367813.prm'
-    network = combine_rvr_prm(prm_file,rvr_file)
+    #rvr_file ='../examples/cedarrapids1/367813.rvr'
+    #prm_file ='../examples/cedarrapids1/367813.prm'
+    #network = combine_rvr_prm(prm_file,rvr_file)
+    network = get_default_network()
     nlinks = network.shape[0]
     states = pd.DataFrame(
         data = np.zeros(shape=(nlinks,len(STATES_NAMES))),
@@ -198,7 +201,7 @@ def test6():
     states['discharge']=1
     velocity = 0.5 #m/s
     idx_up = network['idx_upstream_link'].to_numpy()
-    q = np.array(states['discharge'])
+    q = np.array(states['discharge'],dtype=np.float32)
     channel_len_m = np.array(network['channel_length'])
     start_time = time.time()
     res = solve_ivp(fun,
@@ -260,6 +263,90 @@ def test7():
     wh = np.where(network['link_id']==367813)[0][0]
     qout = res['y'][wh]/3600. #m3/h to m3/s
     plt.plot(res['t'],qout,label='outlet')
+    plt.legend()
+    plt.show()
+
+def test8():
+    hlm_object = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    hlm_object.init_from_file(config_file)
+
+    def fun(t,v,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
+        #print(type(q))
+        v_aux = np.concatenate(([0],v),dtype=np.float32)
+        #v_upstream = np.zeros(v.shape,dtype=np.float32)
+        v_upstream = np.array([np.sum([v_aux[np.array(x,dtype=np.integer)]]) for x in idx_up])
+        velocity = np.multiply(velocity,3600) #m/s to m/h
+        dv_dt = (1/channel_len_m )* velocity * (-1*v_aux[1:] + v_upstream)
+        #dv_dt = 0.5 * (-1*v_aux[1:] + v_upstream)
+        return dv_dt
+
+    idx_up = hlm_object.network['idx_upstream_link'].to_numpy()
+    #t_end_sim = DT*60 #since the ODE flow inputs are in m3/s , t_end_sim is the number of seconds of routing process
+    #t_end_sim = hlm_object.time_step_sec / 3600 # in hours
+    v = np.array(hlm_object.states['volume'],dtype=np.float32)
+    channel_len_m = np.array(hlm_object.network['channel_length'],dtype=np.float32)
+    velocity = np.array(hlm_object.params['river_velocity'],dtype=np.float32)
+    start_time = time.time()
+    res = solve_ivp(fun,
+            t_span=(0,1),
+            y0=v, 
+            args=(velocity,channel_len_m,idx_up),
+            method='RK23',
+            atol=1e-2,
+            rtol=1e-2,
+            vectorized=False
+        )
+    print("--- %s seconds ---" % (time.time() - start_time))
+    n_eval = res.t.shape[0] 
+    y_1 = res.y[:,n_eval-1]
+    hlm_object.states['volume'] = np.array(y_1,dtype=np.float32)
+    wh = np.where(hlm_object.network['link_id']==444657)[0][0] #444657 mason scity
+    vout = res['y'][wh]
+    plt.plot(res['t'],vout,label='outlet')
+    plt.legend()
+    plt.show()
+
+def test9():
+    hlm_object = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    hlm_object.init_from_file(config_file)
+
+    def fun(t,v,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
+        #print(type(q))
+        zero = np.array([[0]])
+        v_aux = np.concatenate((zero,v.reshape(-1,1)),dtype=np.float32)
+        v_upstream = np.array([np.sum([v_aux[x]]) for x in idx_up]).reshape(-1,1)
+        
+        velocity = np.multiply(velocity,3600) #m/s to m/h
+        
+        dv_dt = (1/channel_len_m )* velocity * (-1*v_aux[1:] + v_upstream)
+        #dv_dt = 0.5 * (-1*v_aux[1:] + v_upstream)
+        return dv_dt
+
+    idx_up = hlm_object.network['idx_upstream_link'].to_numpy()
+    #t_end_sim = DT*60 #since the ODE flow inputs are in m3/s , t_end_sim is the number of seconds of routing process
+    #t_end_sim = hlm_object.time_step_sec / 3600 # in hours
+    v = np.array(hlm_object.states['volume'],dtype=np.float32)
+    channel_len_m = np.array(hlm_object.network['channel_length'],dtype=np.float32).reshape(-1,1)
+    velocity = np.array(hlm_object.params['river_velocity'],dtype=np.float32).reshape(-1,1)
+    start_time = time.time()
+    res = solve_ivp(fun,
+            t_span=(0,1),
+            y0=v, 
+            args=(velocity,channel_len_m,idx_up),
+            method='RK23',
+            atol=1e-2,
+            rtol=1e-2,
+            vectorized=False
+        )
+    print("--- %s seconds ---" % (time.time() - start_time))
+    n_eval = res.t.shape[0] 
+    y_1 = res.y[:,n_eval-1]
+    hlm_object.states['volume'] = np.array(y_1,dtype=np.float32)
+    wh = np.where(hlm_object.network['link_id']==444657)[0][0] #444657 mason scity
+    vout = res['y'][wh]
+    plt.plot(res['t'],vout,label='outlet')
     plt.legend()
     plt.show()
 

@@ -10,7 +10,9 @@ def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame,
-    DT:int):
+    time_step_sec:int):
+
+    DT = time_step_sec / 60. #minutes
     print('running runoff')
     if check_input_names(states=states,forcings=forcings,params=params,network=network)==False:
         return
@@ -61,10 +63,11 @@ def runoff1(states:pd.DataFrame,
         },dtype=np.float32).min(axis=1) #[m]
     out1=pd.DataFrame({'val':out1})
     states['static'] += d1['val'] - out1['val']
-    states['basin_evapotranspiration'] = 1000*out1['val'].copy() #[mm]
-    states['basin_static'] = 1000*states['static'].copy() # [mm]
+    CF_METER_TO_MM = 1000
+    states['basin_evapotranspiration'] = CF_METER_TO_MM*out1['val'].copy() #[mm]
+    states['basin_static'] = CF_METER_TO_MM*states['static'].copy() # [mm]
 
-    del d1,x1
+    #del d1,x1
 
     #surface storage
     infiltration = params['infiltration'] * CF_MMHR_M_MIN * DT #infiltration rate [m/min] to [m]
@@ -76,13 +79,17 @@ def runoff1(states:pd.DataFrame,
         'val2':infiltration
     },dtype=np.float32).min(axis=1) #[m]
     d2 = x2['val'] - x3 # the input to surface storage [m]
-    w=pd.Series(params['surface_velocity'] * network['channel_length'] / network['area_hillslope'] * 60,dtype=np.float32) #[1/min]
+    w=pd.Series(params['surface_velocity'] * 60 *network['channel_length'] / network['area_hillslope'],dtype=np.float32) #[1/min]
     # water can take less than 1 min (dt) to leave surface
     w=pd.DataFrame({'val1':1,
         'val2':w},dtype=np.float32).min(axis=1)
-    out2 = pd.Series((states['surface'] * w * DT), dtype=np.float32)  #[m]
+    #out2 = pd.Series((states['surface'] * w * DT), dtype=np.float32)  #[m]
+    out2 = np.array((states['surface'] * w * DT), dtype=np.float32)  #[m]
+    out2 = np.minimum(out2,states['surface'])
+ 
     states['surface']+= d2 - out2 #[m]
-    states['basin_surface'] = 1000*states['surface'].copy()
+    #states['basin_surface'] = 1000*states['surface'].copy()
+    states['basin_surface'] = CF_METER_TO_MM*out2 #mm
     del x2,w,d2,infiltration
 
     #subsurface storage
@@ -92,16 +99,20 @@ def runoff1(states:pd.DataFrame,
         'val2':percolation
     },dtype=np.float32).min(axis=1) #[m]
     d3 = x3 - x4 # input to gravitational storage [m]
-    out3  = pd.Series(DT * states['subsurface'] / (params['tr_subsurface']* 24*60),dtype=np.float32) #[m]
+    CF_DAYS_TO_MINUTES = 24 * 60
+    out3  = pd.Series(DT * states['subsurface'] / (params['tr_subsurface']* CF_DAYS_TO_MINUTES),dtype=np.float32) #[m]
     states['subsurface'] += d3 - out3 #[m]
-    states['basin_subsurface'] = 1000*states['subsurface'].copy()
+    #states['basin_subsurface'] = 1000*states['subsurface'].copy()
+    states['basin_subsurface'] = CF_METER_TO_MM*out3 #mm
     del x3,percolation,d3
 
 	#aquifer storage
     d4 = x4
-    out4= pd.Series(DT * states['groundwater'] / (params['tr_groundwater']* 24 * 60),dtype=np.float32) #[m]
+    
+    out4= pd.Series(DT * states['groundwater'] / (params['tr_groundwater']* CF_DAYS_TO_MINUTES),dtype=np.float32) #[m]
     states['groundwater'] += d4 - out4
-    states['basin_groundwater'] = 1000*states['groundwater'].copy()
+    #states['basin_groundwater'] = 1000*states['groundwater'].copy()
+    states['basin_groundwater'] = CF_METER_TO_MM*out4 #mm
     del x4,d4
 
     #channel update
@@ -153,38 +164,82 @@ def check_input_values(states:pd.DataFrame,
     if flag==True:
         print("Error DT is zero")
         return False
+    
     flag = network['channel_length'].to_numpy().all()
     if flag==False:
         print("Error Parameter channel_length has zeros")
         return False
+    
     flag = network['area_hillslope'].to_numpy().all()
     if flag==False:
         print("Error Parameter area_hillslope has zeros")
         return False
+    
     flag = params['tr_subsurface'].to_numpy().all()
     if flag==False:
         print("Error Parameter tr_subsurface has zeros")
         return False
+    
     flag = params['tr_groundwater'].to_numpy().all()
     if flag==False:
         print("Error Parameter tr_groundwater has zeros")
         return False
+    
     flag = states.index.to_numpy().all()
     if flag==False:
         print("Error States cannot have linkid index zero")
         return False
+    
+    flag = np.array(states['static'].to_numpy()>=0.5).all()
+    if flag==True:
+        print("static storage cannot be larger than 0.5m")
+        quit()
+    
+    flag = np.array(states['static'].to_numpy()<0).all()
+    if flag==True:
+        print("static storage cannot be negative")
+        quit()
+
+    flag = np.array(states['surface'].to_numpy()<0).all()
+    if flag==True:
+        print("surface storage cannot be negative")
+        quit()
+
+    flag = np.array(states['subsurface'].to_numpy()<0).all()
+    if flag==True:
+        print("subsurface storage cannot be negative")
+        quit()
+
+    flag = np.array(states['groundwater'].to_numpy()<0).all()
+    if flag==True:
+        print("groundwater storage cannot be negative")
+        quit()
+
+    flag = np.array(states['volume'].to_numpy()<0).all()
+    if flag==True:
+        print("volume storage cannot be negative")
+        quit()
+
+    flag = np.array(states['discharge'].to_numpy()<0).all()
+    if flag==True:
+        print("discharge storage cannot be negative")
+        quit()
+
     flag = params.index.to_numpy().all()
     if flag==False:
         print("Error Params cannot have linkid index zero")
         return False
+    
     flag = forcings.index.to_numpy().all()
     if flag==False:
         print("Error Forcings cannot have linkid index zero")
         return False
+    
     flag = network.index.to_numpy().all()
     if flag==False:
         print("Error Network cannot have linkid index zero")
         return False
+    
     return flag
 
 

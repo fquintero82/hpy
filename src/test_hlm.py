@@ -2,6 +2,7 @@ from hlm import HLM
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+import netCDF4 as nc
 
 def plot1():
     NSTEPS = 240
@@ -20,6 +21,9 @@ def plot1():
     plt.plot(out[0,:])
     plt.show()
 
+def plot2():
+    f ='/Users/felipe/hpy/hpy/examples/cedarrapids1/out/2008.nc'
+    
 def test1():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_example2.yaml'
