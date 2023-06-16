@@ -7,6 +7,7 @@ from numpy.linalg import inv
 import time
 from scipy.linalg import solve
 
+
 #calculates routing using Mantilla 2005 equation, using lambda1 and lambda 2 parameters
 def nonlinear_velocity(states:pd.DataFrame,
     params:pd.DataFrame,
@@ -223,6 +224,18 @@ def transfer1(hlm_object):
     hlm_object.states['basin_groundwater'] = bgw
     del bp,bet,bswe,bsf,bst,bsub,bgw,routing_order,idxd,idxu
     print(time.time()-t)
+
+
+
+def transfer2(hlm_object):
+    N = hlm_object.network.shape[0]
+    initial_state = np.zeros(shape=(N+1))
+    initial_state[1:] = hlm_object.states['volume'].to_numpy()
+    hlm_object.ODESOLVER.set_initial_value(initial_state,0.0)
+    time = hlm_object.time_step_sec / 3600 #hours
+    out = hlm_object.ODESOLVER.integrate(time)[1:]#value 0 is auxiliary
+    hlm_object.states['volume'] = out
+    hlm_object.states['discharge'] = out / hlm_object.time_step_sec
 
 # def transfer2(hlm_object):
 #     #

@@ -134,3 +134,15 @@ def test6():
         if np.array([idx_up !=-1]).any():
             A[ii-1,(idx_up-1).tolist()]=-1
     print(A)
+
+def test7():
+    import numpy as np
+    from scipy import linalg
+    import time
+    n=1000 # 40000 killed my computer
+    A=np.random.rand(n,n)
+    start= time.time()
+    Am=np.linalg.inv(A.copy())
+    end= time.time()
+    print ('np.linalg.inv ', end-start, ' seconds')
+    print ('residual ', np.linalg.norm(A.dot(Am)-np.identity(n), np.inf))

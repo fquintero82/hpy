@@ -10,7 +10,9 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 from utils.network.network import get_default_network
 from hlm import HLM
+from PyDSTool import *
 
+# http://www.stochasticlifestyle.com/comparison-differential-equation-solver-suites-matlab-r-julia-python-c-fortran/
 def test1():
     '''
     #v[0] = V11'(s) = -12*v12(s)**2 
@@ -273,9 +275,9 @@ def test8():
 
     def fun(t,v,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
         #print(type(q))
-        v_aux = np.concatenate(([0],v),dtype=np.float32)
+        v_aux = np.concatenate(([0],v),dtype=np.float64)
         #v_upstream = np.zeros(v.shape,dtype=np.float32)
-        v_upstream = np.array([np.sum([v_aux[np.array(x,dtype=np.integer)]]) for x in idx_up])
+        v_upstream = np.array([np.sum([v_aux[x]]) for x in idx_up])
         velocity = np.multiply(velocity,3600) #m/s to m/h
         dv_dt = (1/channel_len_m )* velocity * (-1*v_aux[1:] + v_upstream)
         #dv_dt = 0.5 * (-1*v_aux[1:] + v_upstream)
@@ -285,17 +287,19 @@ def test8():
     #t_end_sim = DT*60 #since the ODE flow inputs are in m3/s , t_end_sim is the number of seconds of routing process
     #t_end_sim = hlm_object.time_step_sec / 3600 # in hours
     v = np.array(hlm_object.states['volume'],dtype=np.float32)
-    channel_len_m = np.array(hlm_object.network['channel_length'],dtype=np.float32)
-    velocity = np.array(hlm_object.params['river_velocity'],dtype=np.float32)
+    v = np.ones(shape=(hlm_object.network.shape[0]))
+
+    channel_len_m = np.array(hlm_object.network['channel_length'],dtype=np.float64)
+    velocity = np.array(hlm_object.params['river_velocity'],dtype=np.float64)
     start_time = time.time()
     res = solve_ivp(fun,
             t_span=(0,1),
             y0=v, 
-            args=(velocity,channel_len_m,idx_up),
-            method='RK23',
-            atol=1e-2,
-            rtol=1e-2,
-            vectorized=False
+            args=(velocity,channel_len_m,idx_up)
+            ,method='RK23'
+            ,atol=1e-2
+            ,rtol=1e-2
+            # ,vectorized=False
         )
     print("--- %s seconds ---" % (time.time() - start_time))
     n_eval = res.t.shape[0] 
@@ -350,6 +354,30 @@ def test9():
     plt.legend()
     plt.show()
 
+def test10():
+    icdict = {'x': 1, 'y': 0.4}    # Initial conditions dictonnary
+    pardict = {'k': 0.1, 'm': 0.5} # Parameters values dictionnary
+    x_rhs = 'y'
+    y_rhs = '-k*x/m'
+    vardict = {'x': x_rhs, 'y': y_rhs}
+    DSargs = args()                   # create an empty object instance of the args class, call it DSargs
+    DSargs.name = 'SHM'               # name our model
+    DSargs.ics = icdict               # assign the icdict to the ics attribute
+    DSargs.pars = pardict             # assign the pardict to the pars attribute
+    DSargs.tdata = [0, 20]            # declare how long we expect to integrate for
+    DSargs.varspecs = vardict         # assign the vardict dictionary to the 'varspecs' attribute of DSargs
+    DS = Generator.Vode_ODEsystem(DSargs)
+    DS.set(pars={'k': 0.3},
+           ics={'x': 0.4})
+    traj = DS.compute('demo')
+    pts = traj.sample()
+    plt.plot(pts['t'], pts['x'], label='x')
+    plt.plot(pts['t'], pts['y'], label='y')
+    plt.legend()
+    plt.xlabel('t')
+    plt.show()
+
+
 def test_odeint1():
     def fun(q,t,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
         #print(type(q))
@@ -401,6 +429,7 @@ def test_tf1():
                                    solution_times=[t0, t1])
     y0 = results.states[0]  # == dot(matrix_exp(A * t0), y_init)
     y1 = results.states[1]  # == dot(matrix_exp(A * t1), y_init)
+
 def test_tf2():
     def fun(q,t,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
     #print(type(q))

@@ -4,16 +4,16 @@ import pandas as pd
 import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import transfer1,transfer0
+from routing import transfer1,transfer2
+from solver import create_solver
 from yaml import Loader
 import yaml
-from utils.network.network import combine_rvr_prm
-from utils.params.params_from_prm_file import params_from_prm_file
+
 from utils.params.params_default import get_default_params
 from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
-from utils.network.network import get_default_network, get_adjacency_matrix
-from utils.serialization import save_to_pickle,save_to_netcdf
+from utils.network.network import get_default_network
+from utils.serialization import save_to_netcdf
 #from io3.forcing import check_forcings
 import importlib.util
 from utils.check_yaml import check_yaml1
@@ -35,6 +35,7 @@ class HLM(object):
         self.adjmatrix=None
         self.outputfile =None
         self.configuration = None
+        self.ODESOLVER =None
 
     
     def init_from_file(self,config_file:str):
@@ -57,6 +58,7 @@ class HLM(object):
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
+        self.ODESOLVER = create_solver(self)
         
 
         ...
@@ -108,8 +110,8 @@ class HLM(object):
         #linear_velocity1(self.states,self.params,self.network,self.time_step)
         #transfer0(self.states,self.params,self.network,self.time_step)
         #transfer2(self) #volume and discharge
-        transfer1(self) #basin vars
-        transfer0(self) # volume, discharge with ode
+        #transfer1(self) #basin vars
+        transfer2(self) # volume, discharge with ode
         save_to_netcdf(self.states,self.time,self.outputfile)
         #save_to_pickle(self.states,self.time)
         self.time += self.time_step_sec
