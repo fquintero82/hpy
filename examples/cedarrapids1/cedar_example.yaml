@@ -3,8 +3,8 @@ description: experiment to test hlm with yaml files
 network: examples/cedarrapids1/367813.rvr
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
-init_time: 1212278400
-end_time: 1214870400
+init_time: 1204329600
+end_time: 1222819200
 time_step: 3600
 forcings:
  precipitation:

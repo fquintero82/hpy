@@ -6,6 +6,10 @@ network = getTestDF2('network')
 states = getTestDF2('states')
 states['discharge'] = 1
 
+import numpy  as np
+from PyGMRES.gmres import GMRES
+from PyGMRES.linop import laplace_2d_extrap, resid
+
 #y0 = 1
 #yt1 = y0 - out + in
 
@@ -136,13 +140,28 @@ def test6():
     print(A)
 
 def test7():
-    import numpy as np
-    from scipy import linalg
-    import time
-    n=1000 # 40000 killed my computer
-    A=np.random.rand(n,n)
-    start= time.time()
-    Am=np.linalg.inv(A.copy())
-    end= time.time()
-    print ('np.linalg.inv ', end-start, ' seconds')
-    print ('residual ', np.linalg.norm(A.dot(Am)-np.identity(n), np.inf))
+
+    # Define the linear system of equations
+    A = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    b = np.array([1, 2, 3])
+
+    # Define the initial guess for the solution
+    x0 = np.zeros_like(b)
+    # Solve the linear system using GMRES
+    tolerance = 1e-6
+    max_iterations = 100
+    solution, error = GMRES(A, b, x0, tolerance, max_iterations)
+
+    # Print the solution
+    print(x)
+# def test7():
+#     import numpy as np
+#     from scipy import linalg
+#     import time
+#     n=1000 # 40000 killed my computer
+#     A=np.random.rand(n,n)
+#     start= time.time()
+#     Am=np.linalg.inv(A.copy())
+#     end= time.time()
+#     print ('np.linalg.inv ', end-start, ' seconds')
+#     print ('residual ', np.linalg.norm(A.dot(Am)-np.identity(n), np.inf))

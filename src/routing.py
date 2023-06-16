@@ -237,6 +237,26 @@ def transfer2(hlm_object):
     hlm_object.states['volume'] = out
     hlm_object.states['discharge'] = out / hlm_object.time_step_sec
 
+def transfer3(hlm_object):
+    da = np.array(hlm_object.network['drainage_area']*1e6,dtype=np.float32)
+    vars = np.array(['basin_precipitation',
+                     'basin_evapotranspiration',
+                     'basin_swe',
+                     'basin_static',
+                     'basin_surface',
+                     'basin_subsurface',
+                     'basin_groundwater'
+                     ])
+    time = hlm_object.time_step_sec / 3600 #hours
+    for i in vars:
+        var = np.array(hlm_object.states[i]* hlm_object.network['area_hillslope'],dtype=np.float32)
+        var = np.concatenate(([0],var))
+        hlm_object.accum.set_initial_value(var,0.0)
+        out = hlm_object.accum.integrate(time)[1:]#value 0 is auxiliary
+        out /= da
+        hlm_object.states[i] = out
+
+
 # def transfer2(hlm_object):
 #     #
 #     #transfer discharge volume

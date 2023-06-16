@@ -4,11 +4,10 @@ import pandas as pd
 import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import transfer1,transfer2
-from solver import create_solver
+from routing import transfer3,transfer2
+from solver import create_solver,create_acum
 from yaml import Loader
 import yaml
-
 from utils.params.params_default import get_default_params
 from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
@@ -32,10 +31,11 @@ class HLM(object):
         self.params= None
         self.forcings= None
         self.network= None
-        self.adjmatrix=None
+        self.adjmatrix=None #obsolete
         self.outputfile =None
         self.configuration = None
         self.ODESOLVER =None
+        self.accum = None
 
     
     def init_from_file(self,config_file:str):
@@ -59,6 +59,7 @@ class HLM(object):
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
         self.ODESOLVER = create_solver(self)
+        self.accum = create_acum(self)
         
 
         ...
@@ -110,8 +111,8 @@ class HLM(object):
         #linear_velocity1(self.states,self.params,self.network,self.time_step)
         #transfer0(self.states,self.params,self.network,self.time_step)
         #transfer2(self) #volume and discharge
-        #transfer1(self) #basin vars
         transfer2(self) # volume, discharge with ode
+        transfer3(self) #basin vars
         save_to_netcdf(self.states,self.time,self.outputfile)
         #save_to_pickle(self.states,self.time)
         self.time += self.time_step_sec
