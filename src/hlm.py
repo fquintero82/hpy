@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import transfer3,transfer2
+from routing import transfer3,transfer2,transfer4,transfer5
 from solver import create_solver,create_acum
 from yaml import Loader
 import yaml
@@ -31,11 +31,9 @@ class HLM(object):
         self.params= None
         self.forcings= None
         self.network= None
-        self.adjmatrix=None #obsolete
         self.outputfile =None
         self.configuration = None
         self.ODESOLVER =None
-        self.accum = None
 
     
     def init_from_file(self,config_file:str):
@@ -53,13 +51,11 @@ class HLM(object):
         self.end_time = d['end_time']
         self.time_step_sec= d['time_step']
         self.network = get_default_network()
-        #self.adjmatrix = get_adjacency_matrix(self.network,default=False)
         self.states = get_default_states(self.network)
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
-        self.ODESOLVER = create_solver(self)
-        self.accum = create_acum(self)
+        #self.ODESOLVER = create_solver(self)
         
 
         ...
@@ -108,13 +104,9 @@ class HLM(object):
         print(self.time)
         self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
-        #linear_velocity1(self.states,self.params,self.network,self.time_step)
-        #transfer0(self.states,self.params,self.network,self.time_step)
-        #transfer2(self) #volume and discharge
         transfer2(self) # volume, discharge with ode
-        transfer3(self) #basin vars
-        save_to_netcdf(self.states,self.time,self.outputfile)
-        #save_to_pickle(self.states,self.time)
+        transfer5(self) #basin vars
+        save_to_netcdf(self.states,self.params,self.time,self.outputfile)
         self.time += self.time_step_sec
 
     def advance(self,time_to_advance:float=None):

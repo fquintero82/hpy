@@ -7,6 +7,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from utils.params.params_default import get_default_params
 from utils.states.states_default import get_default_states
+import time
+import numba
+from hlm import HLM
+from utils.network.network import get_default_network
+
+
 
 def test1():
     rvr_file ='../examples/cedarrapids1/367813.rvr'
@@ -132,5 +138,68 @@ def test5():
     states['volume']=1
     params = get_default_params(network)
 
+def transfer6(hlm_object,array):
+    t = time.time()
+    nlinks = hlm_object.network.shape[0]
+    initial_state = np.ones(shape=(nlinks))
+    #initial_state[0]=0
+    out = initial_state.copy()
+    out1 = initial_state.copy()
+    out2 = initial_state.copy()
+    
+    routing_order = hlm_object.network.loc[:,['idx','idx_downstream_link','drainage_area']].copy()
+    routing_order = routing_order.sort_values(by=['drainage_area'])
+    idxd = routing_order['idx_downstream_link'].to_numpy()
+    idxu = routing_order['idx'].to_numpy()
+    print(time.time()-t)
+    t = time.time()
+    for ii in np.arange(nlinks):
+        if idxd[ii]!=-1:
+            out[idxd[ii]-1]+= out[idxu[ii]-1]
+            out1[idxd[ii]-1]+= out1[idxu[ii]-1]
+            out2[idxd[ii]-1]+= out2[idxu[ii]-1]
+    print(time.time()-t)
 
+    import threading
+    def fun1(nlinks,input,idxd,idxu):
+        for ii in np.arange(nlinks):
+            if idxd[ii]!=-1:
+                input[idxd[ii]-1]+= input[idxu[ii]-1]
+        return(input)
+    t = time.time()
+    thread1 = threading.Thread(target=fun1, args=(nlinks,out,idxd,idxu))
+    thread2 = threading.Thread(target=fun1, args=(nlinks,out1,idxd,idxu))
+    thread3 = threading.Thread(target=fun1, args=(nlinks,out2,idxd,idxu))
 
+    thread1.start()
+    thread2.start()
+    thread3.start()
+
+    #thread1.join()
+    #thread2.join()
+    #thread3.join()
+    print(time.time()-t)
+
+def transfer7():
+    t = time.time()
+    
+    network = get_default_network()
+    nlinks = network.shape[0]
+    initial_state = np.ones(shape=(nlinks)) * network['area_hillslope'] /  network['drainage_area']
+  
+    routing_order = network.loc[:,['idx','idx_downstream_link','drainage_area']].copy()
+    routing_order = routing_order.sort_values(by=['drainage_area'])
+    idxd = routing_order['idx_downstream_link'].to_numpy()
+    idxu = routing_order['idx'].to_numpy()
+
+    #@jit(nopython=True)
+    @numba.jit(nopython=True)
+    def fun1(nlinks,input,idxd,idxu):
+        for ii in np.arange(nlinks):
+            if idxd[ii]!=-1:
+                input[idxd[ii]-1]+= input[idxu[ii]-1]
+        return(input)
+    
+
+    input = initial_state
+    out = fun1(nlinks,input,idxd,idxu)
