@@ -15,7 +15,7 @@ PARAM_NAMES = {'link_id':np.uint32,
                 }
 
 PARAM_DEFAULT_VALUES ={'link_id':1,
-                       'river_velocity':1,
+                       'river_velocity':0.3,
                        'lambda1':0,
                        'lambda2':0,
                        'max_storage':100,
@@ -63,6 +63,7 @@ STATES_DEFAULT_VALUES = {'link_id':1,
 FORCINGS_NAMES=['link_id','precipitation','evapotranspiration','temperature','frozen_ground','discharge']
 
 CF_NAMES = {
+    'params.surface_velocity':'params.surface_velocity',
     'params.river_velocity':'params.river_velocity',
     'params.lambda1':'params.lambda1',
     'params.lambda2':'params.lambda2',
@@ -128,6 +129,7 @@ CF_UNITS={
     'params.tr_groundwater':'day',
     'params.temp_threshold':'C',
     'params.melt_factor':'mm day-1 C-1',
+    'params.surface_velocity':'m/s',
     'forcings.precipitation':'mm h-1',
     'forcings.evapotranspiration':'mm h-1',
     'forcings.temperature':'C',

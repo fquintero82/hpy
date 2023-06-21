@@ -12,13 +12,14 @@ def params_from_prm_file(inputfile):
         dtype={
             'link_id':np.uint32,
             'drainage_area':np.float32,
-            'channel_length':np.float16,
+            'channel_length':np.float32,
             'area_hillslope':np.float32
         },
     )
     df.index = df['link_id']
     df['channel_length'] *= 1e3 # from km to m
     df['area_hillslope'] *= 1e6 #from km2 to m2
+    df['drainage_area'] *= 1e6 #from km2 to m2
     df.info()
     return df
 

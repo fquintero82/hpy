@@ -1,5 +1,6 @@
 from jitcode import jitcode,y
 import numpy as np
+import numba
 
 def create_solver(hlm_object):
     N = hlm_object.network.shape[0]
@@ -45,9 +46,25 @@ def create_acum(hlm_object):
             for j in idx_up[i-1]:
                 coupling_sum = coupling_sum + y(j)
         #print(coupling_sum)
-        f.append(y(i)+coupling_sum)
+        f.append(coupling_sum)
         
     
     ODE = jitcode(f)
     ODE.set_integrator("dopri5")
     return ODE
+
+#@jit(nopython=True)
+@numba.jit(nopython=True)
+def create_accum_numba(nlinks,input,idxd,idxu):
+    for ii in np.arange(nlinks):
+        if idxd[ii]!=-1:
+            input[idxd[ii]-1]+= input[idxu[ii]-1]
+    return(input)
+
+#@jit(nopython=True)
+@numba.jit(nopython=True)
+def create_accum_numba_multiple(nlinks,input,idxd,idxu):
+    for ii in np.arange(nlinks):
+        if idxd[ii]!=-1:
+            input[:,idxd[ii]-1]+= input[:,idxu[ii]-1]
+    return(input)

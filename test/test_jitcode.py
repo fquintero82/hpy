@@ -1,8 +1,8 @@
 from jitcode import jitcode,y
 import numpy as np
-from utils.network.network import get_default_network
 from hlm import HLM
 from matplotlib import pyplot as plt
+import time
 
 def test1():
     a  = -0.025794
@@ -74,3 +74,102 @@ def test2():
     plt.plot(out)
     plt.show()
 
+def test3():
+    hlm_object = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    hlm_object.init_from_file(config_file)
+    N = hlm_object.network.shape[0]
+    idx_up = hlm_object.network['idx_upstream_link'].to_numpy()
+    #network indexes start at 1
+    #index 0 is auxiliary to denote no  upstream
+    #aux zero will be used for inputs
+    #first element of f is zero
+    f = [0]
+    for i in np.arange(N)+1:
+        coupling_sum = 0
+        if (idx_up[i-1] !=0).any():
+            for j in idx_up[i-1]:
+                coupling_sum = coupling_sum + y(j)
+        f.append(coupling_sum)
+    
+    initial_state = np.ones(shape=(N+1))
+    initial_state[0] = 0
+    ODE = jitcode(f)
+    ODE.set_integrator("RK45") #this line takes forever . test different methods
+    ODE.set_initial_value(initial_state,0.0)
+    times = 1
+    out = ODE.integrate(times)
+    out.max()
+    from scipy import stats
+    stats.describe(out)
+    id = 32715
+    out[id]
+    plt.plot(out)
+    plt.show()
+
+def test4():
+    # 5\
+    # 4-3-1
+    #   2/
+    f = [0, #y0
+         y(1)+y(3)+y(2), #y1
+         y(2),
+         y(3)+y(4),
+         y(4),
+         y(5)
+         ]
+    
+    f = [0, #y0
+         y(3)+y(2), #y1
+         0, #2
+         y(4)+y(5), #3
+         0, #4
+         0 #5
+         ]
+    
+    init = [1,1,1,1,1,1]
+    ODE = jitcode(f)
+    ODE.set_integrator("dopri5") #this line takes forever . test different methods
+
+    ODE.set_initial_value(init,0.0)
+    times = 1
+    out = ODE.integrate(times)
+    print(out)
+
+def test4():
+    import js2py
+    def sum_network(array,idxup,idxdown):
+        funjs = """function sum_network(array,idxup,idxdown){
+        const out = array.slice();
+        for(let i=0; i< array.length; i++){
+            if(idxdown[i] !==0){
+                out[idxdown[i]-1]+=out[idxup[i]-1];
+            }
+        }
+        return out;
+        }"""
+        
+        sum_network_function = js2py.eval_js(funjs)
+        return sum_network_function(array,idxup,idxdown)
+    # 5\
+    # 4-3-1
+    #   2/
+    array = [1,1,1,1,1]
+    idxup = [2,4,5,3,1]
+    idxdown = [1,3,3,1,0]
+    sum_network(array,idxup,idxdown)
+
+    hlm_object = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    hlm_object.init_from_file(config_file)
+    N = hlm_object.network.shape[0]
+    routing_order = hlm_object.network.loc[:,['idx','idx_downstream_link','drainage_area']].copy()
+    routing_order = routing_order.sort_values(by=['drainage_area'])
+    idxd = routing_order['idx_downstream_link'].to_numpy()
+    idxu = routing_order['idx'].to_numpy()
+    initial_state = np.ones(shape=(N+1))
+    initial_state[0] = 0
+    t = time.time()
+    out = sum_network(initial_state,idxu,idxd)
+    print(time.time()-t)
+    

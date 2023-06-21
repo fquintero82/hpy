@@ -23,7 +23,7 @@ def runoff1(states:pd.DataFrame,
     CF_MMHR_M_MIN = np.float32(1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
     CF_MELTFACTOR= np.float32((1/(24*60.0)) *(1/1000.0)) # mm/day/degree to m/min/degree
     CF_ET = np.float32((1e-3 / (30.0*24.0*60.0)))
-    
+    CF_METER_TO_MM = 1000
     #snow storage
     x1=pd.DataFrame({'val':0},dtype=np.float32,index=network.index)
     #temperature =0 is the flag for no forcing the variable. no snow process
@@ -42,8 +42,8 @@ def runoff1(states:pd.DataFrame,
     wh = (forcings['temperature'] !=0) & (forcings['temperature']<params['temp_threshold']) 
     states.loc[wh,'snow'] += CF_MMHR_M_MIN*DT*forcings['precipitation'][wh] #[m]
     x1.loc[wh,'val'] = 0
-    states['basin_precipitation'] = forcings['precipitation'].copy() #[mm]
-    states['basin_swe'] = 1000*states['snow'].copy() #[mm]
+    states['basin_precipitation'] = forcings['precipitation'].copy()*network['area_hillslope']#[mm x m2]
+    states['basin_swe'] = CF_METER_TO_MM * states['snow'].copy() * network['area_hillslope'] #[mm x m2]
     del snowmelt #garbage collection
 
     #static storage
@@ -63,9 +63,9 @@ def runoff1(states:pd.DataFrame,
         },dtype=np.float32).min(axis=1) #[m]
     out1=pd.DataFrame({'val':out1})
     states['static'] += d1['val'] - out1['val']
-    CF_METER_TO_MM = 1000
-    states['basin_evapotranspiration'] = CF_METER_TO_MM*out1['val'].copy() #[mm]
-    states['basin_static'] = CF_METER_TO_MM*states['static'].copy() # [mm]
+    
+    states['basin_evapotranspiration'] = CF_METER_TO_MM*out1['val'].copy()*network['area_hillslope'] #[mm x m2]
+    states['basin_static'] = CF_METER_TO_MM*states['static'].copy()*network['area_hillslope'] # [mm x m2]
 
     #del d1,x1
 
@@ -89,7 +89,7 @@ def runoff1(states:pd.DataFrame,
  
     states['surface']+= d2 - out2 #[m]
     #states['basin_surface'] = 1000*states['surface'].copy()
-    states['basin_surface'] = CF_METER_TO_MM*out2 #mm
+    states['basin_surface'] = CF_METER_TO_MM*out2 *network['area_hillslope']
     del x2,w,d2,infiltration
 
     #subsurface storage
@@ -103,7 +103,7 @@ def runoff1(states:pd.DataFrame,
     out3  = pd.Series(DT * states['subsurface'] / (params['tr_subsurface']* CF_DAYS_TO_MINUTES),dtype=np.float32) #[m]
     states['subsurface'] += d3 - out3 #[m]
     #states['basin_subsurface'] = 1000*states['subsurface'].copy()
-    states['basin_subsurface'] = CF_METER_TO_MM*out3 #mm
+    states['basin_subsurface'] = CF_METER_TO_MM*out3 *network['area_hillslope']
     del x3,percolation,d3
 
 	#aquifer storage
@@ -112,7 +112,7 @@ def runoff1(states:pd.DataFrame,
     out4= pd.Series(DT * states['groundwater'] / (params['tr_groundwater']* CF_DAYS_TO_MINUTES),dtype=np.float32) #[m]
     states['groundwater'] += d4 - out4
     #states['basin_groundwater'] = 1000*states['groundwater'].copy()
-    states['basin_groundwater'] = CF_METER_TO_MM*out4 #mm
+    states['basin_groundwater'] = CF_METER_TO_MM*out4 *network['area_hillslope']
     del x4,d4
 
     #channel update
