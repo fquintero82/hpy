@@ -55,7 +55,7 @@ class HLM(object):
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
-        #self.ODESOLVER = create_solver(self)
+        self.ODESOLVER = create_solver(self)
         
 
         ...

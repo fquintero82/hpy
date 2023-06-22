@@ -15,7 +15,7 @@ PARAM_NAMES = {'link_id':np.uint32,
                 }
 
 PARAM_DEFAULT_VALUES ={'link_id':1,
-                       'river_velocity':0.3,
+                       'river_velocity':0.75,
                        'lambda1':0,
                        'lambda2':0,
                        'max_storage':100,

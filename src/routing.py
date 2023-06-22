@@ -240,7 +240,8 @@ def transfer2(hlm_object):
     time1 = hlm_object.time_step_sec / 3600 #hours
     out = hlm_object.ODESOLVER.integrate(time1)[1:]#value 0 is auxiliary
     hlm_object.states['volume'] = out
-    hlm_object.states['discharge'] = out / hlm_object.time_step_sec
+    hlm_object.states['discharge'] = out / hlm_object.network['channel_length'] * hlm_object.params['river_velocity']
+    #hlm_object.states['discharge'] = out / hlm_object.time_step_sec
     print('discharge routing in %f' % (time.time()-t))
 
 def transfer3(hlm_object):
