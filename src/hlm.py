@@ -5,7 +5,7 @@ import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
 from routing import transfer3,transfer2,transfer4,transfer5
-from solver import create_solver,create_acum
+from solver import create_solver
 from yaml import Loader
 import yaml
 from utils.params.params_default import get_default_params
@@ -33,6 +33,7 @@ class HLM(object):
         self.network= None
         self.outputfile =None
         self.configuration = None
+        self.pathsolver=None
         self.ODESOLVER =None
 
     
@@ -55,6 +56,7 @@ class HLM(object):
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
+        self.pathsolver = d['solver']
         self.ODESOLVER = create_solver(self)
         
 

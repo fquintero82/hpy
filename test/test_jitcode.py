@@ -62,6 +62,14 @@ def test2():
     initial_state[0] = 0
     ODE = jitcode(f)
     ODE.set_integrator("dopri5")
+    # file1 = open('examples/cedarrapids1/367813_ODE','wb')
+    # pickle.dump(ODE,file1)
+    # file1.close()
+    p = 'examples/cedarrapids1/ode.so'
+    ODE.save_compiled(p,overwrite=True)
+
+    ODE = jitcode(f,module_location = p)
+    ODE.set_integrator("dopri5")
     ODE.set_initial_value(initial_state,0.0)
     times = np.arange(1,240)
     out = np.zeros(shape=(240))

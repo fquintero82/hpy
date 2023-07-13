@@ -38,21 +38,84 @@ def get_default_network():
     df = pd.read_pickle(f)
     return df
 
-def _process_line(f):
-    line = f.readline()
-    items = line.split()
-    _lid = int(items[0])
-    _n = int(items[1])
-    _uplinks = -1
-    if(_n>0):
-        _uplinks = np.array(items[2:],dtype=np.int32)
-    return _lid,_uplinks
 
 def get_idx_up_down(df):
-    #seq = np.arange(df.shape[0])+1
-#    seq = df['idx']
-
     for ii in np.arange(df.shape[0]):
+        print(ii)
+        #get  upstream linkids
+        _up = df.iloc[ii]['upstream_link'] 
+        #get  my linkid
+        _mylink = df.iloc[ii]['link_id']
+        #get my index
+        _myidx = df.iloc[ii]['idx']
+        if(np.array([_up ==-1]).any()):
+            # for mylink, set the idx_upstream column
+            #df.iloc[ii]['idx_upstream_link']=0 #this is necesary for ode evaluation
+            df.iloc[ii]['idx_upstream_link']=np.array([0],dtype=np.int32) #this is necesary for ode evaluation
+        if(np.array([_up !=-1]).any()): #if there are no zeros in the linkids upstream
+             #get the index of upstream links
+            _upidx = df.loc[_up]['idx'].to_numpy()
+            # for mylink, set the idx_upstream column
+            #df.iloc[ii]['idx_upstream_link']=_upidx 
+            df.iloc[ii]['idx_upstream_link']=np.array(_upidx ,dtype=np.int32)
+            #for the upstream links,set their downstream link (mylink)
+            df.loc[_up,'downstream_link'] = _mylink 
+            #for the upstream links, set  their idx_downstream
+            df.loc[_up,'idx_downstream_link'] = _myidx 
+
+def get_idx_up_down(df):
+    for ii in np.arange(df.shape[0]):
+        print(ii)
+        #get  upstream linkids
+        _up = df.iloc[ii]['upstream_link'] 
+        #get  my linkid
+        _mylink = df.iloc[ii]['link_id']
+        #get my index
+        _myidx = df.iloc[ii]['idx']
+        if(np.array([_up ==-1]).any()):
+            # for mylink, set the idx_upstream column
+            #df.iloc[ii]['idx_upstream_link']=0 #this is necesary for ode evaluation
+            df.iloc[ii]['idx_upstream_link']=np.array([0],dtype=np.int32) #this is necesary for ode evaluation
+        if(np.array([_up !=-1]).any()): #if there are no zeros in the linkids upstream
+             #get the index of upstream links
+            _upidx = df.loc[_up]['idx'].to_numpy()
+            # for mylink, set the idx_upstream column
+            #df.iloc[ii]['idx_upstream_link']=_upidx 
+            df.iloc[ii]['idx_upstream_link']=np.array(_upidx ,dtype=np.int32)
+            #for the upstream links,set their downstream link (mylink)
+            df.loc[_up,'downstream_link'] = _mylink 
+            #for the upstream links, set  their idx_downstream
+            df.loc[_up,'idx_downstream_link'] = _myidx 
+
+def get_idx_up_down2(df):
+    # Get the index of upstream links.
+    #df['idx_upstream_link'] = df['upstream_link'].apply(lambda x: df.loc[x]['idx'].to_numpy() if x != -1 else np.array([0]))
+    df['idx_upstream_link'] = df['upstream_link'].apply(lambda x: df.loc[x]['idx'].to_numpy() if min(x) != -1 else np.array([0]))
+
+    # Set the downstream link and idx_downstream for upstream links.
+    up_idxs = df['idx_upstream_link'].values
+    down_links = df['link_id'].values
+    for i in range(len(df)):
+        if up_idxs[i] != 0:
+            df.loc[up_idxs[i], 'downstream_link'] = down_links[i]
+            df.loc[up_idxs[i], 'idx_downstream_link'] = i
+
+
+def get_idx_up_down3(df):
+    _up = np.array(df['upstream_link']) #get  upstream linkids
+    _up1 = np.array([np.min(x) for x in _up])
+    _mylink = df['link_id']
+    _myidx = df['idx']
+
+    _upidx = df.loc[_up]['idx'].to_numpy()
+
+    wh = np.where(_up1==-1,True,False)
+    df.loc[wh,'idx_upstream_link']=np.float32(0)
+    wh = np.where(_up1!=-1,True,False)
+    df.iloc[wh]['idx_upstream_link'] =df.iloc[wh]['idx'].to_numpy()
+    _upidx = [df.loc[_up[x]]['idx'].to_numpy() for x in wh]
+    for ii in np.arange(df.shape[0]):
+        print(ii)
         #get  upstream linkids
         _up = df.iloc[ii]['upstream_link'] 
         #get  my linkid
@@ -91,21 +154,58 @@ def get_adjacency_matrix(network:pd.DataFrame,default=False):
         file1.close()
 
 
+# def network_from_rvr_file(rvr_file):
+#     f = open(rvr_file,'r')
+#     nlines = int(f.readline())
+#     _ = f.readline()
+#     df = pd.DataFrame(data=np.zeros(shape=(nlines,len(NETWORK_NAMES))),
+#         columns=list(NETWORK_NAMES.keys()),
+#         dtype=object)
+#     df[:]=-1
+#     for ii in np.arange(nlines):
+#         _lid,_up = _process_line(f)
+#         df.iloc[ii]['link_id'] = _lid
+#         df.iloc[ii]['upstream_link'] = _up
+#         df.iloc[ii]['idx']= ii + 1 #index starts at 1. idx 0 is needed for operations
+
+#     f.close()
+#     df.index = df[list(NETWORK_NAMES.keys())[0]]
+#     df.info()
+#     return df
+
 def network_from_rvr_file(rvr_file):
+    def get_lid(line:str):
+        items = line.split()
+        _lid = int(items[0])
+        _n = int(items[1])
+        _uplinks = -1
+        if(_n>0):
+            _uplinks = np.array(items[2:],dtype=np.int32)
+        return _lid
+    
+    def get_uplink(line:str):
+        items = line.split()
+        _lid = int(items[0])
+        _n = int(items[1])
+        _uplinks = -1
+        if(_n>0):
+            _uplinks = np.array(items[2:],dtype=np.int32)
+        return _uplinks
+
+    
     f = open(rvr_file,'r')
-    nlines = int(f.readline())
-    _ = f.readline()
+    data = f.readlines()
+    nlines = int(data[0])
     df = pd.DataFrame(data=np.zeros(shape=(nlines,len(NETWORK_NAMES))),
         columns=list(NETWORK_NAMES.keys()),
         dtype=object)
     df[:]=-1
-    for ii in np.arange(nlines):
-        _lid,_up = _process_line(f)
-        df.iloc[ii]['link_id'] = _lid
-        df.iloc[ii]['upstream_link'] = _up
-        df.iloc[ii]['idx']= ii + 1 #index starts at 1. idx 0 is needed for operations
-
-    f.close()
+    data = data[2:]
+    _lid = list(map(get_lid,data))
+    df['link_id'] = np.array(_lid)
+    _up = list(map(get_uplink,data))
+    df['upstream_link'] = _up
+    df['idx']= np.arange(nlines) + 1 #index starts at 1. idx 0 is needed for operations
     df.index = df[list(NETWORK_NAMES.keys())[0]]
     df.info()
     return df
@@ -146,6 +246,12 @@ def test2():
     prm_file ='examples/small/small.prm'
     df = combine_rvr_prm(prm_file,rvr_file)
     df.to_pickle('examples/small/small.pkl')
+
+def test3():
+    rvr_file ='examples/hydrosheds/conus.rvr'
+    prm_file ='examples/hydrosheds/conus.prm'
+    df = combine_rvr_prm(prm_file,rvr_file)
+    df.to_pickle('examples/hydrosheds/conus.pkl')
 
 def testadjmat():
     network = get_default_network()

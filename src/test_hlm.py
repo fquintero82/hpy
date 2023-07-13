@@ -37,6 +37,8 @@ def test2():
     config_file = 'examples/cedarrapids1/cedar_example.yaml'
     instance.init_from_file(config_file)
     instance.advance()
+    
+
 
 if __name__ == "__main__":
     test2()

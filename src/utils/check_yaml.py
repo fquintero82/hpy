@@ -3,10 +3,9 @@ import yaml
 import sys
 
 def check_yaml1(configuration):
-        config_file = 'examples/cedarrapids1/cedar_example2.yaml'
-
-        stream = open(config_file)
-        configuration = yaml.load(stream,Loader=Loader)
+        #config_file = 'examples/cedarrapids1/cedar_example2.yaml'
+        #stream = open(config_file)
+        #configuration = yaml.load(stream,Loader=Loader)
         
         #check that all forcings exists in the yaml file
         if configuration['forcings'] is None:
@@ -49,3 +48,6 @@ def check_yaml1(configuration):
                 print('output_file not included in configuration file')
                 quit()
 
+        if configuration['solver'] is None:
+                print('a path to save the ode solver (e.g. examples/ode.so) must be provided in the configuration file')
+                quit()
