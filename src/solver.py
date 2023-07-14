@@ -30,9 +30,10 @@ def create_solver(hlm_object):
         ODE=jitcode(f,module_location=hlm_object.pathsolver)
     else:
         ODE = jitcode(f)
+        ODE.set_integrator("dopri5")
         ODE.save_compiled(hlm_object.pathsolver)
 
-    ODE.set_integrator("dopri5")
+    #ODE.set_integrator("dopri5")
     return ODE
 
 # def create_acum(hlm_object):

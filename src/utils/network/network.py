@@ -38,6 +38,14 @@ def get_default_network():
     df = pd.read_pickle(f)
     return df
 
+def get_network_from_file(options=None):
+    if 'network' in list(options.keys()):
+        f = options['network']    
+    if os.path.isfile(f)==False:
+        print('Error. Network file not found')
+        quit()
+    df = pd.read_pickle(f)
+    return df
 
 def get_idx_up_down(df):
     for ii in np.arange(df.shape[0]):

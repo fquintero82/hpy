@@ -37,11 +37,16 @@ def test2():
     config_file = 'examples/cedarrapids1/cedar_example.yaml'
     instance.init_from_file(config_file)
     instance.advance()
-    
+
+def test3():
+    instance = HLM()
+    config_file = 'examples/hydrosheds/conus_example.yaml'
+    instance.init_from_file(config_file)
+    instance.advance()   
 
 
 if __name__ == "__main__":
-    test2()
+    test3()
     #plot1()
 
     

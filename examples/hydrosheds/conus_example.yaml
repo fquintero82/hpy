@@ -3,7 +3,7 @@ description: model run in conus network
 network: examples/hydrosheds/conus.pkl
 solver: examples/hydrosheds/solver.so
 parameters: examples/hydrosheds/conus.prm
-initial_states: 
+initial_states: dummy
 init_time: 1199145600
 end_time: 1230768000
 time_step: 3600
@@ -12,6 +12,7 @@ forcings:
   script: /Users/felipe/hpy/hpy/src/io/AORC_conus_hourly.py
   path: /Users/felipe/tmp/aorc/
   prefix: AORC_APCP_2008
+  centroids: examples/hydrosheds/conus_centroids.csv
  evapotranspiration:
   script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
   path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv
