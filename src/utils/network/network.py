@@ -88,6 +88,7 @@ def get_idx_up_down2(df):
             df.loc[up_idxs[i], 'idx_downstream_link'] = i
 
 
+
 def get_idx_up_down3(df):
     upstream_link = np.array(df['upstream_link']) #get  upstream linkids
     #_up1 = np.array([np.min(x) for x in _up])
@@ -97,9 +98,9 @@ def get_idx_up_down3(df):
     idx_upstream_link = np.zeros(shape=(len(idx)),dtype=object)
     downstream_link = -1 * np.ones(shape=(len(idx)))
     idx_downstream_link = df['idx_downstream_link'].to_numpy()
-    ii=0
 
-    def process_row(ii,upstream_link,link_id,idx,idx_upstream_link,idx_downstream_link):
+    def process_row(ii,upstream_link,link_id,idx,idx_upstream_link,downstream_link,idx_downstream_link):
+        print(ii)
         _up = upstream_link[ii]
         _mylink = link_id[ii]
         _myidx = idx[ii]
@@ -111,15 +112,23 @@ def get_idx_up_down3(df):
             idx_upstream_link[ii] = _upidx
             downstream_link[wh] = _mylink
             idx_downstream_link[wh]= _myidx
+        return True
     
     ii = np.arange(df.shape[0])
-    ii = [0,1,2]
-    ii=0
-    process_row(ii,upstream_link,link_id,idx,idx_upstream_link,idx_downstream_link)
-    pool = multiprocessing.Pool()
-    args = (ii,upstream_link,link_id,idx,idx_upstream_link,idx_downstream_link)
-    result = pool.apply_async(process_row,args)
-    result = pool.starmap(process_row,args)
+    #ii = [0,1,2]
+    for i in ii:
+        process_row(i,upstream_link,link_id,idx,idx_upstream_link,downstream_link,idx_downstream_link)
+    df['idx_upstream_link'] = idx_upstream_link
+    df['downstream_link'] = downstream_link
+    df['idx_downstream_link'] = idx_downstream_link
+    return df
+
+    #ii=0
+    #process_row(ii,upstream_link,link_id,idx,idx_upstream_link,idx_downstream_link)
+    #pool = multiprocessing.Pool(processes=1)
+   # args = [(ii,upstream_link,link_id,idx,idx_upstream_link,downstream_link,idx_downstream_link)]
+    #pool.apply_async(process_row,args)
+    #result = pool.starmap(process_row,args)
 
 def get_adjacency_matrix(network:pd.DataFrame,default=False):
 
@@ -210,6 +219,12 @@ def test3():
     df = combine_rvr_prm(prm_file,rvr_file)
     df.to_pickle('examples/hydrosheds/conus.pkl')
 
+def test4():
+    rvr_file ='examples/hydrosheds/conus.rvr'
+    df = network_from_rvr_file(rvr_file)
+    get_idx_up_down3(df)
+    
+
 def testadjmat():
     network = get_default_network()
     A = get_adjacency_matrix(network,False)
@@ -219,5 +234,7 @@ def testadjmat():
  #   np.save(file2,A) #same size as pkl
     file1.close()
 #    file2.close()
+
+test4()
 
 
