@@ -5,23 +5,33 @@ from datetime import datetime
 import pytz
 from os.path import isfile
 from netCDF4 import Dataset
+import geopandas as gpd
+
 
 dir = '/Users/felipe/tmp/aorc/'
 time = 1199145600
 prefix = 'AORC_APCP_2008'
 prefix = ''
 
+
 def get_values(time: int,options=None):
     lid = None
     val = 0
     root,varname = access_file(time,options)
     if root is None:
-        return lid , val
+        print('Error. Could not read netcdf file in yaml file')
+        quit()
     if root is not None:
         lut = get_lid_xy(options)
+        nc2geopandas(root,varname,time)
         lid, val = extract_vals_from_var(root,varname,time,lut)
     return lid,val
 
+def get_relative_time(unixtime:int):
+    d1 = datetime.fromtimestamp(unixtime,pytz.UTC)
+    begin = datetime(d1.year,d1.month,1,0).replace(tzinfo=pytz.timezone("UTC")).timestamp()
+    hours_elapsed = round((unixtime - begin)/3600)
+    return hours_elapsed
 
 def access_file(time:int, options=None):
     root = None
@@ -32,7 +42,9 @@ def access_file(time:int, options=None):
         prefix = options['prefix']
     if 'varname' in list(options.keys()):
         varname = options['varname']
-    
+    if varname is None:
+        print('Error. precipitation varname not in yaml file')
+        quit()
     d1 = datetime.fromtimestamp(time,pytz.UTC)
     month = '{:02d}'.format(d1.month)
     filein = os.path.join(dir,prefix+str(month)+'.nc')
@@ -64,8 +76,36 @@ def get_lid_xy(options=None):
     if format1 == 'parquet':
         df = pd.read_parquet(fcentroids)
     df.columns = ['lid','x','y']
+    
     return df
 
+def get_col_row(nc:Dataset,df:pd.DataFrame):
+    x = df['x'].to_numpy()
+    y = df['y'].to_numpy()
+    lid = df['lid'].to_numpy()
+    n = len(lid)
+    col = np.zeros(shape=(n),dtype=np.int32)
+    row = np.zeros(shape=(n),dtype=np.int32)
+    # Get the nc row, col for the point's lat, lon
+    xnc = np.array(nc.variables["lon"][:])
+    ync = np.array(nc.variables["lat"][:])
+    #need vectorized version of this function. 
+
+    for ii in np.arange(n):
+        print(ii)
+        col[ii] = np.argmin(np.abs(xnc - x[ii]))
+        row[ii] = np.argmin(np.abs(ync - y[ii]))
+    df['col']=  col
+    df['row'] = row
+    return df
+
+
+def nc2geopandas(nc:Dataset,varname:str,t:int):
+    idx_time = get_relative_time(t)
+    #idx_time = np.argwhere(nc.variables["time"][:]==reltime)
+    data = nc[varname][idx_time,:,:]
+    gdf = gpd.GeoDataFrame(data, crs=nc.crs)
+    #values = gdf.loc[gdf.geometry.contains(coordinates)][column_name]
 
 def extract_vals_from_var(nc:Dataset,
                           varname:str,
@@ -74,10 +114,22 @@ def extract_vals_from_var(nc:Dataset,
     x = df['x'].to_numpy()
     y = df['y'].to_numpy()
     lid = df['lid'].to_numpy()
-    # Get the nc row, col for the point's lat, lon
-    col = np.argmin(np.abs(nc.variables["lon"][:] - x))
-    row = np.argmin(np.abs(nc.variables["lat"][:] - y))
-    idx_time = np.argmin(np.abs(nc.variables["time"][:] - t))
+    idx_time = time2hours(t)
+    #idx_time = np.argmin(np.abs(nc.variables["time"][:] - t))
     # Return a np.array with the netcdf data
-    val = np.ma.getdata(nc.variables[varname][idx_time, row, col])
-    return lid,val
+    pass
+    #return lid,val
+
+def test():
+    import yaml
+    from yaml import Loader
+    config_file = 'examples/hydrosheds/conus_example.yaml'
+    stream =open(config_file)
+    d = yaml.load(stream,Loader=Loader)
+    options = d['forcings']['precipitation']
+    time = 1199145600
+    lid,val = get_values(time,options)
+
+test()
+
+    

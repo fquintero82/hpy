@@ -13,6 +13,7 @@ forcings:
   path: /Users/felipe/tmp/aorc/
   prefix: AORC_APCP_2008
   centroids: examples/hydrosheds/conus_centroids.csv
+  varname: APCP
  evapotranspiration:
   script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
   path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv

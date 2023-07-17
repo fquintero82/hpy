@@ -50,7 +50,7 @@ def get_network_from_file(options=None):
     df = pd.read_pickle(f)
     return df
 
-def get_idx_up_down(df):
+def get_idx_up_down1(df):
     for ii in np.arange(df.shape[0]):
         print(ii)
         #get  upstream linkids
@@ -89,7 +89,7 @@ def get_idx_up_down2(df):
 
 
 
-def get_idx_up_down3(df):
+def get_idx_up_down(df):
     upstream_link = np.array(df['upstream_link']) #get  upstream linkids
     #_up1 = np.array([np.min(x) for x in _up])
     link_id = df['link_id'].to_numpy()
@@ -235,6 +235,5 @@ def testadjmat():
     file1.close()
 #    file2.close()
 
-test4()
 
 
