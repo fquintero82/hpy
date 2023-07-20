@@ -103,6 +103,7 @@ def get_network_from_file(options=None):
 
 
 def get_idx_up_down(df):
+    print('indexing')
     upstream_link = np.array(df['upstream_link']) #get  upstream linkids
     #_up1 = np.array([np.min(x) for x in _up])
     link_id = df['link_id'].to_numpy()
@@ -113,7 +114,9 @@ def get_idx_up_down(df):
     idx_downstream_link = df['idx_downstream_link'].to_numpy()
 
     def process_row(ii,upstream_link,link_id,idx,idx_upstream_link,downstream_link,idx_downstream_link):
-        print(ii)
+        
+        if ii % 10000 ==0:
+            print('row %s'%ii)
         _up = upstream_link[ii]
         _mylink = link_id[ii]
         _myidx = idx[ii]
