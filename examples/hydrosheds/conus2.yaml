@@ -1,0 +1,28 @@
+---
+description: model run in conus network
+network: examples/hydrosheds/conus.rvr
+solver: examples/hydrosheds/solver.so
+parameters: examples/hydrosheds/conus.prm
+initial_states: dummy
+init_time: 1199145600
+end_time: 1230768000
+time_step: 3600
+forcings:
+ precipitation:
+  script: src/io/HLM_Binaries.py
+  path: /Dedicated/IFC/users/atmichalek/CONUS/bin/precip/2008/
+  prefix: 
+ evapotranspiration:
+  script: src/io/timeseries1.py
+  path: examples/hydrosheds/timeseries_et.csv
+ temperature:
+  script: src/io/timeseries1.py
+  path: examples/hydrosheds/temperature.csv
+ frozen_ground:
+  script: src/io/timeseries1.py
+  path: examples/hydrosheds/frozenground.csv
+output_file: 
+  script: src/io/out_netcdf1.py
+  path: examples/hydrosheds/output.nc
+
+
