@@ -162,7 +162,7 @@ def get_adjacency_matrix(network:pd.DataFrame,default=False):
 def network_from_rvr_file(rvr_file):
     def get_lid(line:str):
         items = line.split()
-        _lid = int(items[0])
+        _lid = np.int32(items[0])
         _n = int(items[1])
         _uplinks = -1
         if(_n>0):
