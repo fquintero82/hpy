@@ -47,7 +47,12 @@ def get_network_from_file(options=None):
     if os.path.isfile(f)==False:
         print('Error. Network file not found')
         quit()
-    df = pd.read_pickle(f)
+    try:
+        df = pd.read_pickle(f)
+    except AttributeError as e:
+        print('network pickle file created with different version of pandas')
+        print(e)
+        quit()
     return df
 
 def get_idx_up_down1(df):
