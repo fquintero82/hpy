@@ -11,7 +11,7 @@ import yaml
 from utils.params.params_default import get_default_params
 from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
-from utils.network.network import get_default_network
+from utils.network.network import get_default_network, get_network_from_file
 from utils.serialization import save_to_netcdf
 #from io3.forcing import check_forcings
 import importlib.util
@@ -51,7 +51,7 @@ class HLM(object):
         self.init_time = d['init_time']
         self.end_time = d['end_time']
         self.time_step_sec= d['time_step']
-        self.network = get_default_network()
+        self.network = get_network_from_file()
         self.states = get_default_states(self.network)
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
