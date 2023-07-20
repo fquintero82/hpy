@@ -51,7 +51,7 @@ class HLM(object):
         self.init_time = d['init_time']
         self.end_time = d['end_time']
         self.time_step_sec= d['time_step']
-        self.network = get_network_from_file()
+        self.network = get_network_from_file(self.configuration)
         self.states = get_default_states(self.network)
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
