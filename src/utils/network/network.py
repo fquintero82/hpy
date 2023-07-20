@@ -172,6 +172,7 @@ def network_from_rvr_file(rvr_file):
         except ValueError as e:
             print('Error reading rvr file at line %s'%line)
             print(e)
+            quit()
     
     
     def get_uplink(line:str):
