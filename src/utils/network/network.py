@@ -60,7 +60,7 @@ def get_network_from_file(options=None):
         quit()
     if extension =='.rvr':
         prm = options['parameters']
-        df = combine_rvr_prm(f,prm)
+        df = combine_rvr_prm(prm,f)
     
 
 # def get_idx_up_down1(df):
