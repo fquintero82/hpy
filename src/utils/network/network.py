@@ -61,6 +61,7 @@ def get_network_from_file(options=None):
     if extension =='.rvr':
         prm = options['parameters']
         df = combine_rvr_prm(prm,f)
+        return df
     
 
 # def get_idx_up_down1(df):
@@ -121,11 +122,11 @@ def get_idx_up_down(df):
         _mylink = link_id[ii]
         _myidx = idx[ii]
         if(np.array([_up ==-1]).any()):
-            idx_upstream_link[ii]=0
+            idx_upstream_link[ii]=np.array([0],dtype=np.int32)
         if(np.array([_up !=-1]).any()):
             wh = np.where(np.isin(link_id, _up))[0]
             _upidx = idx[wh]
-            idx_upstream_link[ii] = _upidx
+            idx_upstream_link[ii] = np.array(_upidx ,dtype=np.int32)
             downstream_link[wh] = _mylink
             idx_downstream_link[wh]= _myidx
         return True

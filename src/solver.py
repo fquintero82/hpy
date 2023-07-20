@@ -14,17 +14,23 @@ def create_solver(hlm_object):
     #aux zero will be used for inputs
     #first element of f is zero
     f = [0]
-    for i in np.arange(N)+1:
-        coupling_sum = 0
-        if (idx_up[i-1] !=0).any():
-            #print(i)
-            #print(idx_up[i-1])
-            for j in idx_up[i-1]:
-                coupling_sum = coupling_sum + y(j)
-        #print(coupling_sum)
-        f.append(
-             (velocity[i-1] / channel_len_m [i-1]) * (-y(i)+coupling_sum)
-        )
+    try:
+        for i in np.arange(N)+1:
+            coupling_sum = 0
+            if (idx_up[i-1] !=0).any():
+                #print(i)
+                #print(idx_up[i-1])
+                for j in idx_up[i-1]:
+                    coupling_sum = coupling_sum + y(j)
+            #print(coupling_sum)
+            f.append(
+                (velocity[i-1] / channel_len_m [i-1]) * (-y(i)+coupling_sum)
+            )
+    except AttributeError as e:
+        print('Error creating solver from network topology for row %s'%i)
+        print(hlm_object.network.iloc[i])
+        print(e)
+        quit()
     #if file exists, load solver from existing file
     if exists(hlm_object.pathsolver):
         ODE=jitcode(f,module_location=hlm_object.pathsolver)
