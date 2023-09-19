@@ -2,18 +2,24 @@ import nbkode
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from utils.network.network_from_rvr_file import combine_rvr_prm
-from model400names import STATES_NAMES
+from numbalsoda import lsoda,lsoda_sig
+from numba import njit,cfunc
+from numba import numba as nb
+
+#from utils.network.network_from_rvr_file import combine_rvr_prm
+#from model400names import STATES_NAMES
 import time
 
 def test1():
+    start_time = time.time()
     def rhs(t, y):
         return -0.1 * y
     y0 = 1.
     t0 = 0
     solver = nbkode.RungeKutta45(rhs, t0, y0)
-    ts = np.linspace(0, 10, 100)
+    ts = np.linspace(0, 1)
     ts, ys = solver.run(ts)
+    print("--- %s seconds ---" % (time.time() - start_time))
     plt.plot(ts, ys) 
     plt.show()
 
@@ -52,3 +58,39 @@ def test2(t,q,p):
     p=[0.1,0.2]
     solver = nbkode.RungeKutta45(fun, t0, q, params=p)
     ts, ys = solver.step(n=1)
+
+def test3():
+    #https://stackoverflow.com/questions/57706940/solving-ode-with-large-set-of-initial-conditions-in-parallel-through-python
+    start_time = time.time()
+    @cfunc(lsoda_sig)
+    def rhs(t, u,du,p):
+        du[0]=  u[0]-u[0]*u[1]
+        du[1] = u[0]*u[1]-u[1]
+
+    funcptr = rhs.address
+    t_eval = np.linspace(0.0,20.0,201)
+    np.random.seed(0)
+    
+    @nb.njit(parallel=True)
+    def main(n):
+        u1 = np.empty((n,len(t_eval)), np.float64)
+        u2 = np.empty((n,len(t_eval)), np.float64)
+        for i in nb.prange(n):
+            u0 = np.empty((2,), np.float64)
+            u0[0] = np.random.uniform(4.5,5.5)
+            u0[1] = np.random.uniform(0.7,0.9)
+            usol, success = lsoda(funcptr, u0, t_eval, rtol = 1e-8, atol = 1e-8)
+            u1[i] = usol[:,0]
+            u2[i] = usol[:,1]
+        return u1, u2
+
+    u1, u2 = main(10000)
+    usol, success = lsoda(funcptr, u0, t_eval, data = data)
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(usol)
+
+def test4():
+    @cfunc(lsoda_sig)
+    def rhs(t, u,du,p):
+        du[0]=  u[0]-u[0]*u[1]
+test3()
