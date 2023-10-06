@@ -122,6 +122,7 @@ def get_idx_up_down(df):
         _mylink = link_id[ii]
         _myidx = idx[ii]
         if(np.array([_up ==-1]).any()):
+            #por definicion, idx_upstream_link es cero en las cabeceras
             idx_upstream_link[ii]=np.array([0],dtype=np.int32)
         if(np.array([_up !=-1]).any()):
             wh = np.where(np.isin(link_id, _up))[0]
@@ -248,8 +249,9 @@ def test3():
 def test4():
     rvr_file ='examples/hydrosheds/conus.rvr'
     df = network_from_rvr_file(rvr_file)
-    get_idx_up_down3(df)
-    
+    get_idx_up_down(df)
+
+
 
 def testadjmat():
     network = get_default_network()
@@ -261,5 +263,5 @@ def testadjmat():
     file1.close()
 #    file2.close()
 
-
+# test3()
 

@@ -1,4 +1,4 @@
-from routing import linear_velocity
+# from routing import linear_velocity
 from utils.network.network import combine_rvr_prm
 from test_dataframes import getDF_by_size
 from model400names import STATES_NAMES
@@ -181,10 +181,15 @@ def transfer6(hlm_object,array):
     print(time.time()-t)
 
 def transfer7():
-    t = time.time()
     
-    network = get_default_network()
+    # network = get_default_network()
+    f = 'examples/hydrosheds/conus.pkl'
+    # f = 'examples/small/small.pkl'
+    # f = 'examples/cedarrapids1/367813.pkl'
+    network = pd.read_pickle(f)
+
     nlinks = network.shape[0]
+    print(nlinks)
     initial_state = np.ones(shape=(nlinks)) * network['area_hillslope'] /  network['drainage_area']
   
     routing_order = network.loc[:,['idx','idx_downstream_link','drainage_area']].copy()
@@ -200,6 +205,10 @@ def transfer7():
                 input[idxd[ii]-1]+= input[idxu[ii]-1]
         return(input)
     
-
-    input = initial_state
+    input = initial_state.to_numpy()
+    t = time.time()
     out = fun1(nlinks,input,idxd,idxu)
+    print(time.time()-t)
+
+transfer7()
+#@jit(nopython=True)
