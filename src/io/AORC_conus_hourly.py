@@ -5,7 +5,8 @@ from datetime import datetime
 import pytz
 from os.path import isfile
 from netCDF4 import Dataset
-import geopandas as gpd
+#import geopandas as gpd
+import xarray as xr
 
 
 dir = '/Users/felipe/tmp/aorc/'
@@ -14,17 +15,20 @@ prefix = 'AORC_APCP_2008'
 prefix = ''
 
 
-def get_values(time: int,options=None):
+def get_values(unixtime: int,options=None):
     lid = None
     val = 0
-    root,varname = access_file(time,options)
-    if root is None:
-        print('Error. Could not read netcdf file in yaml file')
-        quit()
-    if root is not None:
+    #root,varname = access_file(time,options)
+    ncfile = get_ncfile(time,options)
+    # if root is None:
+    #     print('Error. Could not read netcdf file in yaml file')
+    #     quit()
+    if ncfile is not None:
         lut = get_lid_xy(options)
-        nc2geopandas(root,varname,time)
-        lid, val = extract_vals_from_var(root,varname,time,lut)
+        #nc2geopandas(root,varname,time)
+        d1 = datetime.fromtimestamp(unixtime,pytz.UTC).isoformat()
+        d1 = d1.split('+')[0]
+        lid, val = nc2xr(ncfile,lut,d1)
     return lid,val
 
 def get_relative_time(unixtime:int):
@@ -33,29 +37,44 @@ def get_relative_time(unixtime:int):
     hours_elapsed = round((unixtime - begin)/3600)
     return hours_elapsed
 
-def access_file(time:int, options=None):
+
+def get_ncfile(time:int, options=None):
+    #finds what aorc netcdf file should be open based on the unixtime of the time simulation
     root = None
     varname = None
     if options is not None:
         dir = options['path']
     if 'prefix' in list(options.keys()):
         prefix = options['prefix']
-    if 'varname' in list(options.keys()):
-        varname = options['varname']
-    if varname is None:
-        print('Error. precipitation varname not in yaml file')
-        quit()
     d1 = datetime.fromtimestamp(time,pytz.UTC)
     month = '{:02d}'.format(d1.month)
     filein = os.path.join(dir,prefix+str(month)+'.nc')
-    try:    
-        root= Dataset(filein, mode='r')
-    except FileNotFoundError as e:
-        print(e)
-    if varname not in root.variables:
-        print('Error. variable {varname} not found in {filein}'.format(varname,filein))
-        quit()
-    return root, varname
+    return filein
+
+# def access_file(time:int, options=None):
+#     #reads the aorc netcdf file that should be opened based on the unixtime of the time simulation
+#     root = None
+#     varname = None
+#     if options is not None:
+#         dir = options['path']
+#     if 'prefix' in list(options.keys()):
+#         prefix = options['prefix']
+#     if 'varname' in list(options.keys()):
+#         varname = options['varname']
+#     if varname is None:
+#         print('Error. precipitation varname not in yaml file')
+#         quit()
+#     d1 = datetime.fromtimestamp(time,pytz.UTC)
+#     month = '{:02d}'.format(d1.month)
+#     filein = os.path.join(dir,prefix+str(month)+'.nc')
+#     try:    
+#         root= Dataset(filein, mode='r')
+#     except FileNotFoundError as e:
+#         print(e)
+#     if varname not in root.variables:
+#         print('Error. variable {varname} not found in {filein}'.format(varname,filein))
+#         quit()
+#     return root, varname
 
 def get_lid_xy(options=None):
     fcentroids = None
@@ -100,25 +119,39 @@ def get_col_row(nc:Dataset,df:pd.DataFrame):
     return df
 
 
-def nc2geopandas(nc:Dataset,varname:str,t:int):
-    idx_time = get_relative_time(t)
-    #idx_time = np.argwhere(nc.variables["time"][:]==reltime)
-    data = nc[varname][idx_time,:,:]
-    gdf = gpd.GeoDataFrame(data, crs=nc.crs)
-    #values = gdf.loc[gdf.geometry.contains(coordinates)][column_name]
+# def nc2geopandas(nc:Dataset,varname:str,t:int):
+#     idx_time = get_relative_time(t)
+#     #idx_time = np.argwhere(nc.variables["time"][:]==reltime)
+#     data = nc[varname][idx_time,:,:]
+#     gdf = gpd.GeoDataFrame(data, crs=nc.crs)
+#     #values = gdf.loc[gdf.geometry.contains(coordinates)][column_name]
 
-def extract_vals_from_var(nc:Dataset,
-                          varname:str,
-                          t:int,
-                          df:pd.DataFrame):
-    x = df['x'].to_numpy()
-    y = df['y'].to_numpy()
+def nc2xr(ncfile:str,df:pd.DataFrame,t:str):
+    nc = xr.open_dataset(ncfile)
     lid = df['lid'].to_numpy()
-    idx_time = time2hours(t)
-    #idx_time = np.argmin(np.abs(nc.variables["time"][:] - t))
-    # Return a np.array with the netcdf data
-    pass
-    #return lid,val
+    crd_ix = df.set_index('lid').to_xarray()
+    out = nc.sel(lon=crd_ix.x,lat=crd_ix.y,time=t,method='nearest')
+    val = out['APCP'].to_numpy()
+    return lid,val
+    
+
+# def extract_vals_from_var(nc:Dataset,
+#                           varname:str,
+#                           t:int,
+#                           df:pd.DataFrame):
+#     x = df['x'].to_numpy()
+#     y = df['y'].to_numpy()
+#     lid = df['lid'].to_numpy()
+#     idx_time = time2hours(t)
+#     #idx_time = np.argmin(np.abs(nc.variables["time"][:] - t))
+#     # Return a np.array with the netcdf data
+#     pass
+#     #return lid,val
+
+def test2():
+    ncfile = '/Users/felipe/tmp/aorc/AORC_APCP_200801.nc'
+    nc = xr.open_dataset(ncfile)
+    val = nc.sel(lon=125.1,lat=52.5,time='2008-01-01T01:00:00',method='nearest').to_array()
 
 def test():
     import yaml

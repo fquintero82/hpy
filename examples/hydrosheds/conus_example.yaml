@@ -1,7 +1,7 @@
 ---
 description: model run in conus network
 network: examples/hydrosheds/conus.pkl
-solver: examples/hydrosheds/solver.so
+solver: examples/hydrosheds/ode.so
 parameters: examples/hydrosheds/conus.prm
 initial_states: dummy
 init_time: 1199145600

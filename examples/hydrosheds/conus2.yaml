@@ -1,6 +1,6 @@
 ---
 description: model run in conus network
-network: examples/hydrosheds/conus.rvr
+network: examples/hydrosheds/conus.pkl
 solver: examples/hydrosheds/solver.so
 parameters: examples/hydrosheds/conus.prm
 initial_states: dummy
