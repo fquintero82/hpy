@@ -2,26 +2,34 @@ import nbkode
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from numbalsoda import lsoda,lsoda_sig
+# from numbalsoda import lsoda,lsoda_sig
 from numba import njit,cfunc
 from numba import numba as nb
+from utils.network.network import get_default_network
+from hlm import HLM
 
 #from utils.network.network_from_rvr_file import combine_rvr_prm
 #from model400names import STATES_NAMES
 import time
 
 def test1():
-    start_time = time.time()
     def rhs(t, y):
         return -0.1 * y
+    
     y0 = 1.
     t0 = 0
-    solver = nbkode.RungeKutta45(rhs, t0, y0)
-    ts = np.linspace(0, 1)
-    ts, ys = solver.run(ts)
+    # solver = nbkode.RungeKutta45(rhs, t0, y0)
+    ts = [0,.5,1]
+    start_time = time.time()
+    solver = nbkode.ForwardEuler(rhs, t0, y0)
+
+    # ts, ys = solver.run(ts)
+    solver.skip(upto_t=1)
+    print(solver.t)
+    print(solver.y)
     print("--- %s seconds ---" % (time.time() - start_time))
-    plt.plot(ts, ys) 
-    plt.show()
+    # plt.plot(ts, ys) 
+    # plt.show()
 
 def test2(t,q,p):
     def fun(t,q,p): #t in minutes, q in m3/h
@@ -93,4 +101,28 @@ def test4():
     @cfunc(lsoda_sig)
     def rhs(t, u,du,p):
         du[0]=  u[0]-u[0]*u[1]
-test3()
+
+def test5():
+    hlm_object = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    # config_file = 'examples/hydrosheds/conus2.yaml'
+
+    hlm_object.init_from_file(config_file)
+    N = hlm_object.network.shape[0]
+    channel_len_m = hlm_object.network['channel_length'].to_numpy()
+    velocity = 3600*hlm_object.params['river_velocity'].to_numpy() #m/h
+    y0 = np.ones(shape=(N))
+
+    def rhs(t, y,p):
+        return p * -y
+    
+    t = time.time()
+    ts = [0,.1,1]
+    t0 = 0
+
+    solver = nbkode.RungeKutta45(rhs, t0, y0,params=channel_len_m/velocity)
+    ts, ys = solver.run(ts)
+        # print(ys)
+    print("--- %s seconds ---" % (time.time() - t))
+
+test5()

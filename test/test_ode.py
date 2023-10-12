@@ -3,14 +3,14 @@ from matplotlib import pyplot as plt
 import numpy as np
 from test_dataframes import getTestDF1, getTestDF2
 import pandas as pd
-from utils.network.network_from_rvr_file import combine_rvr_prm
+from utils.network.network import combine_rvr_prm
 from model400names import STATES_NAMES
 import time
-import tensorflow as tf
-import tensorflow_probability as tfp
+# import tensorflow as tf
+# import tensorflow_probability as tfp
 from utils.network.network import get_default_network
 from hlm import HLM
-from PyDSTool import *
+# from PyDSTool import *
 
 # http://www.stochasticlifestyle.com/comparison-differential-equation-solver-suites-matlab-r-julia-python-c-fortran/
 def test1():
@@ -430,12 +430,32 @@ def test_tf1():
     y0 = results.states[0]  # == dot(matrix_exp(A * t0), y_init)
     y1 = results.states[1]  # == dot(matrix_exp(A * t1), y_init)
 
-def test_tf2():
-    def fun(q,t,velocity,channel_len_m,idx_up): #t in minutes, q in m3/h
-    #print(type(q))
-    q_aux = np.concatenate(([0],q))
-    q_upstream = np.zeros(q.shape)
-    q_upstream = np.array([np.sum(q_aux[x]) for x in idx_up]) #m3/h
-    velocity *=60*60 #m/s to m/h
-    dq_dt = (1/channel_len_m )* velocity * (-1*q_aux[1:] + q_upstream)
-    return dq_dt
+
+
+def test11():
+    hlm_object = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    hlm_object.init_from_file(config_file)
+    N = hlm_object.network.shape[0]
+    channel_len_m = hlm_object.network['channel_length'].to_numpy()
+    velocity = 3600*hlm_object.params['river_velocity'].to_numpy() #m/h
+    q = [1]
+
+    def fun(t,q,velocity,channel_len_m): #t in minutes, q in m3/h
+        velocity *=60*60 #m/s to m/h
+        dq_dt = (1/channel_len_m )* velocity * (-q)
+        return dq_dt
+    
+    t = time.time()
+    for i in range(10):
+        print(i)
+        res = solve_ivp(fun,
+            t_span=(0,1),
+            y0=q*3600,
+            args=(velocity[i],channel_len_m[i])
+            )
+        print(res)
+    print("--- %s seconds ---" % (time.time() - t))
+
+test11()     
+    
