@@ -2,7 +2,7 @@ from utils.network.network import get_network_from_file
 import pandas as pd
 import numpy as np
  
-f = 'examples/small/small.pkl'
+f = 'examples/hydrosheds/conus.pkl'
 network = pd.read_pickle(f)
 n = len(network)
 vals = np.zeros(n+1)

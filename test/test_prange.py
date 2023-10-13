@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from numba import njit, prange
-
+import time
 
 def isleaf(_up:np.ndarray)->bool:
     out=False
@@ -119,5 +119,61 @@ def run():
     # print(vals)
     # print(resolved)
 
-run()
+def test_loop():
+    f = 'examples/hydrosheds/conus.pkl'
+    # f = 'examples/small/small.pkl'
+    # f = 'examples/cedarrapids1/367813.pkl'
+
+    network = pd.read_pickle(f)
+    n = len(network)
+    
+    _idxup = network['idx_upstream_link'].to_numpy() #get  upstream linkids
+    idxup = [np.array(x,dtype=np.int32)for x in _idxup] #list
+    @njit(parallel=True)
+    def test1(n):
+        out = np.zeros(n)
+        for i in prange(n):
+            # x = idxup[i]
+            out[i]=1
+    # test1(n)            
+    
+    
+    @njit(parallel=True)
+    def test2(idxup:list):
+        n = len(idxup)
+        out = np.zeros(n)
+        for i in prange(n):
+            x = idxup[i]
+            out[i]= len(x)
+
+    @njit
+    def test3(idxup:list):
+        n = len(idxup)
+        out = np.zeros(n)
+        for i in range(n):
+            x = idxup[i]
+            out[i]= len(x)
+
+    def test4(idxup:list):
+        n = len(idxup)
+        out = np.zeros(n)
+        for i in range(n):
+            x = idxup[i]
+            out[i]= len(x)
+   
+    def test5(idxup:list):
+        n = len(idxup)
+        out = np.zeros(n)
+        for i in np.arange(n):
+            x = idxup[i]
+            out[i]= len(x)    
+    # t = time.time()
+    # print(idxup.dtype) #no le gustan numpy de tipo object
+    # test3(idxup)
+    # print(time.time()-t)
+
+    t = time.time()
+    test5(idxup)
+    print(time.time()-t)
+test_loop()
 
