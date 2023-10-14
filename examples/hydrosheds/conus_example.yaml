@@ -25,6 +25,6 @@ forcings:
   path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
 output_file: 
   script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
-  path: /Users/felipe/hpy/hpy/examples/cedarrapids1/out/2008.nc
+  path: /Users/felipe/hpy/hpy/examples/hydrosheds/conus2008.nc
 
 

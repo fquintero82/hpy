@@ -37,7 +37,7 @@ class HLM(object):
         self.ODESOLVER =None
 
     
-    def init_from_file(self,config_file:str):
+    def init_from_file(self,config_file:str,option_solver=True):
         with open(config_file) as stream:
             try:
                 d = yaml.load(stream,Loader=Loader)
@@ -57,7 +57,8 @@ class HLM(object):
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
         self.pathsolver = d['solver']
-        # self.ODESOLVER = create_solver(self)
+        if option_solver:
+            self.ODESOLVER = create_solver(self)
         
 
         ...

@@ -33,13 +33,18 @@ def create_solver(hlm_object):
         quit()
     #if file exists, load solver from existing file
     if exists(hlm_object.pathsolver):
+        print('loading solver from %s',hlm_object.pathsolver)
         ODE=jitcode(f,module_location=hlm_object.pathsolver)
     else:
+        print('creating new solver')
         ODE = jitcode(f)
-        ODE.set_integrator("dopri5")
+        # ODE.set_integrator("dopri5")
+        print('saving solver to %s',hlm_object.pathsolver)
         ODE.save_compiled(hlm_object.pathsolver)
-
-    #ODE.set_integrator("dopri5")
+    
+    print('setting solver integrator')
+    ODE.set_integrator("dopri5")
+    print('completed solver integrator')
     return ODE
 
 # def create_acum(hlm_object):

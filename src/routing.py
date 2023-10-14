@@ -232,17 +232,22 @@ def transfer1(hlm_object):
 
 
 def transfer2(hlm_object):
-    t = time.time()
-    N = hlm_object.network.shape[0]
-    initial_state = np.zeros(shape=(N+1))
-    initial_state[1:] = hlm_object.states['volume'].to_numpy()
-    hlm_object.ODESOLVER.set_initial_value(initial_state,0.0)
-    time1 = hlm_object.time_step_sec / 3600 #hours
-    out = hlm_object.ODESOLVER.integrate(time1)[1:]#value 0 is auxiliary
-    hlm_object.states['volume'] = out
-    hlm_object.states['discharge'] = out / hlm_object.network['channel_length'] * hlm_object.params['river_velocity']
-    #hlm_object.states['discharge'] = out / hlm_object.time_step_sec
-    print('discharge routing in %f' % (time.time()-t))
+    try:
+        t = time.time()
+        N = hlm_object.network.shape[0]
+        initial_state = np.zeros(shape=(N+1))
+        initial_state[1:] = hlm_object.states['volume'].to_numpy()
+        hlm_object.ODESOLVER.set_initial_value(initial_state,0.0)
+        time1 = hlm_object.time_step_sec / 3600 #hours
+        out = hlm_object.ODESOLVER.integrate(time1)[1:]#value 0 is auxiliary
+        hlm_object.states['volume'] = out
+        hlm_object.states['discharge'] = out / hlm_object.network['channel_length'] * hlm_object.params['river_velocity']
+        #hlm_object.states['discharge'] = out / hlm_object.time_step_sec
+        print('discharge routing in %f' % (time.time()-t))
+    except AttributeError as e:
+        print('ODE SOLVER not defined or loaded')
+        print(e)
+        quit()
 
 def transfer3(hlm_object):
     t = time.time()

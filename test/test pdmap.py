@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
+import time
 
 # f = 'examples/hydrosheds/conus.pkl'
-f = 'examples/small/small.pkl'
-# f = 'examples/cedarrapids1/367813.pkl'
+# f = 'examples/small/small.pkl'
+f = 'examples/cedarrapids1/367813.pkl'
 
 network = pd.read_pickle(f)
 n = len(network)
@@ -39,23 +40,31 @@ def get_count_upstream_links(x):
 test = idxup.map(get_count_upstream_links)
 print(test)
 
-def get_sum_resolved_up(idxup,res):
+def get_sum_resolved_up1(idxup,res):
     x2 = np.array(idxup,dtype=np.int32)
-    print(x2)
-    out = np.array(x2 ==-1).any()
+    res1=res.to_numpy()
+    out = np.array(x2 ==0).any()
     if out == True:
         return 0
-    # print(np.array(res.iloc[x2]))
-    s = np.sum(np.array(res.loc[x2]))
+    s = np.sum(np.array(res1[x2-1]))    
     return s
 
+t = time.time()
 test = idxup.map(lambda x: get_sum_resolved_up(x,network['resolved']))
+print(time.time()-t)
+
+def get_sum_resolved_up2(idxup,res):
+    out = np.zeros(len(res))
+    x2 = np.array([np.array(x,dtype=np.int32) for x in idxup])
+    wh = np.array(x2 ==0).any()
+    wh = ~wh
+    res1=res.to_numpy()
+    s = np.sum(np.array(res1[x2-1]))    
+    return s
+
+t = time.time()
+res = network['resolved']
+test = get_sum_resolved_up2(idxup,network['resolved'])
+print(time.time()-t)
 
 
-idxup1 = network['resolved']*out_check_no_upstream_links
-a =  ~out_check_no_upstream_links
-idxup[out_check_no_upstream_links]
-idxup1 = (idxup==-1).any()
-np.sum(network['resolved'].iloc[[2,3]])
-network['resolved'].iloc[[2,3]]
-network['resolved'].iloc[-1]
