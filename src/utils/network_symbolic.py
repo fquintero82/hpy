@@ -1,6 +1,5 @@
-# from sympy import *
 import numpy as np
-# from sympy.stats import Exponential
+import pandas as pd
 from utils.network.network import get_default_network
 import sys
 from math import factorial
@@ -18,18 +17,6 @@ def test_eval():
         var+= '+ x[%d]'%i
     x=np.ones(N)
     eval(var)
-
-def process_link1(link_id):
-    N = len(network)
-    X =symbols('x0:%d'%N)
-    P =symbols('p0:%d'%N)
-    T =symbols('t')
-    depth = 10
-    link_id = 393217
-    idx = network.loc[link_id,'idx']
-    expr = X[idx]* 2.718**(-P[idx]*T)
-    # expr.evalf(subs={X[idx]: 2,P[idx]:1,t:1})
-
 
 def process_unit(idx:np.int32,
                  idx_upstream_links:np.ndarray,
@@ -49,18 +36,32 @@ def process_unit(idx:np.int32,
         for new_idx in myidx_upstream_links:
             process_unit(new_idx,idx_upstream_links,order+1,expr)
     
+def test_process_unit():
+    network = get_default_network()
+    N = len(network)
+    link_id = 367813
+    idx = 32715
+    order = 1
+    idx_upstream_links = network['idx_upstream_link'].to_numpy()
+    expr = ['0']
+    count = 0
+    process_unit(idx,idx_upstream_links,order,expr)
+    print(len(expr))
+    X = np.ones(N)
+    T = 1
+    P = np.ones(N)
+    out = eval(expr[1])
 
-network = get_default_network()
-N = len(network)
-link_id = 367813
-idx = 32715
-order = 1
-idx_upstream_links = network['idx_upstream_link'].to_numpy()
-expr = ['0']
-count = 0
-process_unit(idx,idx_upstream_links,order,expr)
-print(len(expr))
-X = np.ones(N)
-T = 1
-P = np.ones(N)
-out = eval(expr[1])
+def process_all(network:pd.DataFrame):
+    N = len(network)
+    df = pd.DataFrame({'formula':np.zeros(shape=(N,))},dtype=object)
+    out = np.zeros(shape=(N,),dtype=object)
+    df.index = network.index
+    idx_upstream_links = network['idx_upstream_link'].to_numpy()
+    idxs = network['idx'].to_numpy()
+    for i in np.arange(N):
+        print(i)
+        order = 1
+        expr = []
+        process_unit(idxs[i],idx_upstream_links,order,expr)
+        out[i]=np.array(expr)
