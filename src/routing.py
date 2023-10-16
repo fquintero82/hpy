@@ -454,4 +454,22 @@ def transfer5(hlm_object):
 #     del bp,bet,bswe,bsf,bst,bsub,bgw,routing_order,idxd,idxu
 #     del f, vol,outvol, discharge
 #     print(time.time()-t)
-    
+
+def transfer6(hlm_object):
+    try:
+        t = time.time()
+        N = hlm_object.network.shape[0]
+        initial_state = hlm_object.states['discharge'].to_numpy()
+        # hlm_object.time_step_sec
+        out = np.zeros(shape=(N,))
+        expr = hlm_object.network['expression'].to_numpy()
+        P =  hlm_object.params['river_velocity'] / hlm_object.network['channel_length']
+        d = {'X':initial_state,'P':P, 'T':hlm_object.time_step_sec}
+        for i in np.arange(N):
+            out[i] = eval(expr[i],d)
+        hlm_object.states['discharge'] = out
+        print('discharge routing in %f' % (time.time()-t))
+    except AttributeError as e:
+        print('error symbolic evaluation')
+        print(e)
+        quit()
