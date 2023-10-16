@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from utils.network.network import get_default_network
+from utils.network.network import get_default_network, get_network_from_file
 import sys
 from math import factorial
 import numba
@@ -20,25 +20,8 @@ def test_eval():
     x=np.ones(N)
     eval(var)
 
-def process_unit(idx:np.int32,
-                 idx_upstream_links:np.ndarray,
-                 order:np.int32,
-                 expr:list)->str:
-    # expr = 'X[{idx}] * 2.718 ** (-P[{idx}] * T)'
-    myexpr = '1/factorial({order}-1) * P**({order}-1) * X[{idx}] * T**({order}-1) * 2.718 ** (-P[{idx}] * T)'
-    # myexpr = 'X[{idx}] * P[{idx}] * 2.718 ** (-P[{idx}] * T) * ({order} * 1/factorial({order}-1) * (T * P[{idx}])**({order}-1)
-    
-    myexpr = myexpr.format(order=order,idx=idx)
-    # expr = expr + myexpr
-    expr.append(myexpr)
-    # print(order)
-    # print(expr)
-    myidx_upstream_links = idx_upstream_links[idx - 1]
-    if (myidx_upstream_links!=0).any():
-        for new_idx in myidx_upstream_links:
-            process_unit(new_idx,idx_upstream_links,order+1,expr)
 
-def process_unit2(idx:np.int32,
+def process_unit(idx:np.int32,
                  idx_upstream_links:np.ndarray,
                  order:np.int32,
                  expr:list)->str:
@@ -99,7 +82,7 @@ def process_all_multiprocessing(network:pd.DataFrame):
     jobs = []
     for idx in _idxs:
         order=1
-        j = Process(target=process_unit2,args=(idx,idx_upstream_link,order,[]))
+        j = Process(target=process_unit,args=(idx,idx_upstream_link,order,[]))
         jobs.append(j)
     for j in jobs:
         j.start()
@@ -109,7 +92,8 @@ def process_all_multiprocessing(network:pd.DataFrame):
 def test_process_all_multiprocessing():
     freeze_support()
     t = time.time()
-    process_all_multiprocessing(get_default_network())
+    network = get_network_from_file('examples/cedarrapids1/367813.pkl')
+    process_all_multiprocessing(network)
     print(time.time()-t)
 
 test_process_all_multiprocessing()
