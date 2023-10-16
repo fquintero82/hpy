@@ -34,8 +34,8 @@ def test1():
 
 def test2():
     instance = HLM()
-    config_file = 'examples/cedarrapids1/cedar_example2.yaml'
-    instance.init_from_file(config_file)
+    config_file = 'examples/cedarrapids1/cedar_example_windows.yaml'
+    instance.init_from_file(config_file,option_solver=False)
     instance.advance()
 
 def test3():

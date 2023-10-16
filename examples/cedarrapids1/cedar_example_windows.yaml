@@ -8,21 +8,13 @@ init_time: 1207008000
 end_time: 1214870400
 time_step: 3600
 forcings:
- precipitation:
-  script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
-  path: /Users/felipe/tmp/st4_2008/
-  prefix: iowa_
- evapotranspiration:
-  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
-  path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv
- temperature:
-  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
-  path: /Users/felipe/hio/hio/examples/timeseries1/temperature.csv
- frozen_ground:
-  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
-  path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
+  precipitation:
+  temperature:
+  evapotranspiration:
+  frozen_ground:
+  discharge:
 output_file: 
-  script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
-  path: /Users/felipe/hpy/hpy/examples/cedarrapids1/out/2008.nc
+  script: E:/projects/hpy/src/io/out_netcdf1.py
+  path: E:/projects/hpy/examples/cedarrapids1/2008_win.nc
 
 

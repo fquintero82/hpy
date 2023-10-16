@@ -48,6 +48,6 @@ def check_yaml1(configuration):
                 print('output_file not included in configuration file')
                 quit()
 
-        if configuration['solver'] is None:
-                print('a path to save the ode solver (e.g. examples/ode.so) must be provided in the configuration file')
-                quit()
+        # if configuration['solver'] is None:
+        #         print('a path to save the ode solver (e.g. examples/ode.so) must be provided in the configuration file')
+        #         quit()
