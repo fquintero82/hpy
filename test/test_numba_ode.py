@@ -7,9 +7,7 @@ from numba import njit,cfunc
 from numba import numba as nb
 from utils.network.network import get_default_network
 from hlm import HLM
-
 #from utils.network.network_from_rvr_file import combine_rvr_prm
-#from model400names import STATES_NAMES
 import time
 
 def test1():
@@ -117,11 +115,16 @@ def test5():
         return p * -y
     
     t = time.time()
-    ts = [0,.1,1]
+    ts = [1]
     t0 = 0
 
-    solver = nbkode.RungeKutta45(rhs, t0, y0,params=channel_len_m/velocity)
+    # solver = nbkode.RungeKutta45(rhs, t0, y0,params=channel_len_m/velocity)
+    # solver = nbkode.ForwardEuler(rhs, t0, y0,params=channel_len_m/velocity)
+    solver = nbkode.RungeKutta23(rhs, t0, y0,params=channel_len_m/velocity)
+
+    
     ts, ys = solver.run(ts)
+
         # print(ys)
     print("--- %s seconds ---" % (time.time() - t))
 
