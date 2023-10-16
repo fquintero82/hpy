@@ -63,46 +63,9 @@ def get_network_from_file(options=None):
         df = combine_rvr_prm(prm,f)
         return df
     
-
-# def get_idx_up_down1(df):
-#     for ii in np.arange(df.shape[0]):
-#         print(ii)
-#         #get  upstream linkids
-#         _up = df.iloc[ii]['upstream_link'] 
-#         #get  my linkid
-#         _mylink = df.iloc[ii]['link_id']
-#         #get my index
-#         _myidx = df.iloc[ii]['idx']
-#         if(np.array([_up ==-1]).any()): #if no upstream links
-#             # for mylink, set the idx_upstream column
-#             df.iloc[ii]['idx_upstream_link']=np.array([0],dtype=np.int32) #this is necesary for ode evaluation
-#         if(np.array([_up !=-1]).any()): #if upstream links
-#              #get the index of upstream links
-#             _upidx = df.loc[_up]['idx'].to_numpy()
-#             # for mylink, set the idx_upstream column
-#             #df.iloc[ii]['idx_upstream_link']=_upidx 
-#             df.iloc[ii]['idx_upstream_link']=np.array(_upidx ,dtype=np.int32)
-#             #for the upstream links,set their downstream link (mylink)
-#             df.loc[_up,'downstream_link'] = _mylink 
-#             #for the upstream links, set  their idx_downstream
-#             df.loc[_up,'idx_downstream_link'] = _myidx 
-
-
-# def get_idx_up_down2(df):
-#     # Get the index of upstream links.
-#     #df['idx_upstream_link'] = df['upstream_link'].apply(lambda x: df.loc[x]['idx'].to_numpy() if x != -1 else np.array([0]))
-#     df['idx_upstream_link'] = df['upstream_link'].apply(lambda x: df.loc[x]['idx'].to_numpy() if min(x) != -1 else np.array([0]))
-
-#     # Set the downstream link and idx_downstream for upstream links.
-#     up_idxs = df['idx_upstream_link'].values
-#     down_links = df['link_id'].values
-#     for i in range(len(df)):
-#         if up_idxs[i] != 0:
-#             df.loc[up_idxs[i], 'downstream_link'] = down_links[i]
-#             df.loc[up_idxs[i], 'idx_downstream_link'] = i
-
-
-
+def update_network_pickle(network:pd.DataFrame,fileout:str):
+    network.to_pickle(fileout)
+    
 def get_idx_up_down(df):
     print('indexing')
     upstream_link = np.array(df['upstream_link']) #get  upstream linkids
@@ -148,21 +111,7 @@ def get_idx_up_down(df):
     #pool.apply_async(process_row,args)
     #result = pool.starmap(process_row,args)
 
-def get_adjacency_matrix(network:pd.DataFrame,default=False):
 
-    if default==False:
-        nlinks = len(network)
-        #A = np.eye(nlinks,dtype=np.byte)*-1
-        A = np.eye(nlinks,dtype=np.float32)*-1
-        for ii in np.arange(nlinks):
-            idx_up = network.iloc[ii]['idx_upstream_link']
-            if np.array([idx_up !=-1]).any():
-                A[ii,(idx_up-1).tolist()]=1
-        return A
-    else:
-        file1 = open('examples/cedarrapids1/367813_adj.pkl','rb')
-        return pickle.load(file1)
-        file1.close()
 
 def network_from_rvr_file(rvr_file):
     def get_lid(line:str):
@@ -263,5 +212,5 @@ def testadjmat():
     file1.close()
 #    file2.close()
 
-# test3()
+# test1()
 

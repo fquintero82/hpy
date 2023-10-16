@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import transfer3,transfer2,transfer4,transfer5
+from routing import transfer3,transfer2,transfer4,transfer5,transfer6
 from solver import create_solver
 from yaml import Loader
 import yaml
@@ -107,7 +107,8 @@ class HLM(object):
         print(self.time)
         self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
-        transfer2(self) # volume, discharge with ode
+        # transfer2(self) # volume, discharge with ode
+        transfer6(self) # volume, discharge symbolic
         transfer5(self) #basin vars
         save_to_netcdf(self.states,self.params,self.time,self.outputfile)
         self.time += self.time_step_sec

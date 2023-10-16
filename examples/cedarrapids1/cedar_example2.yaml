@@ -1,6 +1,6 @@
 ---
 description: experiment to test hlm with yaml files
-network: examples/cedarrapids1/367813.rvr
+network: examples/cedarrapids1/367813.pkl
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
 init_time: 0
