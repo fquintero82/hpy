@@ -65,3 +65,15 @@ def process_all(network:pd.DataFrame):
         expr = []
         process_unit(idxs[i],idx_upstream_links,order,expr)
         out[i]=np.array(expr)
+
+def process_all_cuda(idx_upstream_links,idxs):
+    N = len(network)
+    out = np.zeros(shape=(N,),dtype=object)
+    # idx_upstream_links = network['idx_upstream_link'].to_numpy()
+    # idxs = network['idx'].to_numpy()
+    for i in np.arange(N):
+        print(i)
+        order = 1
+        expr = []
+        process_unit(idxs[i],idx_upstream_links,order,expr)
+        out[i]=np.array(expr)
