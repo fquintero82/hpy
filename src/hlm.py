@@ -16,6 +16,7 @@ from utils.serialization import save_to_netcdf
 #from io3.forcing import check_forcings
 import importlib.util
 from utils.check_yaml import check_yaml1
+import time as mytime
 
 class HLM(object):
     """Creates a new HLM model """
@@ -77,7 +78,8 @@ class HLM(object):
         self.time_step=time_step
 
     def set_forcings(self):
-        print('reading forcings')
+        # print('reading forcings')
+        t = mytime.time()
         modelforcings = list(self.forcings.columns)[1:]
         config_forcings = list(self.configuration['forcings'].keys())
         for ii in range(len(modelforcings)):
@@ -100,7 +102,7 @@ class HLM(object):
                     except Exception as e:
                         print(e)
                         quit()
-        print('forcings loaded')
+        print('forcings loaded in {x} sec'.format(x=mytime.time()-t))
                 
     
     def advance_one_step(self):

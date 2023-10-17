@@ -3,9 +3,10 @@ import numpy as np
 from  os.path import isfile
 from netCDF4 import Dataset
 from model400names import CF_UNITS , STATES_NAMES, PARAM_NAMES
-
+import time as mytime
 
 def save_to_netcdf(states:pd.DataFrame,params:pd.DataFrame,time:int,filename:str):
+    t = mytime.time()
     if isfile(filename) == False:
         create_empty_ncdf(states,params,filename)
     try:    
@@ -39,6 +40,7 @@ def save_to_netcdf(states:pd.DataFrame,params:pd.DataFrame,time:int,filename:str
         print('NETCDF file is corrupted')
         print('Delete the file and restart')
         quit()
+    print('saved to netcdf in {x} sec'.format(x=mytime.time()-t))
 
 def create_empty_ncdf(states:pd.DataFrame,params:pd.DataFrame,filename:str):
     try:

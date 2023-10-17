@@ -5,13 +5,15 @@ from model400names import PARAM_NAMES,STATES_NAMES,FORCINGS_NAMES
 from utils.network.network import NETWORK_NAMES
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+import time as mytime
 
 def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame,
     time_step_sec:int):
-
+    
+    t1 = mytime.time()
     DT = time_step_sec / 60. #minutes
     print('running runoff')
     if check_input_names(states=states,forcings=forcings,params=params,network=network)==False:
@@ -119,7 +121,7 @@ def runoff1(states:pd.DataFrame,
     segs_in_DT = DT * 60.
     states['volume'] += (out2 + out3 + out4) * network['area_hillslope'] #[m]*[m2]  = [m3]
     #states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
-    print('completed runoff')
+    print('completed runoff in %f sec'%(mytime.time()-t1))
 
 def check_input_names(states:pd.DataFrame,
     forcings:pd.DataFrame,
