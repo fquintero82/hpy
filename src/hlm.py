@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from model400 import runoff1
 from model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from routing import transfer3,transfer2,transfer4,transfer5
+from routing import transfer3,transfer2,transfer4,transfer5,transfer6
 from solver import create_solver
 from yaml import Loader
 import yaml
@@ -16,6 +16,7 @@ from utils.serialization import save_to_netcdf
 #from io3.forcing import check_forcings
 import importlib.util
 from utils.check_yaml import check_yaml1
+import time as mytime
 
 class HLM(object):
     """Creates a new HLM model """
@@ -56,8 +57,8 @@ class HLM(object):
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
-        self.pathsolver = d['solver']
-        if option_solver:
+        if option_solver==True:
+            self.pathsolver = d['solver']
             self.ODESOLVER = create_solver(self)
         
 
@@ -77,7 +78,8 @@ class HLM(object):
         self.time_step=time_step
 
     def set_forcings(self):
-        print('reading forcings')
+        # print('reading forcings')
+        t = mytime.time()
         modelforcings = list(self.forcings.columns)[1:]
         config_forcings = list(self.configuration['forcings'].keys())
         for ii in range(len(modelforcings)):
@@ -100,14 +102,15 @@ class HLM(object):
                     except Exception as e:
                         print(e)
                         quit()
-        print('forcings loaded')
+        print('forcings loaded in {x} sec'.format(x=mytime.time()-t))
                 
     
     def advance_one_step(self):
         print(self.time)
         self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
-        transfer2(self) # volume, discharge with ode
+        # transfer2(self) # volume, discharge with ode
+        transfer6(self) # volume, discharge symbolic
         transfer5(self) #basin vars
         save_to_netcdf(self.states,self.params,self.time,self.outputfile)
         self.time += self.time_step_sec

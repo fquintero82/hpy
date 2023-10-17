@@ -140,7 +140,8 @@ def test4():
     ODE.set_integrator("dopri5") #this line takes forever . test different methods
 
     ODE.set_initial_value(init,0.0)
-    times = 1
+    times = [0,1]
+    times=0.1
     out = ODE.integrate(times)
     print(out)
 
@@ -184,7 +185,7 @@ def test4():
 def test5():
     hlm_object = HLM()
     config_file = 'examples/hydrosheds/conus2.yaml'
-    hlm_object.init_from_file(config_file)
+    hlm_object.init_from_file(config_file,option_solver=False)
     N = hlm_object.network.shape[0]
     channel_len_m = np.array(hlm_object.network['channel_length'])
     velocity = np.array(hlm_object.params['river_velocity']*3600) #m/h
@@ -209,10 +210,23 @@ def test5():
     initial_state = np.ones(shape=(N+1))
     initial_state[0] = 0
     ODE = jitcode(f)
+    ODE.generate_f_C(chunk_size=1)
+    ODE.compile_C()
+
     ODE.set_integrator("dopri5")
     p = 'examples/hydrosheds/ode.so'
     ODE.save_compiled(p,overwrite=True)
     print("--- %s seconds ---" % (time.time() - start_time))
+
+def test6():
+    from jitcode import jitcode, y
+    ODE = jitcode( [y(1),-y(0)] )
+    ODE.generate_f_C(chunk_size=1)
+    ODE.compile_C(omp=(["-fopenmp"],["-fopenmp"]))
+    ODE.compile_C()
+    ODE.set_integrator("dopri5")
+    ODE.set_initial_value([1,2])
+    ODE.integrate(0.1)
 
 test5()
     

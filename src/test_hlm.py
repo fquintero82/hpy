@@ -34,8 +34,8 @@ def test1():
 
 def test2():
     instance = HLM()
-    config_file = 'examples/cedarrapids1/cedar_example.yaml'
-    instance.init_from_file(config_file)
+    config_file = 'examples/cedarrapids1/cedar_example_windows.yaml'
+    instance.init_from_file(config_file,option_solver=False)
     instance.advance()
 
 def test3():
@@ -44,9 +44,14 @@ def test3():
     instance.init_from_file(config_file)
     instance.advance()   
 
+def test4():
+    instance = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    instance.init_from_file(config_file,option_solver=False)
+    instance.advance()
 
 if __name__ == "__main__":
-    test3()
+    test4()
     #plot1()
 
     

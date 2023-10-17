@@ -1,6 +1,6 @@
 ---
 description: experiment to test hlm with yaml files
-network: examples/cedarrapids1/367813.rvr
+network: examples/cedarrapids1/367813.pkl
 solver: examples/cedarrapids1/ode.so
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
@@ -23,6 +23,6 @@ forcings:
   path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
 output_file: 
   script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
-  path: /Users/felipe/hpy/hpy/examples/cedarrapids1/out/2008.nc
+  path: /Users/felipe/hpy/hpy/examples/cedarrapids1/out/2008_expr.nc
 
 
