@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
-from utils.network.network import get_default_network, update_network_pickle
+from utils.network.network import get_default_network, update_network_pickle,get_network_from_file
 import sys
 from math import factorial
 import numba
 from multiprocessing import Pool, Manager, Process,freeze_support
 import time
+import pickle
+from hlm import HLM
 
 def test_eval():
     var = 'x[0] + x[1]'
@@ -25,7 +27,7 @@ def _process_unit(idx:np.int32,
                     order:np.int32,
                     expr:list):
 
-        myexpr = '1/factorial({order}-1) * P**({order}-1) * X[{idx}] * T**({order}-1) * 2.718 ** (-P[{idx}] * T)'
+        myexpr = '1/factorial({order}-1) * P[{idx}-1]**({order}-1) * X[{idx}-1] * T**({order}-1) * 2.718 ** (-P[{idx}-1] * T)'
         myexpr = myexpr.format(order=order,idx=idx)
         expr.append(myexpr)
         myidx_upstream_links = idx_upstream_links[idx - 1]
@@ -38,13 +40,13 @@ def process_unit(idx:np.int32,
     expr = []
     order=1
     _process_unit(idx,idx_upstream_links,order,expr)
-    expr = '+'.join(expr)
+    # expr = '+'.join(expr)
     return expr
 
-def process_unit(x:list):
-    idx = x[1]
-    idx_upstream_links = x[2]
-    process_unit(idx,idx_upstream_links)
+# def process_unit(x:list):
+#     idx = x[1]
+#     idx_upstream_links = x[2]
+#     process_unit(idx,idx_upstream_links)
     
 
 def test_process_unit():
@@ -55,12 +57,34 @@ def test_process_unit():
     idx = 40163
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
     out = process_unit(idx,idx_upstream_links)
-    
+
+def process_all_map(network:pd.DataFrame):
+    N = len(network)
+    idx_upstream_links = network['idx_upstream_link'].to_numpy()
+    idxs = network['idx'].to_numpy()
+    out = list(map(process_unit,idxs[0:9],idx_upstream_links))
+
+def test_eval():
+    instance = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    instance.init_from_file(config_file,option_solver=False)
+ 
+    N=len(instance.network)
+    initial_state = np.ones(shape=(N,))
+    expr = instance.network['expression'].to_numpy()
+    P = (instance.params['river_velocity'] / instance.network['channel_length']).to_numpy()
+    d = {'X':initial_state,'P':P, 'T':instance.time_step_sec}
+    out = np.zeros(shape=(N,))
+    for i in np.arange(N):
+        print(i)
+        out[i] = eval(expr[i]) #no usar diccionario porque se queja del factorial
+
 def process_all(network:pd.DataFrame):
     N = len(network)
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
     idxs = network['idx'].to_numpy()
-    expression=np.chararray(shape=(N,))
+    expression=np.empty(shape=(N,),dtype=object)
+
     for i in np.arange(N):
         if i % 10000 ==0:
             print('row %s'%i)
