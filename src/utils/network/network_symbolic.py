@@ -20,10 +20,7 @@ def test_eval():
     x=np.ones(N)
     eval(var)
 
-
-def process_unit(idx:np.int32,
-                idx_upstream_links:np.ndarray):
-    def _process_unit(idx:np.int32,
+def _process_unit(idx:np.int32,
                     idx_upstream_links:np.ndarray,
                     order:np.int32,
                     expr:list):
@@ -35,12 +32,20 @@ def process_unit(idx:np.int32,
         if (myidx_upstream_links!=0).any():
             for new_idx in myidx_upstream_links:
                 _process_unit(new_idx,idx_upstream_links,order+1,expr)
+
+def process_unit(idx:np.int32,
+                idx_upstream_links:np.ndarray):
     expr = []
     order=1
     _process_unit(idx,idx_upstream_links,order,expr)
     expr = '+'.join(expr)
     return expr
-#este es el bueno
+
+def process_unit(x:list):
+    idx = x[1]
+    idx_upstream_links = x[2]
+    process_unit(idx,idx_upstream_links)
+    
 
 def test_process_unit():
     network = get_default_network()
@@ -49,14 +54,8 @@ def test_process_unit():
     idx = 32715
     idx = 40163
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
-    # expr = np.empty(shape=(N,),dtype=object)
     out = process_unit(idx,idx_upstream_links)
-    # print(len(expr))
-    # X = np.ones(N)
-    # T = 1
-    # P = np.ones(N)
-    # out = eval(expr[1])
-
+    
 def process_all(network:pd.DataFrame):
     N = len(network)
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
@@ -71,33 +70,38 @@ def process_all(network:pd.DataFrame):
     f = 'examples/cedarrapids1/367813.pkl'
     update_network_pickle(network,f)
 
-def process_all_multiprocessing(network:pd.DataFrame):
+def process_all_map(network:pd.DataFrame):
     N = len(network)
-    _idx_upstream_links = network['idx_upstream_link'].to_numpy()
-    _idxs = network['idx'].to_numpy()
-    ncpu = 2
-    manager = Manager()
-    idx_upstream_link = manager.list(_idx_upstream_links)
-    idx = manager.list(_idxs)
-    _expr = [[] for x in range(4)]
-    expr = manager.list(_expr)
-    jobs = []
-    for idx in _idxs[0:3]:
-        order=1
-        j = Process(target=process_unit,args=(idx,idx_upstream_link,order,expr[idx]))
-        jobs.append(j)
-    for j in jobs:
-        j.start()
-    for j in jobs:
-        j.join()
-    print('stop')
+    idx_upstream_links = network['idx_upstream_link'].to_numpy()
+    idxs = network['idx'].to_numpy()
+    expression=np.chararray(shape=(N,))
+# def process_all_multiprocessing(network:pd.DataFrame):
+#     N = len(network)
+#     _idx_upstream_links = network['idx_upstream_link'].to_numpy()
+#     _idxs = network['idx'].to_numpy()
+#     ncpu = 2
+#     manager = Manager()
+#     idx_upstream_link = manager.list(_idx_upstream_links)
+#     idx = manager.list(_idxs)
+#     _expr = [[] for x in range(4)]
+#     expr = manager.list(_expr)
+#     jobs = []
+#     for idx in _idxs[0:3]:
+#         order=1
+#         j = Process(target=process_unit,args=(idx,idx_upstream_link,order,expr[idx]))
+#         jobs.append(j)
+#     for j in jobs:
+#         j.start()
+#     for j in jobs:
+#         j.join()
+#     print('stop')
 
-def test_process_all_multiprocessing():
-    freeze_support()
-    t = time.time()
-    network = get_default_network()
-    process_all_multiprocessing(network)
-    print(time.time()-t)
+# def test_process_all_multiprocessing():
+#     freeze_support()
+#     t = time.time()
+#     network = get_default_network()
+#     process_all_multiprocessing(network)
+#     print(time.time()-t)
 
 # @numba.jit(target='cuda')
 # def process_all_cuda(idx_upstream_links:np.ndarray,idxs:np.ndarray):
