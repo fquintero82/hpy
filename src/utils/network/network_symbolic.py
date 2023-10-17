@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from utils.network.network import get_default_network
+from utils.network.network import get_default_network, update_network_pickle
 import sys
 from math import factorial
 import numba
@@ -21,72 +21,55 @@ def test_eval():
     eval(var)
 
 
-# def process_unit(idx:np.int32,
-#                  idx_upstream_links:np.ndarray,
-#                  order:np.int32,
-#                  expr:list)->str:
-#     # expr = 'X[{idx}] * 2.718 ** (-P[{idx}] * T)'
-#     myexpr = '1/factorial({order}-1) * P**({order}-1) * X[{idx}] * T**({order}-1) * 2.718 ** (-P[{idx}] * T)'
-#     # myexpr = 'X[{idx}] * P[{idx}] * 2.718 ** (-P[{idx}] * T) * ({order} * 1/factorial({order}-1) * (T * P[{idx}])**({order}-1)
-    
-#     myexpr = myexpr.format(order=order,idx=idx)
-#     # expr = expr + myexpr
-#     expr.append(myexpr)
-#     # print(order)
-#     # print(expr)
-#     myidx_upstream_links = idx_upstream_links[idx - 1]
-#     if (myidx_upstream_links!=0).any():
-#         for new_idx in myidx_upstream_links:
-#             process_unit(new_idx,idx_upstream_links,order+1,expr)
-#     return expr
-
 def process_unit(idx:np.int32,
-                 idx_upstream_links:np.ndarray,
-                 order:np.int32,
-                 expr:list):
-    if idx % 10000 ==0:
-        print('row %s'%idx)
+                idx_upstream_links:np.ndarray):
+    def _process_unit(idx:np.int32,
+                    idx_upstream_links:np.ndarray,
+                    order:np.int32,
+                    expr:list):
 
-    myexpr = '1/factorial({order}-1) * P**({order}-1) * X[{idx}] * T**({order}-1) * 2.718 ** (-P[{idx}] * T)'
-    myexpr = myexpr.format(order=order,idx=idx)
-    # expr = expr + myexpr
-    expr.append(myexpr)
-    # expr[oldidx].append(myexpr)
-    # expr = np.append(expr,myexpr)
-    myidx_upstream_links = idx_upstream_links[idx - 1]
-    if (myidx_upstream_links!=0).any():
-        for new_idx in myidx_upstream_links:
-            process_unit(new_idx,idx_upstream_links,order+1,expr)
+        myexpr = '1/factorial({order}-1) * P**({order}-1) * X[{idx}] * T**({order}-1) * 2.718 ** (-P[{idx}] * T)'
+        myexpr = myexpr.format(order=order,idx=idx)
+        expr.append(myexpr)
+        myidx_upstream_links = idx_upstream_links[idx - 1]
+        if (myidx_upstream_links!=0).any():
+            for new_idx in myidx_upstream_links:
+                _process_unit(new_idx,idx_upstream_links,order+1,expr)
+    expr = []
+    order=1
+    _process_unit(idx,idx_upstream_links,order,expr)
+    expr = '+'.join(expr)
+    return expr
+#este es el bueno
 
 def test_process_unit():
     network = get_default_network()
     N = len(network)
     link_id = 367813
     idx = 32715
-    order = 1
+    idx = 40163
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
     # expr = np.empty(shape=(N,),dtype=object)
-    expr = [[] for x in range(N)]
-    process_unit(idx,idx_upstream_links,order,expr[idx])
-    print(len(expr))
-    X = np.ones(N)
-    T = 1
-    P = np.ones(N)
-    out = eval(expr[1])
+    out = process_unit(idx,idx_upstream_links)
+    # print(len(expr))
+    # X = np.ones(N)
+    # T = 1
+    # P = np.ones(N)
+    # out = eval(expr[1])
 
 def process_all(network:pd.DataFrame):
     N = len(network)
-    df = pd.DataFrame({'formula':np.zeros(shape=(N,))},dtype=object)
-    out = np.zeros(shape=(N,),dtype=object)
-    df.index = network.index
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
     idxs = network['idx'].to_numpy()
+    expression=np.chararray(shape=(N,))
     for i in np.arange(N):
-        print(i)
-        order = 1
-        expr = [[] for x in range(N)]
-        process_unit(idxs[i],idx_upstream_links,order,expr[idxs[i]])
-        out[i]=np.array(expr)
+        if i % 10000 ==0:
+            print('row %s'%i)
+        out=process_unit(idxs[i],idx_upstream_links)
+        expression[i] = out
+    network['expression'] = expression
+    f = 'examples/cedarrapids1/367813.pkl'
+    update_network_pickle(network,f)
 
 def process_all_multiprocessing(network:pd.DataFrame):
     N = len(network)
