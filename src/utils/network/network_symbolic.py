@@ -26,21 +26,21 @@ def _process_unit(idx:np.int32,
                     idx_upstream_links:np.ndarray,
                     order:np.int32,
                     expr:list):
-
-        myexpr = '1/factorial({order}-1) * P[{idx}-1]**({order}-1) * X[{idx}-1] * T**({order}-1) * 2.718 ** (-P[{idx}-1] * T)'
-        myexpr = myexpr.format(order=order,idx=idx)
-        expr.append(myexpr)
-        myidx_upstream_links = idx_upstream_links[idx - 1]
-        if (myidx_upstream_links!=0).any():
-            for new_idx in myidx_upstream_links:
-                _process_unit(new_idx,idx_upstream_links,order+1,expr)
+        if order < 10:
+            myexpr = '1/float(factorial({order}-1)) * P[{idx}-1]**({order}-1) * X[{idx}-1] * T**({order}-1) * 2.718 ** (-P[{idx}-1] * T)'
+            myexpr = myexpr.format(order=order,idx=idx)
+            expr.append(myexpr)
+            myidx_upstream_links = idx_upstream_links[idx - 1]
+            if (myidx_upstream_links!=0).any():
+                for new_idx in myidx_upstream_links:
+                    _process_unit(new_idx,idx_upstream_links,order+1,expr)
 
 def process_unit(idx:np.int32,
                 idx_upstream_links:np.ndarray):
     expr = []
     order=1
     _process_unit(idx,idx_upstream_links,order,expr)
-    # expr = '+'.join(expr)
+    expr = '+'.join(expr)
     return expr
 
 # def process_unit(x:list):
@@ -73,13 +73,16 @@ def test_eval():
     initial_state = np.ones(shape=(N,))
     expr = instance.network['expression'].to_numpy()
     P = (instance.params['river_velocity'] / instance.network['channel_length']).to_numpy()
-    d = {'X':initial_state,'P':P, 'T':instance.time_step_sec}
+    # d = {'X':initial_state,'P':P, 'T':instance.time_step_sec}
+    T=instance.time_step_sec
+    X = np.ones(shape=(N,))
     out = np.zeros(shape=(N,))
     for i in np.arange(N):
         print(i)
         out[i] = eval(expr[i]) #no usar diccionario porque se queja del factorial
 
-def process_all(network:pd.DataFrame):
+def process_all():
+    network = get_default_network()
     N = len(network)
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
     idxs = network['idx'].to_numpy()
@@ -146,5 +149,7 @@ def process_all_map(network:pd.DataFrame):
 #         a+=i
 #     print(a)
 if __name__ == '__main__':
-    test_process_all_multiprocessing()
+    process_all()
+    test_eval()
+    # test_process_all_multiprocessing()
     # test_process_unit()
