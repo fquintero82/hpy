@@ -82,6 +82,12 @@ def eval1(x):
     locals()
     return eval(x)
 
+class Evaluator(object):
+    def __init__(self, dict):
+        self.dict = dict
+    def __call__(self, src):
+        eval(src, self.dict)
+
 def test_eval():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_example.yaml'
@@ -114,8 +120,8 @@ def test_eval():
     # print('done in %f sec'%(time.time()-t))
 
     t=time.time()
-    with Pool() as pool:
-        out = pool.map(eval1,expr)
+    with Pool(processes=8) as pool:
+        out = pool.map(Evaluator(d),expr)
     print('done in %f sec'%(time.time()-t))
     
  
