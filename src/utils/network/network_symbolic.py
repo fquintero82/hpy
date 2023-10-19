@@ -8,7 +8,9 @@ from multiprocessing import Pool, Manager, Process,freeze_support
 import time
 import pickle
 from hlm import HLM
-
+import warnings
+from numba import njit,prange
+# https://stackoverflow.com/questions/69423036/use-eval-in-numba-numbalsoda#:~:text=eval%20is%20fundamentally%20incompatible%20with,calls)%20to%20be%20strongly%20typed.
 def test_eval():
     var = 'x[0] + x[1]'
     x = np.array([1,1])
@@ -64,6 +66,22 @@ def process_all_map(network:pd.DataFrame):
     idxs = network['idx'].to_numpy()
     out = list(map(process_unit,idxs[0:9],idx_upstream_links))
 
+# @njit(parallel=True)
+# def eval_numba(expr,X,P,T):
+#     N = len(expr)
+#     out =np.zeros(shape=(N,))
+#     X=X
+#     P=P
+#     T=T
+#     for i in prange(N):
+#         out[i] = eval(expr[i])
+#     return out
+
+def eval1(x):
+    globals()
+    locals()
+    return eval(x)
+
 def test_eval():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_example.yaml'
@@ -73,13 +91,34 @@ def test_eval():
     initial_state = np.ones(shape=(N,))
     expr = instance.network['expression'].to_numpy()
     P = (instance.params['river_velocity'] / instance.network['channel_length']).to_numpy()
-    # d = {'X':initial_state,'P':P, 'T':instance.time_step_sec}
+    d = {'X':initial_state,
+        'P':P,
+        'T':instance.time_step_sec,
+        'factorial':factorial}
     T=instance.time_step_sec
     X = np.ones(shape=(N,))
     out = np.zeros(shape=(N,))
-    for i in np.arange(N):
-        print(i)
-        out[i] = eval(expr[i]) #no usar diccionario porque se queja del factorial
+    t=time.time()
+    # for i in np.arange(N):
+    #     # print(i)
+    #     out[i] = eval(expr[i]) #no usar diccionario porque se queja del factorial
+    # print('done in %f sec'%(time.time()-t))
+    globs = globals()
+    locs = locals()
+    # t=time.time()
+    # out = [eval(expr[i],globs,locs) for i in np.arange(N)]
+    # print('done in %f sec'%(time.time()-t))
+    # t=time.time()
+    # i = np.arange(N)
+    # out = list(map(lambda i: eval(expr[i],d),i))
+    # print('done in %f sec'%(time.time()-t))
+
+    t=time.time()
+    with Pool() as pool:
+        out = pool.map(eval1,expr)
+    print('done in %f sec'%(time.time()-t))
+    
+ 
 
 def process_all():
     network = get_default_network()
@@ -149,7 +188,7 @@ def process_all_map(network:pd.DataFrame):
 #         a+=i
 #     print(a)
 if __name__ == '__main__':
-    process_all()
+    # process_all()
     test_eval()
     # test_process_all_multiprocessing()
     # test_process_unit()
