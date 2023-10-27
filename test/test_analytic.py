@@ -11,7 +11,7 @@ import time
 import pickle
 import warnings
 from numba import njit,prange
-from utils.network.network_symbolic import process_all,process_unit
+from utils.network.network_symbolic import process_all,process_unit,eval_all
 
 def eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
     #uneven values of x are the order
@@ -140,6 +140,18 @@ def test_process_all():
     process_all(network)
 
 
+def test_eval_all():
+    instance = HLM()
+    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    instance.init_from_file(config_file,option_solver=False)
+    N=len(instance.network)
+    process_all(instance.network)
+    expr = instance.network['expression'].to_numpy()
+    P = (instance.params['river_velocity'] / instance.network['channel_length']).to_numpy()
+    T=instance.time_step_sec
+    X = np.ones(shape=(N,))
+    eval_all(expr,P,X,T)
+
 
 # def process_all_map(network:pd.DataFrame):
 #     N = len(network)
@@ -194,7 +206,8 @@ def test_process_all():
 #         a+=i
 #     print(a)
 if __name__ == '__main__':
-    test_process_all()
+    test_eval_all()
+    # test_process_all()
     # test_eval_unit()
     # process_all()
     # test_eval()
