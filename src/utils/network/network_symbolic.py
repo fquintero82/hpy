@@ -92,6 +92,7 @@ def eval_all2(expr,P,X,T):
     N = len(expr)
     t=time.time()
     ncpu = cpu_count() - 1
+    ncpu=2
     with Pool(processes=ncpu) as pool:
         out = pool.map(Evaluator(expr,P,X,T),range(N))
     print('done in %f sec'%(time.time()-t))
