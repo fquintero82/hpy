@@ -11,6 +11,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
+            "env":{"PYDEVD_WARN_EVALUATION_TIMEOUT": "500"},
             "justMyCode": true
             
         }
