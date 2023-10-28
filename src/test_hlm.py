@@ -50,8 +50,14 @@ def test4():
     instance.init_from_file(config_file,option_solver=False)
     instance.advance()
 
+def test5():
+    instance = HLM()
+    config_file = 'examples/iowa/iowa_macbook.yaml'
+    instance.init_from_file(config_file,option_solver=False)
+    instance.advance()   
+
 if __name__ == "__main__":
-    test3()
+    test5()
     #plot1()
 
     
