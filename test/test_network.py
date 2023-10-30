@@ -47,6 +47,6 @@ def test5():
 # #    file2.close()
 
 if __name__ == "__main__":
-    # test5()
-    f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
-    df = pd.read_pickle(f)
+    test5()
+    # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
+    # df = pd.read_pickle(f)
