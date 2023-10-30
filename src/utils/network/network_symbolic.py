@@ -5,40 +5,43 @@ from multiprocessing import Pool
 import time
 from os import cpu_count
 from numba import jit
+import copy
 # https://stackoverflow.com/questions/69423036/use-eval-in-numba-numbalsoda#:~:text=eval%20is%20fundamentally%20incompatible%20with,calls)%20to%20be%20strongly%20typed.
 
 
 def _process_unit(idx:np.int32,
                     idx_upstream_links:np.ndarray,
                     order:np.int32,
-                    expr:list):
+                    expr:list,source_idx:np.int32):
         if order < 100:
             # myexpr = (order,idx)
             expr.append(order)
             expr.append(idx)
+            expr.append(source_idx)
             myidx_upstream_links = idx_upstream_links[idx - 1]
             if (myidx_upstream_links!=0).any():
                 for new_idx in myidx_upstream_links:
-                    _process_unit(new_idx,idx_upstream_links,order+1,expr)
+                    _process_unit(new_idx,idx_upstream_links,order+1,expr,source_idx)
 
-def _process_unit2(idx:np.int32,
-                    idx_upstream_links:np.ndarray,
-                    order:np.int32,
-                    expr:list):
-        if order < 10:
-            myexpr = '1/float(factorial({order}-1)) * P[{idx}-1]**({order}-1) * X[{idx}-1] * T**({order}-1) * 2.718 ** (-P[{idx}-1] * T)'
-            myexpr = myexpr.format(order=order,idx=idx)
-            expr.append(myexpr)
-            myidx_upstream_links = idx_upstream_links[idx - 1]
-            if (myidx_upstream_links!=0).any():
-                for new_idx in myidx_upstream_links:
-                    _process_unit(new_idx,idx_upstream_links,order+1,expr)
+# def _process_unit2(idx:np.int32,
+#                     idx_upstream_links:np.ndarray,
+#                     order:np.int32,
+#                     expr:list):
+#         if order < 10:
+#             myexpr = '1/float(factorial({order}-1)) * P[{idx}-1]**({order}-1) * X[{idx}-1] * T**({order}-1) * 2.718 ** (-P[{idx}-1] * T)'
+#             myexpr = myexpr.format(order=order,idx=idx)
+#             expr.append(myexpr)
+#             myidx_upstream_links = idx_upstream_links[idx - 1]
+#             if (myidx_upstream_links!=0).any():
+#                 for new_idx in myidx_upstream_links:
+#                     _process_unit(new_idx,idx_upstream_links,order+1,expr)
 
 def process_unit(idx:np.int32,
                 idx_upstream_links:np.ndarray):
     expr = []
     order=1
-    _process_unit(idx,idx_upstream_links,order,expr)
+    source_idx = copy.deepcopy(idx)
+    _process_unit(idx,idx_upstream_links,order,expr,source_idx)
     # expr = '+'.join(expr)
     return expr
 class ProcessLink(object):
@@ -107,6 +110,16 @@ def eval_all(expr,P,X,T):
     print('done in %f sec'%(time.time()-t))
     return out
 
+def expression_to_arrays():
+    f = '/Users/felipe/tmp/iowa/iowa_network.pkl'
+    network = pd.read_pickle(f)
+    expr = network['expression'].to_numpy()
+    x = np.concatenate(expr)
+    order = np.array(x[0:len(x):3])
+    idx = np.array(x[1:len(x):3])
+    source_idx = np.array(x[2:len(x):3])
+    
+    
 
 
 # def process_all2(network:pd.DataFrame):
