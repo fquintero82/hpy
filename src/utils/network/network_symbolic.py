@@ -6,6 +6,8 @@ import time
 from os import cpu_count
 from numba import jit
 import copy
+import dask
+
 # https://stackoverflow.com/questions/69423036/use-eval-in-numba-numbalsoda#:~:text=eval%20is%20fundamentally%20incompatible%20with,calls)%20to%20be%20strongly%20typed.
 
 
@@ -61,6 +63,7 @@ def _eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
     out = np.sum(val)
     return out
 
+
 def eval_unit(idx:np.int32,expr:np.ndarray,P:np.ndarray,X:np.ndarray,T:int):
     x= expr[idx]
     out = _eval_unit(x,P,X,T)
@@ -75,6 +78,19 @@ class Evaluator(object):
     def __call__(self, src):
         out = eval_unit(src, self.expr,self.P,self.X,self.T)
         return out
+
+def eval3(order:np.ndarray,idx:np.ndarray,P:np.ndarray,X:np.ndarray,T:np.int32):
+    # val = 1/(factorial(order-1)) * P[idx-1]**(order-1) * X[idx-1] * T**(order-1) * 2.718 ** (-P[idx-1] * T)
+    val = 1.0/(factorial(order-1)) * np.power(P[idx-1],(order-1)) * X[idx-1] * np.power(T,(order-1)) * np.exp(-P[idx-1] * T)
+    return val
+
+def eval_onetime(order:np.ndarray,idx:np.ndarray,P:np.ndarray,T:np.int32):
+    val = 1.0/(factorial(order-1)) * np.power(P[idx-1],(order-1))  * np.power(T,(order-1)) * np.exp(-P[idx-1] * T)
+    return val
+
+def eval4(idx:np.ndarray,X:np.ndarray,onetimeterm:np.ndarray):
+    val = onetimeterm * X[idx-1]
+    return val
 
 
 def process_all(network:pd.DataFrame):
@@ -113,14 +129,23 @@ def eval_all(expr,P,X,T):
 def expression_to_arrays():
     f = '/Users/felipe/tmp/iowa/iowa_network.pkl'
     network = pd.read_pickle(f)
+    N = len(network)
     expr = network['expression'].to_numpy()
     x = np.concatenate(expr)
     order = np.array(x[0:len(x):3])
     idx = np.array(x[1:len(x):3])
     source_idx = np.array(x[2:len(x):3])
-    
-    
-
+    df = pd.DataFrame({'order':order,'idx':idx})
+    df.index = source_idx
+    X = np.ones(N)
+    P = np.ones(N)
+    T = 3600
+    t = time.time()
+    onetimeterm = eval_onetime(order,idx,P,T)
+    print('done in %f sec'%(time.time()-t))
+    t = time.time()
+    a = eval4(idx,X,onetimeterm)
+    print('done in %f sec'%(time.time()-t))
 
 # def process_all2(network:pd.DataFrame):
 #     N = len(network)
