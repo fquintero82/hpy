@@ -13,10 +13,12 @@ from utils.forcings.forcing_manager import get_default_forcings
 from utils.states.states_default import get_default_states
 from utils.network.network import get_network_from_file
 from utils.serialization import save_to_netcdf
+from utils.network.network_symbolic import NetworkSymbolic
 #from io3.forcing import check_forcings
 import importlib.util
 from utils.check_yaml import check_yaml1
 import time as mytime
+
 
 class HLM(object):
     """Creates a new HLM model """
@@ -36,6 +38,7 @@ class HLM(object):
         self.configuration = None
         self.pathsolver=None
         self.ODESOLVER =None
+        self.NetworkSymbolic=None
 
     
     def init_from_file(self,config_file:str,option_solver=True):
@@ -57,6 +60,8 @@ class HLM(object):
         self.params = get_default_params(self.network)
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
+        self.NetworkSymbolic = NetworkSymbolic(self)
+
         if option_solver==True:
             self.pathsolver = d['solver']
             self.ODESOLVER = create_solver(self)
