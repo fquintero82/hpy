@@ -57,7 +57,7 @@ def test5():
     instance.advance()   
 
 if __name__ == "__main__":
-    test5()
+    test4()
     #plot1()
 
     
