@@ -499,12 +499,7 @@ def transfer8(hlm_object):
 
 def transfer9(hlm_object):
     t = time.time()
-    N = hlm_object.network.shape[0]
     initial_state = hlm_object.states['discharge'].to_numpy()
-    T= hlm_object.time_step_sec
-    out = np.zeros(shape=(N,))
-    expr = hlm_object.network['expression'].to_numpy()
-    P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
-    out = eval_all2(expr,P,initial_state,T)
+    out = hlm_object.NetworkSymbolic.eval(initial_state)
     hlm_object.states['discharge'] = out
     print('discharge routing in %f' % (time.time()-t))
