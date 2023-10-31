@@ -4,9 +4,7 @@ from  scipy.special import factorial
 from multiprocessing import Pool
 import time
 from os import cpu_count
-from numba import jit
 import copy
-import dask
 
 # https://stackoverflow.com/questions/69423036/use-eval-in-numba-numbalsoda#:~:text=eval%20is%20fundamentally%20incompatible%20with,calls)%20to%20be%20strongly%20typed.
 
@@ -53,6 +51,13 @@ class ProcessLink(object):
         out= process_unit(src, self.idx_upstream_links)
         return out
 
+class NetworkSymbolic(object):
+    def __init__(self,hlm_object) -> None:
+        self.routing_term, self.idx,self.indices = _get_routing_term_indices(hlm_object)
+    def eval(self,X:np.ndarray):
+        return _eval4(self.idx,X,self.routing_term,self.indices)
+
+
 def _eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
     #uneven values of x are the order
     #even values of x are the index
@@ -84,13 +89,17 @@ def eval3(order:np.ndarray,idx:np.ndarray,P:np.ndarray,X:np.ndarray,T:np.int32):
     val = 1.0/(factorial(order-1)) * np.power(P[idx-1],(order-1)) * X[idx-1] * np.power(T,(order-1)) * np.exp(-P[idx-1] * T)
     return val
 
-def eval_onetime(order:np.ndarray,idx:np.ndarray,P:np.ndarray,T:np.int32):
+def _eval_onetime(order:np.ndarray,idx:np.ndarray,P:np.ndarray,T:np.int32):
     val = 1.0/(factorial(order-1)) * np.power(P[idx-1],(order-1))  * np.power(T,(order-1)) * np.exp(-P[idx-1] * T)
     return val
 
-def eval4(idx:np.ndarray,X:np.ndarray,onetimeterm:np.ndarray):
-    val = onetimeterm * X[idx-1]
-    return val
+    
+def _eval4(idx:np.ndarray,X:np.ndarray,routing_term:np.ndarray,indices:np.ndarray):
+    val = routing_term * X[idx-1]
+    # out = np.bincount(indices,weights=val)
+    out = np.bincount(indices-1,weights=val)
+
+    return out
 
 
 def process_all(network:pd.DataFrame):
@@ -126,30 +135,27 @@ def eval_all(expr,P,X,T):
     print('done in %f sec'%(time.time()-t))
     return out
 
-def expression_to_arrays():
-    f = '/Users/felipe/tmp/iowa/iowa_network.pkl'
-    network = pd.read_pickle(f)
+def _get_routing_term_indices(hlm_object):
+    # f = '/Users/felipe/tmp/iowa/iowa_network.pkl'
+    # network = pd.read_pickle(f)
+    network = hlm_object.network
     N = len(network)
     expr = network['expression'].to_numpy()
     x = np.concatenate(expr)
     order = np.array(x[0:len(x):3])
     idx = np.array(x[1:len(x):3])
     source_idx = np.array(x[2:len(x):3])
-    df = pd.DataFrame({'order':order,'idx':idx})
-    df.index = source_idx
-    X = np.ones(N)
-    P = np.ones(N)
-    T = 3600
+    P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
+    T= hlm_object.time_step_sec
     t = time.time()
-    onetimeterm = eval_onetime(order,idx,P,T)
-    print('done in %f sec'%(time.time()-t))
-    t = time.time()
-    a = eval4(idx,X,onetimeterm)
-    print('done in %f sec'%(time.time()-t))
+    onetimeterm = _eval_onetime(order,idx,P,T)
+    print('onetimeterm done in %f sec'%(time.time()-t))
+    return onetimeterm, idx,source_idx
+
 
 # def process_all2(network:pd.DataFrame):
 #     N = len(network)
-#     idx_upstream_links = network['idx_upstream_link'].to_numpy()
+#     idx_upstream_links =network['idx_upstream_link'].to_numpy()
 #     idxs = network['idx'].to_numpy()
 #     expression=np.empty(shape=(N,),dtype=object)
 #     for i in np.arange(N):
