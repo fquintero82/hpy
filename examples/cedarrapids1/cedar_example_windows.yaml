@@ -1,6 +1,6 @@
 ---
 description: experiment to test hlm with yaml files
-network: examples/cedarrapids1/367813.pkl
+network: E:/tmp/examples/367813.pkl
 solver: examples/cedarrapids1/ode.so
 parameters: examples/cedarrapids1/367813.prm
 initial_states: examples/cedarrapids1/state0.pkl
@@ -9,12 +9,15 @@ end_time: 1214870400
 time_step: 3600
 forcings:
   precipitation:
+   script: E:/projects/hpy/src/io/HLM_Binaries.py
+   path: E:/tmp/st4_2008/
+   prefix: iowa_
   temperature:
   evapotranspiration:
   frozen_ground:
   discharge:
 output_file: 
   script: E:/projects/hpy/src/io/out_netcdf1.py
-  path: E:/projects/hpy/examples/cedarrapids1/2008_win.nc
+  path: E:/tmp/examples/2008_win.nc
 
 
