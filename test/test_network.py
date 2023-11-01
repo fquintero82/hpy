@@ -41,6 +41,13 @@ def test6():
     df = pd.read_pickle(f)
     process_all(df)
     df.to_pickle('examples/cedarrapids1/367813.pkl')
+
+def test7():
+    f ='E:/projects/hpy/examples/cedarrapids1/367813.pkl'
+    df = pd.read_pickle(f)
+    process_all(df)
+    df.to_pickle('E:/projects/hpy/examples/cedarrapids1/367813.pkl')
+
 # def testadjmat():
 #     network = get_default_network()
 #     A = get_adjacency_matrix(network,False)
@@ -52,6 +59,6 @@ def test6():
 # #    file2.close()
 
 if __name__ == "__main__":
-    test6()
+    test7()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)
