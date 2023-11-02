@@ -15,7 +15,6 @@ def runoff1(states:pd.DataFrame,
     
     t1 = mytime.time()
     DT = time_step_sec / 60. #minutes
-    print('running runoff')
     if check_input_names(states=states,forcings=forcings,params=params,network=network)==False:
         return
     if check_input_values(states=states,forcings=forcings,params=params,network=network,DT=DT)==False:
