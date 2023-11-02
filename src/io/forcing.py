@@ -22,10 +22,3 @@ def check_forcings(instance:HLM):
     #                             linkids = lid,
     #                             values= values
     #                             )
-            
-def test():
-    instance = HLM()
-    config_file = '../examples/cedarrapids1/cedar_example.yaml'
-    instance.init_from_file(config_file)
-
-test()
