@@ -138,17 +138,23 @@ def eval_all(expr,P,X,T):
 def _get_routing_term_indices(hlm_object):
     # f = '/Users/felipe/tmp/iowa/iowa_network.pkl'
     # network = pd.read_pickle(f)
-    network = hlm_object.network
-    N = len(network)
-    expr = network['expression'].to_numpy()
-    x = np.concatenate(expr)
-    order = np.array(x[0:len(x):3])
-    idx = np.array(x[1:len(x):3])
-    source_idx = np.array(x[2:len(x):3])
-    # P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
-    T = hlm_object.time_step_sec
-    t_in_hours= T / 3600
-    P =  (hlm_object.params['river_velocity'] * T / hlm_object.network['channel_length']).to_numpy() #[m/h]
+    try:
+        network = hlm_object.network
+        N = len(network)
+        expr = network['expression'].to_numpy()
+        x = np.concatenate(expr)
+        order = np.array(x[0:len(x):3])
+        idx = np.array(x[1:len(x):3])
+        source_idx = np.array(x[2:len(x):3])
+        # P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
+        T = hlm_object.time_step_sec
+        t_in_hours= T / 3600
+            
+        P =  (hlm_object.params['river_velocity'] * T / hlm_object.network['channel_length']).to_numpy() #[m/h]
+    except ValueError as e:
+        print('problems with network symbolic')
+        print(e)
+        quit()
     t = time.time()
     onetimeterm = _eval_onetime(order,idx,P,t_in_hours)
     print('onetimeterm done in %f sec'%(time.time()-t))
