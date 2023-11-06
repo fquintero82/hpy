@@ -1,4 +1,4 @@
-import pandas as pd
+import modin.pandas as pd
 import numpy as np
 from test_dataframes import getTestDF1
 from model400names import PARAM_NAMES,STATES_NAMES,FORCINGS_NAMES
@@ -31,7 +31,8 @@ def runoff1(states:pd.DataFrame,
     x1=pd.DataFrame({'val':0},dtype=np.float32,index=network.index)
     #temperature =0 is the flag for no forcing the variable. no snow process
     wh = forcings['temperature']==0 #maybe i should trigger this condition with temperature = none
-    x1.loc[wh,'val'] = forcings['precipitation'][wh] * CF_MMHR_M_MIN * DT #[m]      #FF
+    if len(wh)>0:
+        x1.loc[wh,'val'] = forcings['precipitation'][wh] * CF_MMHR_M_MIN * DT #[m]      #FF
     #if(temperature>=temp_thres):
     snowmelt=pd.DataFrame({'val':0},dtype=np.float32,index=network.index)
     wh = forcings['temperature']>=params['temp_threshold'] #indices where true

@@ -28,3 +28,6 @@ def get_params_from_manager(options=None,network:pd.DataFrame=None):
         df = params_from_csv(f)
         return df
     
+    print('no option found for parameters')
+    quit()
+    

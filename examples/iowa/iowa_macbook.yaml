@@ -1,7 +1,7 @@
 ---
 description: simulation of iowa
 network: /Users/felipe/tmp/iowa/iowa_network.pkl
-parameters: /Users/felipe/tmp/iowa/params.prm
+parameters: default
 initial_states: /Users/felipe/tmp/iowa/initstate.pkl
 init_time: 1199145600
 end_time: 1230768000
