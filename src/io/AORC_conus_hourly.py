@@ -98,25 +98,25 @@ def get_lid_xy(options=None):
     
     return df
 
-def get_col_row(nc:Dataset,df:pd.DataFrame):
-    x = df['x'].to_numpy()
-    y = df['y'].to_numpy()
-    lid = df['lid'].to_numpy()
-    n = len(lid)
-    col = np.zeros(shape=(n),dtype=np.int32)
-    row = np.zeros(shape=(n),dtype=np.int32)
-    # Get the nc row, col for the point's lat, lon
-    xnc = np.array(nc.variables["lon"][:])
-    ync = np.array(nc.variables["lat"][:])
-    #need vectorized version of this function. 
+# def get_col_row(nc:Dataset,df:pd.DataFrame):
+#     x = df['x'].to_numpy()
+#     y = df['y'].to_numpy()
+#     lid = df['lid'].to_numpy()
+#     n = len(lid)
+#     col = np.zeros(shape=(n),dtype=np.int32)
+#     row = np.zeros(shape=(n),dtype=np.int32)
+#     # Get the nc row, col for the point's lat, lon
+#     xnc = np.array(nc.variables["lon"][:])
+#     ync = np.array(nc.variables["lat"][:])
+#     #need vectorized version of this function. 
 
-    for ii in np.arange(n):
-        print(ii)
-        col[ii] = np.argmin(np.abs(xnc - x[ii]))
-        row[ii] = np.argmin(np.abs(ync - y[ii]))
-    df['col']=  col
-    df['row'] = row
-    return df
+#     for ii in np.arange(n):
+#         print(ii)
+#         col[ii] = np.argmin(np.abs(xnc - x[ii]))
+#         row[ii] = np.argmin(np.abs(ync - y[ii]))
+#     df['col']=  col
+#     df['row'] = row
+#     return df
 
 
 # def nc2geopandas(nc:Dataset,varname:str,t:int):
