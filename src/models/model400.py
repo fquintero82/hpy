@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from test_dataframes import getTestDF1
-from model400names import PARAM_NAMES,STATES_NAMES,FORCINGS_NAMES
+from models.model400names import PARAM_NAMES,STATES_NAMES,FORCINGS_NAMES
 from utils.network.network import NETWORK_NAMES
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
