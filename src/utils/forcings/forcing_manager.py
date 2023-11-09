@@ -1,5 +1,5 @@
 import pandas as pd
-from model400names import FORCINGS_NAMES
+from models.model400names import FORCINGS_NAMES
 import numpy as np
 
 def get_default_forcings(network:pd.DataFrame):
