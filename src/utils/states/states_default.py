@@ -1,5 +1,5 @@
 import pandas as pd
-from model400names import STATES_NAMES, STATES_DEFAULT_VALUES
+from models.model400names import STATES_NAMES, STATES_DEFAULT_VALUES
 import numpy as np
 
 def get_default_states(network:pd.DataFrame):
