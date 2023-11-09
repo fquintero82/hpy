@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from  os.path import isfile
 from netCDF4 import Dataset
-from model400names import CF_UNITS , STATES_NAMES, PARAM_NAMES
+from models.model400names import CF_UNITS , STATES_NAMES, PARAM_NAMES
 import time as mytime
 
 def save_to_netcdf(states:pd.DataFrame,params:pd.DataFrame,time:int,filename:str):
