@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from model400names import PARAM_NAMES
+from models.model400names import PARAM_NAMES
 import sys
 
 def params_from_prm_file_old(prm_file):
