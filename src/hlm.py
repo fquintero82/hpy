@@ -112,7 +112,7 @@ class HLM(object):
                 
     
     def advance_one_step(self):
-        print(self.time)
+        # print(self.time)
         self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
         # transfer2(self) # volume, discharge with ode
