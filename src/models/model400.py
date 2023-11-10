@@ -13,7 +13,7 @@ def runoff1(states:pd.DataFrame,
     forcings:pd.DataFrame,
     params:pd.DataFrame,
     network:pd.DataFrame,
-    time_step_sec:int):
+    time_step_sec:int,debug=False):
     
     t1 = mytime.time()
     DT = time_step_sec / 60. #minutes
@@ -41,6 +41,10 @@ def runoff1(states:pd.DataFrame,
         },dtype=np.float32).min(axis=1) #[m]
     states.loc[wh,'snow'] -= snowmelt['val'][wh] #[m]
     x1.loc[wh,'val'] = (CF_MMHR_M_MIN*DT*forcings['precipitation'][wh]) + snowmelt['val'][wh] #[m]      #FF
+    print('outlet %f'%x1.loc[367813,'val'])
+    print('outlet %f'%forcings.loc[367813,'precipitation'])
+    print('outlet %f'%snowmelt.loc[367813,'val'])
+
     #if(temperature != 0 and temperature <temp_thres):
     wh = (forcings['temperature'] !=0) & (forcings['temperature']<params['temp_threshold']) 
     states.loc[wh,'snow'] += CF_MMHR_M_MIN*DT*forcings['precipitation'][wh] #[m]
@@ -59,6 +63,8 @@ def runoff1(states:pd.DataFrame,
     #therefore nothing is diverted to static tank
     wh = forcings['frozen_ground']==1
     x2[wh] = x1[wh]
+    print('outlet %f'%x1.loc[367813,'val'])
+
     d1 = x1 - x2 # the input to static tank [m/min]
     out1= pd.DataFrame({
         'val1':forcings['evapotranspiration']*CF_ET*DT, #mm/month to m/min to m
@@ -122,6 +128,7 @@ def runoff1(states:pd.DataFrame,
     segs_in_DT = DT * 60.
     states['volume'] += (out2 + out3 + out4) * network['area_hillslope'] #[m]*[m2]  = [m3]
     #states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
+    # print('outlet %f'%states.loc[367813,'static'])
     print('completed runoff in %f sec'%(mytime.time()-t1))
 
 def check_input_names(states:pd.DataFrame,
