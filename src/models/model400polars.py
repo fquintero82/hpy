@@ -6,13 +6,14 @@ import polars as pl
 from polars import col
 import numpy as np
 
-CF_MMHR_M_MIN = np.float32(1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
-CF_MELTFACTOR= np.float32((1/(24*60.0)) *(1/1000.0)) # mm/day/degree to m/min/degree
-CF_ET = np.float32((1e-3 / (30.0*24.0*60.0)))
-CF_METER_TO_MM = 1000
-CF_DAYS_TO_MINUTES = 24 * 60
 
-def model(df:pl.DataFrame,DT):
+
+def model(df:pl.DataFrame,DT,debug=False):
+    CF_MMHR_M_MIN = np.float32(1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
+    CF_MELTFACTOR= np.float32((1/(24*60.0)) *(1/1000.0)) # mm/day/degree to m/min/degree
+    CF_ET = np.float32((1e-3 / (30.0*24.0*60.0)))
+    CF_METER_TO_MM = 1000
+    CF_DAYS_TO_MINUTES = 24 * 60
 
     df = df.with_columns(
         pl.when(col('temperature')==0)
@@ -38,8 +39,10 @@ def model(df:pl.DataFrame,DT):
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(CF_MMHR_M_MIN*DT*col('precipitation') + col('snowmelt'))
-        .alias('x1')
+        .alias('x1') #[m]
     )
+    df.filter(df['link_id']==367813)['x1'].item()
+
     df = df.with_columns(
         pl.when((col('temperature')!=0)&(col('temperature')< col('temp_threshold')))
         .then(col('snow') + CF_MMHR_M_MIN*DT*col('precipitation'))
@@ -60,22 +63,9 @@ def model(df:pl.DataFrame,DT):
         (CF_METER_TO_MM*col('snow')*col('area_hillslope'))
         .alias('basin_swe')
     )
-    # df = df.with_columns(
-    #     (pl.lit(0))
-    #     .alias('val1')
-    # )
+
     df = df.with_columns(
-        (col('x1') + col('static') - col('max_storage')/1000)
-        .alias('val2')
-    )
-    # df = df.with_columns(
-    #     pl.when(col('val1')<=col('val2'))
-    #     .then(col('val2'))
-    #     .otherwise(col('val1'))
-    #     .alias('x2')
-    # )
-    df = df.with_columns(
-        pl.max_horizontal(0,'val2')
+        pl.max_horizontal(0,(col('x1') + col('static') - col('max_storage')/1000.))
         .alias('x2')
     )
 
@@ -85,23 +75,22 @@ def model(df:pl.DataFrame,DT):
         .otherwise(col('x2'))
         .alias('x2')
     )
+    # print((df['x2']).describe()[2])
+    v = df.filter(df['link_id']==367813)['x2'].item()
+    print('outlet %f'%v)
     df = df.with_columns(
-        (col('evapotranspiration')*CF_ET*DT)
-        .alias('val1')
-    )
-    df = df.with_columns(
-        (col('static'))
-        .alias('val2')
-    )
-
-    df = df.with_columns(
-        pl.min_horizontal('val1','val2')
+        pl.min_horizontal(
+            (col('evapotranspiration')*CF_ET*DT),
+            'static'
+            )
         .alias('out1')
     )
     df = df.with_columns(
         (col('static') + col('x1') - col('x2')-col('out1'))
         .alias('static')
     )
+    # print((df['static']+df['x1']-df['x2']-df['out1']).describe()[2])
+
 
     df = df.with_columns(
         (CF_METER_TO_MM*col('out1')*col('area_hillslope'))
@@ -191,6 +180,7 @@ def model(df:pl.DataFrame,DT):
         ((col('out4')+col('out3')+col('out2')) *col('area_hillslope'))
         .alias('volume')
     )
+
     return df
 
 def transfer_df(states:pd.DataFrame,df):
@@ -219,9 +209,11 @@ def runoff1(states:pd.DataFrame,
     n = len(params.columns)
     c = pl.from_pandas(params.iloc[:,1:n])
     d = pl.from_pandas(network[['channel_length','area_hillslope']])
-    DT = time_step_sec
     df = pl.concat([a,b,c,d],how='horizontal')
-    df = model(df,DT)
+    # if (states.index==forcings.index).all()==False:
+    #     print('different order')
+    #     quit()
+    df = model(df,DT,debug=True)
     transfer_df(states,df)
     print('completed runoff in %f sec'%(mytime.time()-t1))
 
