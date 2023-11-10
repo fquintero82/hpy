@@ -2,6 +2,7 @@ from hlm import HLM
 import polars as pl
 from polars import col
 import numpy as np
+from models.model400names import STATES_NAMES
 
 CF_MMHR_M_MIN = np.float32(1./1000.)*(1/60.) #factor .converts [mm/hr] to [m/min]
 CF_MELTFACTOR= np.float32((1/(24*60.0)) *(1/1000.0)) # mm/day/degree to m/min/degree
@@ -13,21 +14,12 @@ CF_DAYS_TO_MINUTES = 24 * 60
 def model(df:pl.DataFrame):
 
     df = df.with_columns(
-        pl.min_horizontal(col("precipitation")+1,col('precipitation')-1)
-        .alias('test')
-    )
-
-    df = df.with_columns(
         pl.when(col('temperature')==0)
         .then(col('precipitation')* CF_MMHR_M_MIN * DT)
         .otherwise(0)
         .alias('x1')
     )
-    df = df.with_columns(
-        pl.when(col('temperature')>=col('temp_threshold'))
-        .then(col('snow'))
-        .alias('val1')
-    )
+    
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(col('temperature')*(col('melt_factor')*CF_MELTFACTOR * DT))
@@ -48,13 +40,15 @@ def model(df:pl.DataFrame):
         .alias('x1')
     )
     df = df.with_columns(
-        pl.when(col('temperature')!=0 & col('temperature')< col('temp_threshold'))
+        pl.when((col('temperature')!=0)&(col('temperature')< col('temp_threshold')))
         .then(col('snow') + CF_MMHR_M_MIN*DT*col('precipitation'))
+        .otherwise(col('snow'))
         .alias('snow')
     )
     df = df.with_columns(
-        pl.when(col('temperature')!=0 & col('temperature')< col('temp_threshold'))
+        pl.when((col('temperature')!=0)&(col('temperature')< col('temp_threshold')))
         .then(0)
+        .otherwise(col('x1'))
         .alias('x1')
     )
     df = df.with_columns(
@@ -65,20 +59,25 @@ def model(df:pl.DataFrame):
         (CF_METER_TO_MM*col('snow')*col('area_hillslope'))
         .alias('basin_swe')
     )
-    df = df.with_columns(
-        (pl.lit(0))
-        .alias('val1')
-    )
+    # df = df.with_columns(
+    #     (pl.lit(0))
+    #     .alias('val1')
+    # )
     df = df.with_columns(
         (col('x1') + col('static') - col('max_storage')/1000)
         .alias('val2')
     )
+    # df = df.with_columns(
+    #     pl.when(col('val1')<=col('val2'))
+    #     .then(col('val2'))
+    #     .otherwise(col('val1'))
+    #     .alias('x2')
+    # )
     df = df.with_columns(
-        pl.when(col('val1')<=col('val2'))
-        .then(col('val2'))
-        .otherwise(col('val1'))
+        pl.max_horizontal(0,'val2')
         .alias('x2')
     )
+
     df = df.with_columns(
         pl.when(col('frozen_ground')==1)
         .then(col('x1'))
@@ -95,7 +94,7 @@ def model(df:pl.DataFrame):
     )
 
     df = df.with_columns(
-        pl.min_horizontal('val1','val1')
+        pl.min_horizontal('val1','val2')
         .alias('out1')
     )
     df = df.with_columns(
@@ -188,9 +187,15 @@ def model(df:pl.DataFrame):
         .alias('basin_groundwater')
     )
     df= df.with_columns(
-        (col('out4') *col('area_hillslope'))
+        ((col('out4')+col('out3')+col('out2')) *col('area_hillslope'))
         .alias('volume')
     )
+    return df
+
+def transfer_df(hlm_instance,df):
+    col = hlm_instance.forcings.columns
+    for i in range(len(col)):
+        hlm_instance.states[col[i]]=np.array(df[col[i]].to_numpy(),dtype=STATES_NAMES[col[i]])
 
 instance= HLM()
 
@@ -198,10 +203,13 @@ config_file = 'examples/cedarrapids1/cedar_example.yaml'
 instance.init_from_file(config_file,option_solver=False)
 
 a = pl.from_pandas(instance.states)
-b = pl.from_pandas(instance.forcings.iloc[:,1:-1])
-c = pl.from_pandas(instance.params.iloc[:,1:-1])
+n = len(instance.forcings.columns)
+b = pl.from_pandas(instance.forcings.iloc[:,1:n])
+n = len(instance.params.columns)
+c = pl.from_pandas(instance.params.iloc[:,1:n])
 d = pl.from_pandas(instance.network[['channel_length','area_hillslope']])
 N = len(instance.network)
 DT = instance.time_step_sec
 df = pl.concat([a,b,c,d],how='horizontal')
-model(df)
+df = model(df)
+transfer_df(instance,df)
