@@ -26,8 +26,8 @@ def plot2():
     
 def test1():
     instance = HLM()
-    config_file = 'examples/cedarrapids1/cedar_example2.yaml'
-    instance.init_from_file(config_file)
+    config_file = 'examples/cedarrapids1/cedar_imac.yaml'
+    instance.init_from_file(config_file,option_solver=False)
     for ii in range(10):
         print(ii)
         instance.advance_one_step()
@@ -46,7 +46,7 @@ def test3():
 
 def test4():
     instance = HLM()
-    config_file = 'examples/cedarrapids1/cedar_example.yaml'
+    config_file = 'examples/cedarrapids1/cedar_imac.yaml'
     instance.init_from_file(config_file,option_solver=False)
     instance.advance()
 
