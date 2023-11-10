@@ -40,13 +40,13 @@ def test6():
     f ='examples/cedarrapids1/367813.pkl'
     df = pd.read_pickle(f)
     process_all(df)
-    df.to_pickle('/Users/felipe/tmp/367813_macbook.pkl')
+    df.to_pickle('/Users/felipe/tmp/367813_imac.pkl')
 
 def test7():
     f ='E:/projects/hpy/examples/cedarrapids1/367813.pkl'
     df = pd.read_pickle(f)
     process_all(df)
-    df.to_pickle('E:/projects/hpy/examples/cedarrapids1/367813.pkl')
+    df.to_pickle('/Users/felipe/tmp/367813_imac.pkl')
 
 def test8():
     f ='examples/hydrosheds/conus.pkl'
@@ -65,6 +65,6 @@ def test8():
 # #    file2.close()
 
 if __name__ == "__main__":
-    test8()
+    test6()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)
