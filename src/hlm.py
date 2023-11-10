@@ -2,7 +2,9 @@
 #""" bmi compatible version of Hillslope Link Model"""
 import pandas as pd
 import numpy as np
-from models.model400 import runoff1
+# from models.model400 import runoff1
+from models.model400polars import runoff1
+
 from models.model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
 from models.routing import transfer5,transfer9
 from solver import create_solver
