@@ -223,6 +223,8 @@ def runoff1(states:pd.DataFrame,
     df = pl.concat([a,b,c,d],how='horizontal')
     df = model(df,DT)
     transfer_df(states,df)
+    print('completed runoff in %f sec'%(mytime.time()-t1))
+
 
 def check_input_names(states:pd.DataFrame,
     forcings:pd.DataFrame,
@@ -344,5 +346,6 @@ def check_input_values(states:pd.DataFrame,
         return False
     
     return flag
+
 
 
