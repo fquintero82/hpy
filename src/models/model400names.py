@@ -60,7 +60,7 @@ STATES_DEFAULT_VALUES = {'link_id':1,
                 'basin_groundwater':0
                 }
 
-FORCINGS_NAMES=['link_id','precipitation','evapotranspiration','temperature','frozen_ground','discharge']
+FORCINGS_NAMES=['link_id','precipitation','evapotranspiration','temperature','frozen_ground','obsdischarge']
 
 CF_NAMES = {
     'params.surface_velocity':'params.surface_velocity',
@@ -78,7 +78,7 @@ CF_NAMES = {
     'forcings.evapotranspiration':'water_evapotranspiration_flux',
     'forcings.temperature':'air_temperature',
     'forcings.frozen_ground':'soil_temperature',
-    'forcings.discharge':'water_volume_transport_into_sea_water_from_rivers',
+    'forcings.obsdischarge':'water_volume_transport_into_sea_water_from_rivers',
     'states.snow':'surface_snow_amount',
     'states.static':'',
     'states.surface':'surface_runoff_amount',
@@ -109,7 +109,7 @@ VAR_TYPES ={
     'forcings.evapotranspiration':'float',
     'forcings.temperature':'float',
     'forcings.frozen_ground':'int',
-    'forcings.discharge':'float',
+    'forcings.obsdischarge':'float',
     'states.snow':'float',
     'states.static':'float',
     'states.surface':'float',
@@ -134,7 +134,7 @@ CF_UNITS={
     'forcings.evapotranspiration':'mm h-1',
     'forcings.temperature':'C',
     'forcings.frozen_ground':'',
-    'forcings.discharge':'m3 s-1',
+    'forcings.obsdischarge':'m3 s-1',
     'states.snow':'m',
     'states.static':'m',
     'states.surface':'m',
@@ -167,7 +167,7 @@ CF_LOCATION={
     'forcings.evapotranspiration':'face',
     'forcings.temperature':'face',
     'forcings.frozen_ground':'face',
-    'forcings.discharge':'edge',
+    'forcings.obsdischarge':'edge',
     'states.snow':'face',
     'states.static':'face',
     'states.surface':'face',
