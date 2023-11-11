@@ -41,7 +41,6 @@ def model(df:pl.DataFrame,DT,debug=False):
         .then(CF_MMHR_M_MIN*DT*col('precipitation') + col('snowmelt'))
         .alias('x1') #[m]
     )
-    df.filter(df['link_id']==367813)['x1'].item()
 
     df = df.with_columns(
         pl.when((col('temperature')!=0)&(col('temperature')< col('temp_threshold')))
@@ -76,8 +75,7 @@ def model(df:pl.DataFrame,DT,debug=False):
         .alias('x2')
     )
     # print((df['x2']).describe()[2])
-    v = df.filter(df['link_id']==367813)['x2'].item()
-    print('outlet %f'%v)
+
     df = df.with_columns(
         pl.min_horizontal(
             (col('evapotranspiration')*CF_ET*DT),
@@ -177,7 +175,7 @@ def model(df:pl.DataFrame,DT,debug=False):
         .alias('basin_groundwater')
     )
     df= df.with_columns(
-        ((col('out4')+col('out3')+col('out2')) *col('area_hillslope'))
+        (col('volume')+ (col('out4')+col('out3')+col('out2')) *col('area_hillslope'))
         .alias('volume')
     )
 
