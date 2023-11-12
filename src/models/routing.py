@@ -329,7 +329,9 @@ def transfer5(hlm_object):
 
     for ii in range(len(var)):
         hlm_object.states[var[ii]] = input[ii,:] /hlm_object.network['drainage_area']
-    print('vars routing in %f' % (time.time()-t))
+    
+    x = int(1000*(time.time()-t))
+    print('vars routing in {x} msec'.format(x=x))
 # #this doesnt work well
 # def transfer3(hlm_object):
 #     #da = np.array(hlm_object.network['drainage_area']*1e6,dtype=np.float32)
@@ -503,5 +505,5 @@ def transfer9(hlm_object):
     out = hlm_object.NetworkSymbolic.eval(initial_state)
     hlm_object.states['volume'] = out
     hlm_object.states['discharge'] = out / hlm_object.network['channel_length'] * hlm_object.params['river_velocity']
-
-    print('discharge routing in %f' % (time.time()-t))
+    x = int(1000*(time.time()-t))
+    print('discharge routing in {x} msec'.format(x=x))
