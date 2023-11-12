@@ -213,7 +213,8 @@ def runoff1(states:pd.DataFrame,
     #     quit()
     df = model(df,DT,debug=True)
     transfer_df(states,df)
-    print('completed runoff in %f sec'%(mytime.time()-t1))
+    x = int(1000*(mytime.time()-t1))
+    print('completed runoff in {x} msec'.format(x=x))
 
 
 def check_input_names(states:pd.DataFrame,
