@@ -40,7 +40,8 @@ def save_to_netcdf(states:pd.DataFrame,params:pd.DataFrame,time:int,filename:str
         print('NETCDF file is corrupted')
         print('Delete the file and restart')
         quit()
-    print('saved to netcdf in {x} sec'.format(x=mytime.time()-t))
+    x = int(1000*(mytime.time()-t))
+    print('saved to netcdf in {x} msec'.format(x=x))
 
 def create_empty_ncdf(states:pd.DataFrame,params:pd.DataFrame,filename:str):
     try:
