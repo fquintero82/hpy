@@ -108,14 +108,14 @@ class HLM(object):
                     except Exception as e:
                         print(e)
                         quit()
-        print('forcings loaded in {x} sec'.format(x=mytime.time()-t))
+        x = int((mytime.time()-t)*1000)
+        print('forcings loaded in {x} msec'.format(x=x))
                 
     
     def advance_one_step(self):
         # print(self.time)
         self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
-        # transfer2(self) # volume, discharge with ode
         transfer9(self) # volume, discharge symbolic
         transfer5(self) #basin vars
         save_to_netcdf(self.states,self.params,self.time,self.outputfile)
