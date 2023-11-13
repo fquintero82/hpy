@@ -1,0 +1,27 @@
+---
+description: simulation of iowa
+network: /Users/felipe/tmp/iowa/iowa_network.pkl
+parameters: default
+initial_states: /Users/felipe/tmp/iowa/initstate.pkl
+init_time: 1199145600
+end_time: 1230768000
+time_step: 3600
+forcings:
+ precipitation:
+  script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
+  path: /Users/felipe/tmp/st4_2008/
+  prefix: iowa_
+ evapotranspiration:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv
+ temperature:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/temperature.csv
+ frozen_ground:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
+output_file: 
+  script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
+  path: /Users/felipe/tmp/iowa/iowa_2008.nc
+
+
