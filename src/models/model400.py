@@ -126,9 +126,7 @@ def runoff1(states:pd.DataFrame,
     states['volume'] += (out2 + out3 + out4) * network['area_hillslope'] #[m]*[m2]  = [m3]
     #states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
     # print('outlet %f'%states.loc[367813,'static'])
-    out2.loc[367813,'val']
-    out3.loc[367813,'val']
-    out4.loc[367813,'val']
+
 
     print('completed runoff in %f sec'%(mytime.time()-t1))
 
