@@ -11,7 +11,7 @@ import time
 import pickle
 import warnings
 from numba import njit,prange
-from utils.network.network_symbolic import process_all,process_unit,eval_all
+from utils.network.network_symbolic import process_all,process_unit,eval_all,_get_routing_term_indices,_pack_to_df,_eval5
 
 def eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
     #uneven values of x are the order
@@ -152,6 +152,14 @@ def test_eval_all():
     X = np.ones(shape=(N,))
     eval_all(expr,P,X,T)
 
+def test_polars_eval():
+    instance = HLM()
+    config_file = 'examples/cedarrapids1/cedar_imac.yaml'
+    instance.init_from_file(config_file,option_solver=False)
+    routing_term, idx,source_idx = _get_routing_term_indices(instance)
+    routing_df = _pack_to_df(routing_term, idx,source_idx)
+    X = np.ones(len(instance.network))
+    df2 = _eval5(idx,X,routing_df)
 
 # def process_all_map(network:pd.DataFrame):
 #     N = len(network)
@@ -206,7 +214,7 @@ def test_eval_all():
 #         a+=i
 #     print(a)
 if __name__ == '__main__':
-    test_eval_all()
+    test_polars_eval()
     # test_process_all()
     # test_eval_unit()
     # process_all()
