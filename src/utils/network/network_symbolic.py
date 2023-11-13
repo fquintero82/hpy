@@ -5,6 +5,7 @@ from multiprocessing import Pool
 import time
 from os import cpu_count
 import copy
+import polars as pl
 
 # https://stackoverflow.com/questions/69423036/use-eval-in-numba-numbalsoda#:~:text=eval%20is%20fundamentally%20incompatible%20with,calls)%20to%20be%20strongly%20typed.
 
@@ -54,6 +55,7 @@ class ProcessLink(object):
 class NetworkSymbolic(object):
     def __init__(self,hlm_object) -> None:
         self.routing_term, self.idx,self.indices = _get_routing_term_indices(hlm_object)
+        self.routing_df = _pack_to_df(self.routing_term, self.idx,self.indices)
     def eval(self,X:np.ndarray):
         return _eval4(self.idx,X,self.routing_term,self.indices)
 
@@ -98,8 +100,17 @@ def _eval4(idx:np.ndarray,X:np.ndarray,routing_term:np.ndarray,indices:np.ndarra
     val = routing_term * X[idx-1]
     # out = np.bincount(indices,weights=val)
     out = np.bincount(indices-1,weights=val)
-
     return out
+
+def _eval5(idx:np.ndarray,X:np.ndarray,routing_df:pl.DataFrame):
+    df = pl.DataFrame({'X':X[idx-1]})
+    df = pl.concat([routing_df,df],how='horizontal')
+    df = df.with_columns(
+        (pl.col('routing_term')*pl.col('X')).alias('val')
+    )
+    df1 = df.group_by('indices',maintain_order=True).agg(pl.col('val').sum())
+    val = df1['val'].to_numpy()
+    return val
 
 
 def process_all(network:pd.DataFrame):
@@ -156,11 +167,17 @@ def _get_routing_term_indices(hlm_object):
         print(e)
         quit()
     t = time.time()
-    onetimeterm = _eval_onetime(order,idx,P,t_in_hours)
+    routing_term = _eval_onetime(order,idx,P,t_in_hours)
     print('onetimeterm done in %f sec'%(time.time()-t))
-    return onetimeterm, idx,source_idx
+    return routing_term, idx,source_idx
 
-
+def _pack_to_df(routing_term, idx,indices):
+    df = pl.DataFrame({
+        'routing_term':routing_term,
+        'idx':idx,
+        'indices':indices
+        })
+    return df
 # def process_all2(network:pd.DataFrame):
 #     N = len(network)
 #     idx_upstream_links =network['idx_upstream_link'].to_numpy()
