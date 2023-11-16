@@ -11,7 +11,7 @@ import time
 import pickle
 import warnings
 from numba import njit,prange
-from utils.network.network_symbolic import process_all,process_unit,eval_all,_get_routing_term_indices,_pack_to_df,_eval5
+from utils.network.network_symbolic import process_all,process_unit,eval_all,_get_routing_term_indices,_pack_to_df,_eval5,_eval4
 
 def eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
     #uneven values of x are the order
@@ -157,10 +157,23 @@ def test_polars_eval():
     config_file = 'examples/cedarrapids1/cedar_imac.yaml'
     instance.init_from_file(config_file,option_solver=False)
     routing_term, idx,source_idx = _get_routing_term_indices(instance)
+    t=time.time()
     routing_df = _pack_to_df(routing_term, idx,source_idx)
     X = np.ones(len(instance.network))
     df2 = _eval5(idx,X,routing_df)
+    x = int(1000*(time.time()-t))
+    print('done in {x} msec'.format(x=x))
 
+def test_numpy_eval():
+    instance = HLM()
+    config_file = 'examples/cedarrapids1/cedar_imac.yaml'
+    instance.init_from_file(config_file,option_solver=False)
+    routing_term, idx,source_idx = _get_routing_term_indices(instance)
+    X = np.ones(len(instance.network))
+    t=time.time()
+    out = _eval4(idx,X,routing_term,source_idx)
+    x = int(1000*(time.time()-t))
+    print('done in {x} msec'.format(x=x))
 # def process_all_map(network:pd.DataFrame):
 #     N = len(network)
 #     idx_upstream_links = network['idx_upstream_link'].to_numpy()
@@ -215,6 +228,7 @@ def test_polars_eval():
 #     print(a)
 if __name__ == '__main__':
     test_polars_eval()
+    test_numpy_eval()
     # test_process_all()
     # test_eval_unit()
     # process_all()
