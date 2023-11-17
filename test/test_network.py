@@ -52,19 +52,10 @@ def test8():
     f ='examples/hydrosheds/conus.pkl'
     df = pd.read_pickle(f)
     process_all(df)
-    df.to_pickle('/Users/felipe/tmp/conus_macbook.pkl')
+    df.to_pickle('/Users/felipe/tmp/conus_imac.pkl')
 
-# def testadjmat():
-#     network = get_default_network()
-#     A = get_adjacency_matrix(network,False)
-#     file1 = open('examples/cedarrapids1/367813_adj.pkl','wb')
-#     #file2 = open('examples/cedarrapids1/367813_adj.np','wb')
-#     pickle.dump(A,file1)
-#  #   np.save(file2,A) #same size as pkl
-#     file1.close()
-# #    file2.close()
 
 if __name__ == "__main__":
-    test6()
+    test8()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)
