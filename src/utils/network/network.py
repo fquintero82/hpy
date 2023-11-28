@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from utils.params.params_from_prm_file import params_from_prm_file
+from utils.params.params_from_prm_file import params_from_prm_file,params_from_prm_file_split
 from utils.network.network_symbolic import set_routing_expression
 import os
 from os.path import splitext
@@ -191,12 +191,11 @@ def network_from_rvr_file(rvr_file)->pd.DataFrame:
 
     def lids_and_ups1(data):
         n = len(data)
-        x = data[2:n:3]
+        x = data[0:n:3]
         x = [int(a) for a in x]
-        y = data[3:n:3]
+        y = data[1:n:3]
         lids = np.array(x,dtype=np.int32)
         uplinks = np.empty(shape=len(x),dtype=object)
-        z = []
         for i in range(len(x)):
             a = [eval(j) for j in y[i].split()]
             if len(a)>1:
@@ -241,9 +240,12 @@ def network_from_rvr_file(rvr_file)->pd.DataFrame:
     return df
 
 
-def combine_rvr_prm(prm_file,rvr_file)->pd.DataFrame:
+def combine_rvr_prm(prm_file,rvr_file,paramsplit=False)->pd.DataFrame:
     df1 = network_from_rvr_file(rvr_file)
-    df2 = params_from_prm_file(prm_file)
+    if paramsplit:
+        df2 = params_from_prm_file_split(prm_file)
+    else:
+        df2 = params_from_prm_file(prm_file)
     print('indexing network')
     get_idx_up_down(df1)
     print('done indexing network')
