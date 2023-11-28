@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import sys
-
+from utils.network.network import get_idx_up_down
+from utils.network.network_symbolic import set_routing_expression
 def _get_basin_ids(idx:np.int32,
                     idx_upstream_links:np.ndarray,
                     expr:list):
@@ -16,7 +17,7 @@ def get_basin_ids(idx:np.int32,idx_upstream_links:np.ndarray):
     _get_basin_ids(idx,idx_upstream_links,expr)
     return expr
 
-def network_subset(network:pd.DataFrame,outlet:int):
+def network_subset(network:pd.DataFrame,outlet:int)->pd.DataFrame:
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
     wh = np.where(network['link_id'].to_numpy()==outlet)[0][0]
     idxs = network['idx'].to_numpy()
@@ -26,8 +27,14 @@ def network_subset(network:pd.DataFrame,outlet:int):
     sys.setrecursionlimit(int(1E3))
     basin_idx = np.array(x[1:len(x):2])
     mask = np.isin(idxs, basin_idx)
-    subbasin = network[mask]
-    return subbasin
+    # subbasin = network[mask]
+    network = network[mask]
+    # df = get_idx_up_down(subbasin)
+    network['idx']= np.arange(len(network)) + 1 #index starts at 1. idx 0 is needed for operations
+    network['idx_downstream_link'] = -1 * np.ones(shape=(len(network)))
+    network = get_idx_up_down(network)
+    network = set_routing_expression(network)
+    return network
 
 f = '/Users/felipe/tmp/conus_imac.pkl'
 df = pd.read_pickle(f)
