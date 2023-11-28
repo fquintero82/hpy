@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from utils.params.params_from_prm_file import params_from_prm_file
+from utils.network.network_symbolic import set_routing_expression
 import os
 from os.path import splitext
 import pickle
@@ -58,15 +59,28 @@ def get_network_from_file(options=None):
             print('network pickle file created with different version of pandas')
             print(e)
         quit()
+
     if extension =='.rvr':
+        if 'parameters' not in list(options.keys()):
+            print('Error. No parameter option in yaml')
+            quit()
         prm = options['parameters']
+        # flag, f = check_if_pkl_exists(f)
         df = combine_rvr_prm(prm,f)
         return df
     
 def update_network_pickle(network:pd.DataFrame,fileout:str):
     network.to_pickle(fileout)
-    
-def get_idx_up_down(df):
+
+def check_if_pkl_exists(rvr_file:str):
+    r, ext = os.path.splitext(rvr_file)
+    f = r+'.pkl'
+    flag = False
+    if os.path.isfile(f)==True:
+        flag=True
+    return flag, f
+
+def get_idx_up_down(df)->pd.DataFrame:
     print('indexing')
     upstream_link = np.array(df['upstream_link']) #get  upstream linkids
     #_up1 = np.array([np.min(x) for x in _up])
@@ -104,16 +118,54 @@ def get_idx_up_down(df):
     df['idx_downstream_link'] = idx_downstream_link
     return df
 
-    #ii=0
-    #process_row(ii,upstream_link,link_id,idx,idx_upstream_link,idx_downstream_link)
-    #pool = multiprocessing.Pool(processes=1)
-   # args = [(ii,upstream_link,link_id,idx,idx_upstream_link,downstream_link,idx_downstream_link)]
-    #pool.apply_async(process_row,args)
-    #result = pool.starmap(process_row,args)
+# def network_from_rvr_file(rvr_file)->pd.DataFrame:
+#     def get_lid(line:str):
+#         try:
+#             items = line.split()
+#             _lid = np.int32(items[0])
+#             _n = int(items[1])
+#             _uplinks = -1
+#             if(_n>0):
+#                 _uplinks = np.array(items[2:],dtype=np.int32)
+#             return _lid
+#         except ValueError as e:
+#             print('Error reading rvr file at line %s'%line)
+#             print(e)
+#             quit()
+    
+#     def get_uplink(line:str):
+#         items = line.split()
+#         _lid = int(items[0])
+#         _n = int(items[1])
+#         _uplinks = -1
+#         if(_n>0):
+#             _uplinks = np.array(items[2:],dtype=np.int32)
+#         return _uplinks
 
+#     def reshape_rvr(data):
+#         n = len(data)
+#         x = data[2:n:3]
+#         y = data[3:n:3]
+#         z = [x + y for i in range(n)]
 
+#     f = open(rvr_file,'r')
+#     data = f.readlines()
+#     nlines = int(data[0])
+#     df = pd.DataFrame(data=np.zeros(shape=(nlines,len(NETWORK_NAMES))),
+#         columns=list(NETWORK_NAMES.keys()),
+#         dtype=object)
+#     df[:]=-1
+#     data = data[2:]
+#     _lid = list(map(get_lid,data))
+#     df['link_id'] = np.array(_lid)
+#     _up = list(map(get_uplink,data))
+#     df['upstream_link'] = _up
+#     df['idx']= np.arange(nlines) + 1 #index starts at 1. idx 0 is needed for operations
+#     df.index = df[list(NETWORK_NAMES.keys())[0]]
+#     df.info()
+#     return df
 
-def network_from_rvr_file(rvr_file):
+def network_from_rvr_file(rvr_file)->pd.DataFrame:
     def get_lid(line:str):
         try:
             items = line.split()
@@ -128,7 +180,6 @@ def network_from_rvr_file(rvr_file):
             print(e)
             quit()
     
-    
     def get_uplink(line:str):
         items = line.split()
         _lid = int(items[0])
@@ -138,6 +189,35 @@ def network_from_rvr_file(rvr_file):
             _uplinks = np.array(items[2:],dtype=np.int32)
         return _uplinks
 
+    def lids_and_ups1(data):
+        n = len(data)
+        x = data[2:n:3]
+        x = [int(a) for a in x]
+        y = data[3:n:3]
+        lids = np.array(x,dtype=np.int32)
+        uplinks = np.empty(shape=len(x),dtype=object)
+        z = []
+        for i in range(len(x)):
+            a = [eval(j) for j in y[i].split()]
+            if len(a)>1:
+                uplinks[i] = a[2:-1]
+            else:
+                uplinks[i] = [-1]
+        return lids,uplinks
+
+    def lids_and_ups2(data):
+        n = len(data)
+        x = data[2:n]
+        lids = np.empty(x,dtype=np.int32)
+        uplinks = np.empty(shape=len(x),dtype=object)
+        for i in range(len(x)):
+            a = [eval(j) for j in y[i].split()]
+            lids[i] = int(a[0])
+            if a[1]>1:
+                uplinks[i] = a[2:-1]
+            else:
+                uplinks[i] = [-1]
+        return lids,uplinks
     
     f = open(rvr_file,'r')
     data = f.readlines()
@@ -147,16 +227,21 @@ def network_from_rvr_file(rvr_file):
         dtype=object)
     df[:]=-1
     data = data[2:]
-    _lid = list(map(get_lid,data))
-    df['link_id'] = np.array(_lid)
-    _up = list(map(get_uplink,data))
-    df['upstream_link'] = _up
+    if len(data) > 1.5*nlines:
+        lids,uplinks = lids_and_ups1(data)
+    else:
+        lids,uplinks = lids_and_ups2(data)
+    # _lid = list(map(get_lid,data))
+    df['link_id'] = np.array(lids)
+    # _up = list(map(get_uplink,data))
+    df['upstream_link'] = uplinks
     df['idx']= np.arange(nlines) + 1 #index starts at 1. idx 0 is needed for operations
     df.index = df[list(NETWORK_NAMES.keys())[0]]
     df.info()
     return df
 
-def combine_rvr_prm(prm_file,rvr_file):
+
+def combine_rvr_prm(prm_file,rvr_file)->pd.DataFrame:
     df1 = network_from_rvr_file(rvr_file)
     df2 = params_from_prm_file(prm_file)
     print('indexing network')
@@ -167,8 +252,10 @@ def combine_rvr_prm(prm_file,rvr_file):
     df = df1.merge(df2,left_index=True,right_index=True)
     df = df.astype(NETWORK_NAMES)    
     del df1, df2
+    set_routing_expression(df)
     r, ext = os.path.splitext(rvr_file)
     f2 = r+'.pkl'
+    print('saved network to %s'%f2)
     df.to_pickle(f2)
     return df
 
