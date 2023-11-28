@@ -56,8 +56,14 @@ def test5():
     instance.init_from_file(config_file,option_solver=False)
     instance.advance()   
 
+def test6():
+    instance = HLM()
+    config_file = '/Users/felipe/tmp/iowa_operational/iowa_operational_imac.yaml'
+    instance.init_from_file(config_file,option_solver=False)
+    instance.advance()   
+
 if __name__ == "__main__":
-    test1()
+    test6()
     #plot1()
 
     
