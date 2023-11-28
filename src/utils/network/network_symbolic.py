@@ -112,8 +112,10 @@ def _eval5(idx:np.ndarray,X:np.ndarray,routing_df:pl.DataFrame):
     val = df1['val'].to_numpy()
     return val
 
+def set_routing_expression(network:pd.DataFrame)->pd.DataFrame:
+    return(process_all(network))
 
-def process_all(network:pd.DataFrame):
+def process_all(network:pd.DataFrame)->pd.DataFrame:
     N = len(network)
     idx_upstream_links = network['idx_upstream_link'].to_numpy()
     idxs = network['idx'].to_numpy()
@@ -126,6 +128,7 @@ def process_all(network:pd.DataFrame):
     for i in np.arange(len(out)):
         expression[i] = np.array(out[i])
     network['expression'] = expression
+    return network
     
 def eval_all2(expr,P,X,T):
     N = len(expr)
