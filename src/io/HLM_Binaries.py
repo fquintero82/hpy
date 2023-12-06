@@ -3,8 +3,9 @@ import numpy as np
 
     
 dir = '/Users/felipe/hio/hio/examples/HLM_Binaries'
-prefix = ''
+
 def get_values(time: int,options=None):
+    prefix = ''
     if options is not None:
         dir = options['path']
     if 'prefix' in list(options.keys()):
