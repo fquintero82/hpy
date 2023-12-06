@@ -54,8 +54,13 @@ def test8():
     process_all(df)
     df.to_pickle('/Users/felipe/tmp/conus_imac.pkl')
 
+def test9():
+    rvr= '/Users/felipe/tmp/iowa_operational/ifis_iowa.rvr'
+    prm= '/Users/felipe/tmp/iowa_operational/ifis_iowa.prm'
+    df = combine_rvr_prm(prm,rvr,paramsplit=True)
+
 
 if __name__ == "__main__":
-    test8()
+    test9()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)
