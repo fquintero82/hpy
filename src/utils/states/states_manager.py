@@ -1,4 +1,5 @@
 from utils.states.states_default import get_default_states
+from utils.states.states_from_nc import states_from_nc
 import os
 import pandas as pd
 
@@ -22,5 +23,11 @@ def get_states_from_manager(options=None,network:pd.DataFrame=None):
             print('states pickle file created with different version of pandas')
             print(e)
         quit()
+    if extension == '.nc':
+        if 'init_time' not in list(options.keys()):
+            print('Error. No init time option in yaml')
+            quit()
+        init_time = options['init_time']
+        df = states_from_nc(f,init_time,network)
     if extension == '.csv':
         pass   
