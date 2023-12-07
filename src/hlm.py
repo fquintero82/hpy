@@ -12,7 +12,8 @@ from yaml import Loader
 import yaml
 from utils.params.params_manager import get_params_from_manager
 from utils.forcings.forcing_manager import get_default_forcings
-from utils.states.states_default import get_default_states
+# from utils.states.states_default import get_default_states
+from utils.states.states_manager import get_states_from_manager
 from utils.network.network import get_network_from_file
 from utils.serialization import save_to_netcdf
 from utils.network.network_symbolic import NetworkSymbolic
@@ -57,7 +58,8 @@ class HLM(object):
         self.end_time = d['end_time']
         self.time_step_sec= d['time_step']
         self.network = get_network_from_file(self.configuration)
-        self.states = get_default_states(self.network)
+        # self.states = get_default_states(self.network)
+        self.states = get_states_from_manager(d,self.network)
         self.params = get_params_from_manager(self.configuration,self.network)
         self.forcings = get_default_forcings(self.network)
         self.outputfile = d['output_file']['path']
