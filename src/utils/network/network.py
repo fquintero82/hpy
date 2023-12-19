@@ -208,7 +208,7 @@ def network_from_rvr_file(rvr_file)->pd.DataFrame:
         n = len(data)
         x = data[2:n]
         lids = np.empty(x,dtype=np.int32)
-        uplinks = np.empty(shape=len(x),dtype=object)
+        uplinks = np.empty(shape=len(x),dtype=object) 
         for i in range(len(x)):
             a = [eval(j) for j in y[i].split()]
             lids[i] = int(a[0])
