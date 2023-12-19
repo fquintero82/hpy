@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from model400names import STATES_NAMES
+from models.model400names import STATES_NAMES
 import sys
 from  os.path import isfile
 from netCDF4 import Dataset
@@ -25,7 +25,8 @@ def check_file(ncfile,unixtime:np.int32):
         quit()
     root = Dataset(ncfile, mode='r')
     time = root['time'][:]
-    check = unixtime in time
+    # check = unixtime in time
+    check = np.isin([unixtime],time)[0]
     root.close()
     if check == False:
         print('unixtime %s not in nc file. '%unixtime)
