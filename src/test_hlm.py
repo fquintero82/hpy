@@ -35,6 +35,7 @@ def test1():
 def test2():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_example_windows.yaml'
+    config_file = 'E:/projects/et/hydrology/modis_climatology/iowa_modis_climatology.yaml'
     instance.init_from_file(config_file,option_solver=False)
     instance.advance()
 
@@ -63,7 +64,7 @@ def test6():
     instance.advance()   
 
 if __name__ == "__main__":
-    test6()
+    test2()
     #plot1()
 
     
