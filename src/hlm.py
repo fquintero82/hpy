@@ -7,7 +7,7 @@ from models.model400polars import runoff1
 
 from models.model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
 from models.routing import transfer5,transfer9
-from solver import create_solver
+#from solver import create_solver
 from yaml import Loader
 import yaml
 from utils.params.params_manager import get_params_from_manager
@@ -38,8 +38,8 @@ class HLM(object):
         self.network= None
         self.outputfile =None
         self.configuration = None
-        self.pathsolver=None
-        self.ODESOLVER =None
+        #self.pathsolver=None
+        #self.ODESOLVER =None
         self.NetworkSymbolic=None
 
     
@@ -66,11 +66,11 @@ class HLM(object):
         self.NetworkSymbolic = NetworkSymbolic(self)
 
         if option_solver==True:
-            self.pathsolver = d['solver']
-            self.ODESOLVER = create_solver(self)
+            pass
+            #self.pathsolver = d['solver']
+            #self.ODESOLVER = create_solver(self)
         
 
-        ...
 
 
     def get_time(self)->int:
