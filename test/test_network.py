@@ -59,8 +59,13 @@ def test9():
     prm= '/Users/felipe/tmp/iowa_operational/ifis_iowa.prm'
     df = combine_rvr_prm(prm,rvr,paramsplit=True)
 
+def test10():
+    rvr = 'C:/Users/fquinteroduque/Desktop/tmp/ifisff/topo.rvr'
+    prm = 'C:/Users/fquinteroduque/Desktop/tmp/ifisff/params.prm'
+    df = combine_rvr_prm(prm,rvr,paramsplit=False)
+    df.to_pickle('E:/projects/et/hydrology/iowa_win.pkl')
 
 if __name__ == "__main__":
-    test9()
+    test10()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)
