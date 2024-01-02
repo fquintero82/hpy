@@ -210,7 +210,7 @@ def network_from_rvr_file(rvr_file)->pd.DataFrame:
         lids = np.empty(shape=len(x),dtype=np.int32)
         uplinks = np.empty(shape=len(x),dtype=object) 
         for i in range(len(x)):
-            a = [eval(j) for j in y[i].split()]
+            a = [eval(j) for j in x[i].split()]
             lids[i] = int(a[0])
             if a[1]>1:
                 uplinks[i] = a[2:-1]
@@ -225,19 +225,24 @@ def network_from_rvr_file(rvr_file)->pd.DataFrame:
         columns=list(NETWORK_NAMES.keys()),
         dtype=object)
     df[:]=-1
-    data = data[2:]
-    if len(data) > 1.5*nlines:
-        lids,uplinks = lids_and_ups1(data)
-    else:
-        lids,uplinks = lids_and_ups2(data)
-    # _lid = list(map(get_lid,data))
-    df['link_id'] = np.array(lids)
-    # _up = list(map(get_uplink,data))
-    df['upstream_link'] = uplinks
-    df['idx']= np.arange(nlines) + 1 #index starts at 1. idx 0 is needed for operations
-    df.index = df[list(NETWORK_NAMES.keys())[0]]
-    df.info()
-    return df
+    try:
+        #data = data[2:]
+        if len(data) > 1.5*nlines:
+            lids,uplinks = lids_and_ups1(data)
+        else:
+            lids,uplinks = lids_and_ups2(data)
+        # _lid = list(map(get_lid,data))
+        df['link_id'] = np.array(lids)
+        # _up = list(map(get_uplink,data))
+        df['upstream_link'] = uplinks
+        df['idx']= np.arange(nlines) + 1 #index starts at 1. idx 0 is needed for operations
+        df.index = df[list(NETWORK_NAMES.keys())[0]]
+        df.info()
+        return df
+    except ValueError as e:
+        print('Check that param files do not have blank lines')
+        print(e)
+        quit()
 
 
 def combine_rvr_prm(prm_file,rvr_file,paramsplit=False)->pd.DataFrame:
