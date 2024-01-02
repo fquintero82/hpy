@@ -4,10 +4,10 @@ import os
 import pandas as pd
 
 def get_states_from_manager(options=None,network:pd.DataFrame=None):
-    if 'states' not in list(options.keys()):
+    if 'initial_states' not in list(options.keys()):
         print('Error. No states option in yaml')
         quit()
-    f = options['states']
+    f = options['initial_states']
     if f=='default':
         df = get_default_states(network)
         return df
