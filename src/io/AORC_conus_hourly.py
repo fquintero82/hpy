@@ -9,9 +9,9 @@ from netCDF4 import Dataset
 import xarray as xr
 
 
-dir = '/Users/felipe/tmp/aorc/'
-time = 1199145600
-prefix = 'AORC_APCP_2008'
+#dir = '/Users/felipe/tmp/aorc/'
+#time = 1199145600
+#prefix = 'AORC_APCP_2008'
 prefix = ''
 
 
@@ -19,7 +19,7 @@ def get_values(unixtime: int,options=None):
     lid = None
     val = 0
     #root,varname = access_file(time,options)
-    ncfile = get_ncfile(time,options)
+    ncfile = get_ncfile(unixtime,options)
     # if root is None:
     #     print('Error. Could not read netcdf file in yaml file')
     #     quit()
@@ -163,6 +163,6 @@ def test():
     time = 1199145600
     lid,val = get_values(time,options)
 
-test()
+
 
     
