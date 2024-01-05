@@ -1,9 +1,8 @@
 ---
 description: model run in conus network
 network: /Users/felipe/tmp/conus_macbook.pkl
-solver: examples/hydrosheds/ode.so
 parameters: default
-initial_states: dummy
+initial_states: default
 init_time: 1199145600
 end_time: 1230768000
 time_step: 3600
