@@ -25,11 +25,13 @@ def model(df:pl.DataFrame,DT,debug=False):
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(col('temperature')*(col('melt_factor')*CF_MELTFACTOR * DT))
+        .otherwise(0)
         .alias('val2')
     )
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(pl.min_horizontal('snow','val2'))
+        .otherwise(0)
         .alias('snowmelt')
     )
     df = df.with_columns(
@@ -39,6 +41,7 @@ def model(df:pl.DataFrame,DT,debug=False):
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(CF_MMHR_M_MIN*DT*col('precipitation') + col('snowmelt'))
+        .otherwise(0)
         .alias('x1') #[m]
     )
 
