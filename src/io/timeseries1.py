@@ -10,4 +10,9 @@ def get_values(time:int,options=None):
     unixtime =(pd.to_datetime(data['date']) - dt.datetime(1970,1,1)).dt.total_seconds()
     val=np.interp(time,unixtime,data['val'])
     lid=None
+    if val is None:
+        return lid,0
+    if np.isnan(val):
+        return lid,0
+    
     return lid,val 
