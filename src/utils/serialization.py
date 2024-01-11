@@ -14,10 +14,14 @@ def get_time(timedimension,timevariable,time_to_ingest):
         current_len = np.argwhere(time_to_ingest==timevariable)[0][0]
     return current_len
 
-def save_to_netcdf(states:pd.DataFrame,params:pd.DataFrame,time:int,filename:str,discharge_only=False):
+def save_to_netcdf(states:pd.DataFrame,
+                   params:pd.DataFrame,
+                   time:int,
+                   filename:str,
+                   discharge_only=True):
     t = mytime.time()
     if isfile(filename) == False:
-        create_empty_ncdf(states,params,filename)
+        create_empty_ncdf(states,params,filename,discharge_only)
     try:    
         with Dataset(filename, mode='r+') as root:
             # Access the unlimited dimension
@@ -51,7 +55,10 @@ def save_to_netcdf(states:pd.DataFrame,params:pd.DataFrame,time:int,filename:str
     x = int(1000*(mytime.time()-t))
     print('saved to netcdf in {x} msec'.format(x=x))
 
-def create_empty_ncdf(states:pd.DataFrame,params:pd.DataFrame,filename:str,discharge_only=False):
+def create_empty_ncdf(states:pd.DataFrame,
+                      params:pd.DataFrame,
+                      filename:str,
+                      discharge_only=False):
     try:
         fn = filename
         root = Dataset(fn, 'w', format='NETCDF4')
