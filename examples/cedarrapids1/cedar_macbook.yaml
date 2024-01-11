@@ -1,11 +1,10 @@
 ---
 description: experiment to test hlm with yaml files
 network: /Users/felipe/tmp/367813_macbook.pkl
-solver: examples/cedarrapids1/ode.so
 parameters: default
-initial_states: examples/cedarrapids1/state0.pkl
-init_time: 1207008000
-end_time: 1214870400
+initial_states: default
+init_time: 1199145600
+end_time: 1199923200
 time_step: 3600
 forcings:
  precipitation:
@@ -24,5 +23,6 @@ forcings:
 output_file: 
   script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
   path: /Users/felipe/hpy/hpy/examples/cedarrapids1/out/2008_expr.nc
+  discharge_only: True
 
 
