@@ -27,7 +27,7 @@ def plot2():
 def test1():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_imac.yaml'
-    instance.init_from_file(config_file,option_solver=False)
+    instance.init_from_file(config_file)
     for ii in range(10):
         print(ii)
         instance.advance_one_step()
@@ -36,7 +36,7 @@ def test2():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_example_windows.yaml'
     config_file = 'E:/projects/et/hydrology/modis_climatology/iowa_modis_climatology.yaml'
-    instance.init_from_file(config_file,option_solver=False)
+    instance.init_from_file(config_file)
     instance.advance()
 
 def test3():
@@ -48,23 +48,25 @@ def test3():
 def test4():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_imac.yaml'
-    instance.init_from_file(config_file,option_solver=False)
+    instance.init_from_file(config_file)
     instance.advance()
 
 def test5():
     instance = HLM()
     config_file = 'examples/iowa/iowa_macbook.yaml'
-    instance.init_from_file(config_file,option_solver=False)
+    config_file = 'examples/cedarrapids1/cedar_macbook.yaml'
+
+    instance.init_from_file(config_file)
     instance.advance()   
 
 def test6():
     instance = HLM()
     config_file = '/Users/felipe/tmp/iowa_operational/iowa_operational_imac.yaml'
-    instance.init_from_file(config_file,option_solver=False)
+    instance.init_from_file(config_file)
     instance.advance()   
 
 if __name__ == "__main__":
-    test4()
+    test5()
     #plot1()
 
     
