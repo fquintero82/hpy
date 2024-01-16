@@ -42,12 +42,14 @@ def test2():
 def test3():
     instance = HLM()
     config_file = 'examples/hydrosheds/conus_example.yaml'
+    config_file = 'examples/miss/miss_imac.yaml'
     instance.init_from_file(config_file)
     instance.advance()   
 
 def test4():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_imac.yaml'
+    config_file = 'examples/cedarrapids1/cedar_imac_aorc.yaml'
     instance.init_from_file(config_file)
     instance.advance()
 
@@ -66,7 +68,7 @@ def test6():
     instance.advance()   
 
 if __name__ == "__main__":
-    test5()
+    test3()
     #plot1()
 
     
