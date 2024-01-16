@@ -1,18 +1,17 @@
 ---
 description: model run in conus network
-network: examples/hydrosheds/conus.pkl
-solver: examples/hydrosheds/ode.so
-parameters: examples/hydrosheds/conus.prm
-initial_states: dummy
-init_time: 1199145600
-end_time: 1230768000
+network: /Users/felipe/tmp/conus_imac.pkl
+parameters: default
+initial_states: default
+init_time: 1207008000
+end_time: 1214870400
 time_step: 3600
 forcings:
  precipitation:
   script: /Users/felipe/hpy/hpy/src/io/AORC_conus_hourly.py
   path: /Users/felipe/tmp/aorc/
   prefix: AORC_APCP_2008
-  centroids: examples/hydrosheds/conus_centroids.csv
+  centroids: examples/hydrosheds/conus_centroids.pkl
   varname: APCP
  evapotranspiration:
   script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
@@ -25,6 +24,6 @@ forcings:
   path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
 output_file: 
   script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
-  path: /Users/felipe/hpy/hpy/examples/hydrosheds/conus2008.nc
+  path: /Users/felipe/tmp/conus_2008.nc
 
 
