@@ -7,6 +7,7 @@ from os.path import isfile
 from netCDF4 import Dataset
 #import geopandas as gpd
 import xarray as xr
+import time as time
 
 
 #dir = '/Users/felipe/tmp/aorc/'
@@ -85,17 +86,15 @@ def get_lid_xy(options=None):
             if isfile(fcentroids)==False:
                 print('Error. Not valid path to hillslope centroids in yaml file.')
                 quit()
-        if 'format' in list(options.keys()):
-            format1 = options['format']
     if fcentroids is None:
         print('Error. Hillslope centroids missing in yaml file.')
         quit()
-    if format1 =='csv':
-        df = pd.read_csv(fcentroids)
-    if format1 == 'parquet':
-        df = pd.read_parquet(fcentroids)
+    _, extension = os.path.splitext(fcentroids)
+    if extension =='.pkl':
+        df = pd.read_pickle(fcentroids)
+    if extension =='csv':
+        df = pd.read_csv(fcentroids)    
     df.columns = ['lid','x','y']
-    
     return df
 
 # def get_col_row(nc:Dataset,df:pd.DataFrame):
@@ -150,8 +149,23 @@ def nc2xr(ncfile:str,df:pd.DataFrame,t:str):
 
 def test2():
     ncfile = '/Users/felipe/tmp/aorc/AORC_APCP_200801.nc'
+    t = time.time()
     nc = xr.open_dataset(ncfile)
     val = nc.sel(lon=125.1,lat=52.5,time='2008-01-01T01:00:00',method='nearest').to_array()
+    print(time.time()-t)
+
+def test3():
+    fcentroids = 'examples/iowa/centroids.csv'
+    t = time.time()
+    df = pd.read_csv(fcentroids)
+    print(time.time()-t)
+    df.to_pickle('examples/iowa/centroids.pkl')
+    fcentroids = 'examples/iowa/centroids.pkl'
+    t = time.time()
+    df = pd.read_pickle(fcentroids)
+    print(time.time()-t)
+
+   
 
 def test():
     import yaml
@@ -162,7 +176,7 @@ def test():
     options = d['forcings']['precipitation']
     time = 1199145600
     lid,val = get_values(time,options)
-
+# https://github.com/pydata/xarray/issues/1385
 
 
     
