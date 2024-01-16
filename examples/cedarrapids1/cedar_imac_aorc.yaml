@@ -1,0 +1,29 @@
+---
+description: experiment to test hlm with yaml files
+network: /Users/felipe/tmp/367813_imac.pkl
+parameters: default
+initial_states: default
+init_time: 1199145600
+end_time: 1230768000
+time_step: 3600
+forcings:
+ precipitation:
+  script: /Users/felipe/hpy/hpy/src/io/AORC_conus_hourly.py
+  path: /Users/felipe/tmp/aorc/
+  prefix: AORC_APCP_2008
+  centroids: examples/iowa/centroids.pkl
+  varname: APCP
+ evapotranspiration:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv
+ temperature:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/temperature.csv
+ frozen_ground:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
+output_file: 
+  script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
+  path: /Users/felipe/tmp/cedarrapids_2008_aorc.nc
+
+
