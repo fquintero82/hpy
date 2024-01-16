@@ -3,8 +3,8 @@ description: experiment to test hlm with yaml files
 network: /Users/felipe/tmp/367813_imac.pkl
 parameters: default
 initial_states: default
-init_time: 1207008000
-end_time: 1214870400
+init_time: 1199145600
+end_time: 1230768000
 time_step: 3600
 forcings:
  precipitation:
@@ -22,6 +22,6 @@ forcings:
   path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
 output_file: 
   script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
-  path: /Users/felipe/tmp/cedarrapids_2008.nc
+  path: /Users/felipe/tmp/cedarrapids_2008_binaries.nc
 
 
