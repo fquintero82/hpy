@@ -1,0 +1,26 @@
+---
+description: model run in conus network
+network: examples/miss/miss.pkl
+parameters: default
+initial_states: default
+init_time: 1207008000
+end_time: 1214870400
+time_step: 3600
+forcings:
+ precipitation:
+  script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
+  path: /Users/felipe/tmp/st4_2008/
+  prefix: iowa_
+ evapotranspiration:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: examples/miss/timeseries_et.csv
+ temperature:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: examples/miss/temperature.csv
+ frozen_ground:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: examples/miss/frozenground.csv
+output_file: 
+  path: examples/miss/miss_2008_binary.nc
+
+
