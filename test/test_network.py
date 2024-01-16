@@ -65,7 +65,13 @@ def test10():
     df = combine_rvr_prm(prm,rvr,paramsplit=False)
     df.to_pickle('E:/projects/et/hydrology/iowa_win.pkl')
 
+def test11():
+    rvr_file ='examples/miss/miss.rvr'
+    prm_file ='examples/miss/miss.prm'
+    df = combine_rvr_prm(prm_file,rvr_file)
+    df.to_pickle('examples/miss/miss.pkl')
+
 if __name__ == "__main__":
-    test10()
+    test11()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)
