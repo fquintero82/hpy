@@ -1,0 +1,29 @@
+---
+description: model run in conus network
+network: examples/hydrosheds/conus_win.pkl
+parameters: default
+initial_states: default
+init_time: 347155200
+end_time: 378691200
+time_step: 3600
+forcings:
+ precipitation:
+  script: src/io/AORC_conus_hourly.py
+  path: E:\projects\aorc\CONUS_APCP\1981
+  prefix: AORC_APCP_1981
+  centroids: examples/hydrosheds/conus_centroids.pkl
+  varname: APCP
+ evapotranspiration:
+  script: src/io/timeseries1.py
+  path: examples/hydrosheds/timeseries_et_1981.csv
+ temperature:
+  script: src/io/timeseries1.py
+  path: examples/hydrosheds/temperature_1981.csv
+ frozen_ground:
+  script: src/io/timeseries1.py
+  path: examples/hydrosheds/frozenground_1981.csv
+output_file: 
+  script: src/io/out_netcdf1.py
+  path: E:\projects\hpy_tests\conus_1981_aorc.nc
+
+
