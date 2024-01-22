@@ -72,6 +72,6 @@ def test11():
     df.to_pickle('examples/miss/miss.pkl')
 
 if __name__ == "__main__":
-    test11()
+    test3()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)
