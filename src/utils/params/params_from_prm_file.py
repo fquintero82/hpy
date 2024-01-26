@@ -81,8 +81,23 @@ def params_from_prm_file_split(prm_file)->pd.DataFrame:
     df.info()
     return df
 
+def df_to_prm(df,f):
+    print('writing new file ',f)
+    f = open(f,'w')
+    f.write('%d\n' % len(df.index))
+    f.write('\n')
+    for ii in range(len(df.index)):
+      f.write('%d\n' % df['link_id'].iloc[ii])
+      f.write('%.3e %.3e %.3e \n' % (1/1e6*df['drainage_area'].iloc[ii],1/1e3*df['channel_length'].iloc[ii],1/1e6*df['area_hillslope'].iloc[ii]))
+    f.close()
+    print('completed writing ',f)
+
+    
+
 def test():
     inputfile ='/Users/felipe/tmp/iowa_operational/ifis_iowa.prm'
     df = params_from_prm_file_split(inputfile)
+    outfile = '/Users/felipe/tmp/iowa_operational/ifis_iowa_3columns.prm'
+    df_to_prm(df,outfile)
 
-
+test()
