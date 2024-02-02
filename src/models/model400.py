@@ -123,8 +123,8 @@ def runoff1(states:pd.DataFrame,
 
     #channel update
     segs_in_DT = DT * 60.
-    states['volume'] += (out2 + out3 + out4) * network['area_hillslope'] #[m]*[m2]  = [m3]
-    #states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
+    states['volume'] = (out2 + out3 + out4) * network['area_hillslope'] #[m]*[m2]  = [m3]
+    states['discharge'] += (out2 + out3 + out4) * network['area_hillslope'] / segs_in_DT #[m]*[m2] / [s] = [m3/s]
     # print('outlet %f'%states.loc[367813,'static'])
 
 

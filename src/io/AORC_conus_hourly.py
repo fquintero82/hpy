@@ -164,7 +164,10 @@ def test3():
     t = time.time()
     df = pd.read_pickle(fcentroids)
     print(time.time()-t)
-
+    fcentroids = 'examples/hydrosheds/conus_centroids.csv'
+    df = pd.read_csv(fcentroids)
+    df.columns = ['lid','x','y']
+    df.to_pickle('examples/hydrosheds/conus_centroids.pkl')
    
 
 def test():

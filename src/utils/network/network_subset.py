@@ -42,3 +42,4 @@ outlet = 70814357
 subbasin = network_subset(df,outlet)
 f = '/Users/felipe/tmp/ms_imac.pkl'
 subbasin.to_pickle(f)
+df = pd.read_pickle(f)

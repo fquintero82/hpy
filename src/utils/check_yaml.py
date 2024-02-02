@@ -44,8 +44,8 @@ def check_yaml1(configuration):
                 print('time_step not included in configuration file')
                 quit()
 
-        if configuration['output_file'] is None:
-                print('output_file not included in configuration file')
+        if configuration['output'] is None:
+                print('output not included in configuration file')
                 quit()
 
         # if configuration['solver'] is None:

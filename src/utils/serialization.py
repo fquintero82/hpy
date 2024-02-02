@@ -18,7 +18,7 @@ def save_to_netcdf(states:pd.DataFrame,
                    params:pd.DataFrame,
                    time:int,
                    filename:str,
-                   discharge_only=True):
+                   discharge_only=False):
     t = mytime.time()
     if isfile(filename) == False:
         create_empty_ncdf(states,params,filename,discharge_only)

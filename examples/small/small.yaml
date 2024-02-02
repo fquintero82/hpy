@@ -1,0 +1,27 @@
+---
+description: experiment to test hlm with yaml files
+network: examples/small/small.pkl
+parameters: default
+initial_states: default
+init_time: 0
+end_time: 86400
+time_step: 300
+forcings:
+ precipitation:
+  script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
+  path: /Users/felipe/tmp/st4/
+  prefix: iowa_
+ evapotranspiration:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv
+ temperature:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/temperature.csv
+ frozen_ground:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
+output: 
+  script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
+  path: /Users/felipe/tmp/small_routing.nc
+
+

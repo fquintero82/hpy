@@ -177,11 +177,19 @@ def model(df:pl.DataFrame,DT,debug=False):
         (CF_METER_TO_MM*col('out4') *col('area_hillslope'))
         .alias('basin_groundwater')
     )
+    # df= df.with_columns(
+    #     (col('volume')+ (col('out4')+col('out3')+col('out2')) *col('area_hillslope'))
+    #     .alias('volume')
+    # )
     df= df.with_columns(
-        (col('volume')+ (col('out4')+col('out3')+col('out2')) *col('area_hillslope'))
+        ((col('out4')+col('out3')+col('out2')) *col('area_hillslope'))
         .alias('volume')
     )
-
+    segs_in_DT = DT * 60.
+    df= df.with_columns(
+        (col('discharge')+ (col('out4')+col('out3')+col('out2')) *col('area_hillslope')/segs_in_DT)
+        .alias('discharge')
+    )
     return df
 
 def transfer_df(states:pd.DataFrame,df):
