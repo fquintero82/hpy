@@ -210,5 +210,3 @@ def transfer7():
     out = fun1(nlinks,input,idxd,idxu)
     print(time.time()-t)
 
-transfer7()
-#@jit(nopython=True)
