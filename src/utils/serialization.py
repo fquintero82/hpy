@@ -89,7 +89,8 @@ def create_empty_ncdf(states:pd.DataFrame,
                 var_state = root.createVariable(varname='states/'+n[ii],
                                             datatype =STATES_NAMES[n[ii]],
                                             dimensions = ('timedim','linkdim'), #unlimited dimension is leftmost (recommended)
-                                            chunksizes=(1,nlinks),
+                                            # chunksizes=(1,nlinks),
+                                            chunksizes=(366*24,1), #chunksize that will be READ
                                             fill_value=float('nan'), 
                                             zlib=True
                                             )
@@ -100,7 +101,8 @@ def create_empty_ncdf(states:pd.DataFrame,
             var_state = root.createVariable(varname='states/discharge',
                                             datatype =STATES_NAMES['discharge'],
                                             dimensions = ('timedim','linkdim'), #unlimited dimension is leftmost (recommended)
-                                            chunksizes=(1,nlinks),
+                                            # chunksizes=(1,nlinks),
+                                            chunksizes=(366*24,1), #chunksize to READ
                                             fill_value=float('nan'), 
                                             zlib=True
                                             )
