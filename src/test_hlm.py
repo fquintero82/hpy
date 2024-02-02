@@ -36,7 +36,10 @@ def test2():
     instance = HLM()
     config_file = 'examples/cedarrapids1/cedar_example_windows.yaml'
     config_file = 'E:/projects/et/hydrology/modis_climatology/iowa_modis_climatology.yaml'
+    config_file = 'examples/cedarrapids1/cedar_imac_routing.yaml'
+    config_file = 'examples/small/small.yaml'
     instance.init_from_file(config_file)
+    instance.set_values('parameters.river_velocity',0.15,None)
     instance.advance()
 
 def test3():
@@ -68,7 +71,7 @@ def test6():
     instance.advance()   
 
 if __name__ == "__main__":
-    test3()
+    test2()
     #plot1()
 
     
