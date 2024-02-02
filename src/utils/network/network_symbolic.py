@@ -155,6 +155,10 @@ def _get_routing_term_indices(hlm_object):
     try:
         network = hlm_object.network
         N = len(network)
+        if 'expression' not in network.columns:
+            print('network file is corrupted')
+            print('Symbolic routing not completed')
+            quit()
         expr = network['expression'].to_numpy()
         x = np.concatenate(expr)
         order = np.array(x[0:len(x):3])
@@ -163,14 +167,14 @@ def _get_routing_term_indices(hlm_object):
         # P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
         T = hlm_object.time_step_sec
         t_in_hours= T / 3600
-            
+        #this term is in meters per hour to help computation    
         P =  (hlm_object.params['river_velocity'] * T / hlm_object.network['channel_length']).to_numpy() #[m/h]
     except ValueError as e:
         print('problems with network symbolic')
         print(e)
         quit()
     t = time.time()
-    routing_term = _eval_onetime(order,idx,P,t_in_hours)
+    routing_term = _eval_onetime(order,idx,P,t_in_hours) #expects discharge in m3/h
     print('onetimeterm done in %f sec'%(time.time()-t))
     return routing_term, idx,source_idx
 
