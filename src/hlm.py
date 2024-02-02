@@ -6,7 +6,7 @@ import numpy as np
 from models.model400polars import runoff1
 
 from models.model400names import CF_LOCATION , CF_UNITS, VAR_TYPES
-from models.routing import transfer5,transfer9
+from models.routing import transfer5,transfer9,transfer10
 #from solver import create_solver
 from yaml import Loader
 import yaml
@@ -15,12 +15,12 @@ from utils.forcings.forcing_manager import get_default_forcings
 # from utils.states.states_default import get_default_states
 from utils.states.states_manager import get_states_from_manager
 from utils.network.network import get_network_from_file
-from utils.serialization import save_to_netcdf
+# from utils.serialization import save_to_netcdf
 from utils.network.network_symbolic import NetworkSymbolic
 import importlib.util
 from utils.check_yaml import check_yaml1
 import time as mytime
-
+from utils.output_manager import OutputManager
 
 class HLM(object):
     """Creates a new HLM model """
@@ -41,6 +41,7 @@ class HLM(object):
         #self.pathsolver=None
         #self.ODESOLVER =None
         self.NetworkSymbolic=None
+        self.OutputManager = None
 
     
     def init_from_file(self,config_file:str):
@@ -62,8 +63,9 @@ class HLM(object):
         self.states = get_states_from_manager(d,self.network)
         self.params = get_params_from_manager(self.configuration,self.network)
         self.forcings = get_default_forcings(self.network)
-        self.outputfile = d['output_file']['path']
+        # self.outputfile = d['output']['path']
         self.NetworkSymbolic = NetworkSymbolic(self)
+        self.OutputManager = OutputManager(self)
 
         
 
@@ -112,12 +114,18 @@ class HLM(object):
     
     def advance_one_step(self):
         # print(self.time)
-        self.set_forcings()
-        runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
-        transfer9(self) # volume, discharge symbolic
-        transfer5(self) #basin vars
-        save_to_netcdf(self.states,self.params,self.time,self.outputfile)
+        if self.time == self.init_time:
+            self.OutputManager.save(self)
+            # save_to_netcdf(self.states,self.params,self.time,self.outputfile)
+        # self.set_forcings()
+        # runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
+        # transfer9(self) # volume, discharge symbolic
+        transfer10(self) # volume, discharge symbolic
+        # transfer5(self) #basin vars
         self.time += self.time_step_sec
+        self.OutputManager.save(self)
+        # save_to_netcdf(self.states,self.params,self.time,self.outputfile)
+        
 
     def advance(self,time_to_advance:float=None):
         if time_to_advance is None:
@@ -172,8 +180,9 @@ class HLM(object):
         if self.check_var_exists(variable)==False:
             print('{} not in HLM variables'.format(var_name))
             return
-        if group == 'params':
-            pass
+        if group == 'params' or group =='parameters':
+            if linkids is None:
+                self.params.loc[:,variable]=values
         elif group == 'forcings':
             if linkids is None:
                 self.forcings.loc[:,variable] = values
