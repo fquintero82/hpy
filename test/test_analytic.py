@@ -12,6 +12,7 @@ import pickle
 import warnings
 from numba import njit,prange
 from utils.network.network_symbolic import process_all,process_unit,eval_all,_get_routing_term_indices,_pack_to_df,_eval5,_eval4
+from models.routing import transfer9, transfer10
 
 def eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
     #uneven values of x are the order
@@ -25,7 +26,7 @@ def eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
 
 def test1():
     X = np.array([10,1,0])
-    P = np.ones(3)*0.01
+    P = np.ones(3)*0.1
     T = np.linspace(0,10)
     # T = 1
     x =[1,1]
@@ -51,6 +52,96 @@ def test1():
 
     plt.legend()
     plt.show()
+
+def test1b():
+    X = np.array([1,1,1,1,1])
+    P = np.ones(5)*1
+    T = np.linspace(0,10)
+    # T = 1
+    x =[1,1,2,2,2,3,3,4,3,5]
+    out1 = [eval_unit(x,P,X,t) for t in T]
+    x = [1,2]
+    out2 = [eval_unit(x,P,X,t) for t in T]
+    x = [1,3,2,4,2,5]
+    out3 = [eval_unit(x,P,X,t) for t in T]
+    x = [1,4]
+    out4 = [eval_unit(x,P,X,t) for t in T]
+    x = [1,5]
+    out5 = [eval_unit(x,P,X,t) for t in T]
+
+    def fun(t,X):
+        p=1
+        # return [p*(-X[0]), p*(-X[1]+X[0]) ,p*(-X[2]+X[1])]
+        return [p*(-X[0]+X[1]+X[2]), #X[0]
+                p*(-X[1]),  #X[1]
+                p*(-X[2]+X[3]+X[4]), #X[2]
+                p*(-X[3]),
+                p*(-X[4])]
+   
+    res = solve_ivp(fun,t_span=(0,10),y0=X)
+
+    instance = HLM()
+    config_file = 'examples/small/small.yaml'
+    instance.init_from_file(config_file)
+    for ii in range(10):
+        transfer10(instance)
+
+    df = pd.DataFrame({'tan':T,
+                       'a1':np.array(out1),
+                       'a2':np.array(out2),
+                       'a3':np.array(out3),
+                       'a4':np.array(out4),
+                       'a5':np.array(out5),
+                       })
+    df.to_csv('/Users/felipe/tmp/analytic_numeric/analytic.csv',index=False)
+    df = pd.DataFrame({'tnum':np.array(res['t']),
+                       'n1':np.array(res['y'][0]),
+                       'n2':np.array(res['y'][1]),
+                       'n3':np.array(res['y'][2]),
+                       'n4':np.array(res['y'][3]),
+                       'n5':np.array(res['y'][4]),
+                       })
+    df.to_csv('/Users/felipe/tmp/analytic_numeric/numeric.csv',index=False)
+
+    plt.plot(T,out1,label='out1')
+    plt.plot(T,out2,label='out2')
+    plt.plot(T,out3,label='out3')
+    plt.plot(T,out4,label='out4')
+    plt.plot(T,out5,label='out5')
+    plt.plot(res['t'],res['y'][0],label='1')
+    plt.plot(res['t'],res['y'][1],label='2')
+    plt.plot(res['t'],res['y'][2],label='3')
+    plt.plot(res['t'],res['y'][3],label='4')
+    plt.plot(res['t'],res['y'][4],label='5')
+    plt.legend()
+    plt.show()
+
+def test1c():
+    id = 558284
+    ad=0.31067
+    l= 0.88*1000#km->m
+    ai=0.31067*1e6#m2
+    real =[1.00,0.51,0.26,0.13,0.07,0.03,0.02,0.01,0.00]
+    v = 0.75#m/s
+    invtau = 60.0*v*ai**0 / ((1.0 - 0)*l)	#[1/min]  invtau
+    #dqdt = invtau * pow(q, 0) * ans[0];
+    
+    import numpy as np
+    def fun(t,X):
+        l= 0.88*1000#km->m        
+        v = 0.75#m/s
+        invtau = 60.0*v / l	#[1/min]  invtau
+        invtau #0.051
+        # invtau = 0.011
+        return (invtau*(-X))
+    # Runge-Kutta method, dx/dt = -1*0.75/(0.88*1000)x, x(0) = 1, from 0 to 7200, h = 60
+    X=[1] #m3/s 
+    X = [60] #m3/min
+    res = solve_ivp(fun,t_span=[0,600],t_eval=[0,60,120,180],y0=X)
+    #res = solve_ivp(fun,t_span=[0,600],t_eval=[0,59,119,179],y0=X)
+    np.set_printoptions(suppress=True)
+    y = np.array(res['y'][0])
+    print(y/60.)
 
 def test_eval_unit():
     instance = HLM()
@@ -227,8 +318,9 @@ def test_numpy_eval():
 #         a+=i
 #     print(a)
 if __name__ == '__main__':
-    test_polars_eval()
-    test_numpy_eval()
+    test1b()
+    # test_polars_eval()
+    # test_numpy_eval()
     # test_process_all()
     # test_eval_unit()
     # process_all()
