@@ -195,6 +195,12 @@ class HLM(object):
         elif group == 'states':
             if linkids is None:
                 self.states.loc[:,variable]=values
+            else:
+                self.states.loc[:,variable]=0
+                df = pd.DataFrame({'val':values},index=linkids)
+                ix = self.states.index.intersection(df.index)
+                self.states.loc[ix,variable] = df.loc[ix,'val']
+                del df, ix                
         elif group == 'network':
             pass
         
