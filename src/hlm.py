@@ -121,7 +121,7 @@ class HLM(object):
         # runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
         # transfer9(self) # volume, discharge symbolic
         transfer10(self) # volume, discharge symbolic
-        # transfer5(self) #basin vars
+        transfer5(self) #basin vars
         self.time += self.time_step_sec
         self.OutputManager.save(self)
         # save_to_netcdf(self.states,self.params,self.time,self.outputfile)
@@ -193,7 +193,8 @@ class HLM(object):
                 self.forcings.loc[ix,variable] = df.loc[ix,'val']
                 del df, ix
         elif group == 'states':
-            pass
+            if linkids is None:
+                self.states.loc[:,variable]=values
         elif group == 'network':
             pass
         
