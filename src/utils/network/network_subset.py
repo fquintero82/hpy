@@ -36,10 +36,14 @@ def network_subset(network:pd.DataFrame,outlet:int)->pd.DataFrame:
     network = set_routing_expression(network)
     return network
 
-f = '/Users/felipe/tmp/conus_imac.pkl'
-df = pd.read_pickle(f)
-outlet = 70814357
-subbasin = network_subset(df,outlet)
-f = '/Users/felipe/tmp/ms_imac.pkl'
-subbasin.to_pickle(f)
-df = pd.read_pickle(f)
+def test():
+    f = 'examples/hydrosheds/conus_win.pkl'
+    df = pd.read_pickle(f)
+    outlet = 70814357
+    subbasin = network_subset(df,outlet)
+    f = 'examples/miss/miss.pkl'
+    subbasin.to_pickle(f)
+    df = pd.read_pickle(f)
+
+if __name__=='__main__':
+    test()
