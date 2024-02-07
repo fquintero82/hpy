@@ -329,7 +329,8 @@ def transfer5(hlm_object):
 
     for ii in range(len(var)):
         hlm_object.states[var[ii]] = input[ii,:] /hlm_object.network['drainage_area']
-    
+        #hlm_object.states[var[ii]] = input[ii,:] #test
+
     x = int(1000*(time.time()-t))
     print('vars routing in {x} msec'.format(x=x))
 # #this doesnt work well
