@@ -117,8 +117,8 @@ class HLM(object):
         if self.time == self.init_time:
             self.OutputManager.save(self)
             # save_to_netcdf(self.states,self.params,self.time,self.outputfile)
-        # self.set_forcings()
-        # runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
+        self.set_forcings()
+        runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
         # transfer9(self) # volume, discharge symbolic
         transfer10(self) # volume, discharge symbolic
         transfer5(self) #basin vars
