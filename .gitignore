@@ -1,3 +1,6 @@
 examples/cedarrapids1/out/*
 src/__pycache__/*
 *.pyc
+examples/hydrosheds/conus.pkl
+examples/hydrosheds/conus_win.pkl
+examples/miss/miss.pkl
