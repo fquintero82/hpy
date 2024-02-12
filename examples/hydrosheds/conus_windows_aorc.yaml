@@ -22,8 +22,8 @@ forcings:
  frozen_ground:
   script: src/io/timeseries1.py
   path: examples/hydrosheds/frozenground_1981.csv
-output_file: 
-  script: src/io/out_netcdf1.py
+output: 
   path: E:\projects\hpy_tests\conus_1981_aorc.nc
+  links: examples/hydrosheds/usgs.txt
 
 
