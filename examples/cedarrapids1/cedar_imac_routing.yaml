@@ -1,0 +1,26 @@
+---
+description: experiment to test hlm with yaml files
+network: /Users/felipe/tmp/367813_imac.pkl
+parameters: default
+initial_states: default
+init_time: 0
+end_time: 1209600
+time_step: 3600
+forcings:
+ precipitation:
+  script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
+  path: /Users/felipe/tmp/st4/
+  prefix: iowa_
+ evapotranspiration:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/timeseries_et.csv
+ temperature:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/temperature.csv
+ frozen_ground:
+  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
+  path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
+output: 
+  path: /Users/felipe/tmp/cedarrapids_routing.nc
+  links: /Users/felipe/tmp/links.txt
+

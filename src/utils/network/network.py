@@ -199,27 +199,30 @@ def network_from_rvr_file(rvr_file)->pd.DataFrame:
         for i in range(len(x)):
             a = [eval(j) for j in y[i].split()]
             if len(a)>1:
-                uplinks[i] = a[2:-1]
+                uplinks[i] = a[2:]
             else:
                 uplinks[i] = [-1]
         return lids,uplinks
 
     def lids_and_ups2(data):
-        n = len(data)
-        x = data[2:n]
+        data.remove('\n') #here expects 1st line to be the number of links, second the first links ant topo, and so on
+        # n = len(data)
+        n = int(data[0])
+        x = data[1:]
         lids = np.empty(shape=len(x),dtype=np.int32)
         uplinks = np.empty(shape=len(x),dtype=object) 
         for i in range(len(x)):
             a = [eval(j) for j in x[i].split()]
             lids[i] = int(a[0])
             if a[1]>1:
-                uplinks[i] = a[2:-1]
+                uplinks[i] = a[2:]
             else:
                 uplinks[i] = [-1]
         return lids,uplinks
     
     f = open(rvr_file,'r')
     data = f.readlines()
+    # data.remove('\n')
     nlines = int(data[0])
     df = pd.DataFrame(data=np.zeros(shape=(nlines,len(NETWORK_NAMES))),
         columns=list(NETWORK_NAMES.keys()),

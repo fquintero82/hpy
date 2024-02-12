@@ -8,7 +8,7 @@ def test1():
     #df = network_from_rvr_file(rvr_file)
     prm_file ='examples/cedarrapids1/367813.prm'
     df = combine_rvr_prm(prm_file,rvr_file)
-    df.to_pickle('examples/cedarrapids1/367813_network.pkl')
+    df.to_pickle('examples/cedarrapids1/367813.pkl')
 
 
 
@@ -71,7 +71,14 @@ def test11():
     df = combine_rvr_prm(prm_file,rvr_file)
     df.to_pickle('examples/miss/miss.pkl')
 
+def test12():
+    f = '/Users/felipe/tmp/367813_imac.pkl'
+    f2 = '/Users/felipe/tmp/367813_imac_fullrouting.pkl'
+    df = pd.read_pickle(f)
+    process_all(df)
+    df.to_pickle(f2)
+
 if __name__ == "__main__":
-    test11()
+    test3()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)

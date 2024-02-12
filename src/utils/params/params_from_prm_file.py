@@ -100,4 +100,3 @@ def test():
     outfile = '/Users/felipe/tmp/iowa_operational/ifis_iowa_3columns.prm'
     df_to_prm(df,outfile)
 
-test()
