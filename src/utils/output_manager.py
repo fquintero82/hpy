@@ -1,3 +1,4 @@
+# I create an output manager in the folder /outputs and this is not used.
 import os
 from os.path import splitext
 import numpy as np

@@ -1,0 +1,15 @@
+link_id
+snow
+static
+surface
+subsurface
+groundwater
+volume
+discharge
+basin_precipitation
+basin_evapotranspiration
+basin_static
+basin_swe
+basin_surface
+basin_subsurface
+basin_groundwater
