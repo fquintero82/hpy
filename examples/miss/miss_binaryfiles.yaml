@@ -1,26 +1,39 @@
 ---
 description: model run in conus network
-network: examples/miss/miss.pkl
-parameters: default
-initial_states: default
-init_time: 1207008000
-end_time: 1214870400
-time_step: 3600
+network: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\miss.pkl
+parameters: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\sbasin_vary_hlm_param_df.csv
+# Varying parameters: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\sbasin_vary_hlm_param_df.csv
+# Uniform parameters: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\default_hlm_param_df.csv
+initial_states: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\zero_init_state.csv
+init_time: 0 # start time
+end_time: 63136800 # end time (seconds)
+time_step: 21600 # computation intervals (seconds)
 forcings:
  precipitation:
-  script: /Users/felipe/hpy/hpy/src/io/HLM_Binaries.py
-  path: /Users/felipe/tmp/st4_2008/
-  prefix: iowa_
+  script: E:\Code\Packages\hpy_new\src\io\HLM_Binaries.py
+  path: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\2015_2016_aorc\2015_2016
  evapotranspiration:
-  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
-  path: examples/miss/timeseries_et.csv
+  script: E:\Code\Packages\hpy_new\src\io\timeseries1.py
+  path: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\et_climate_2_year.csv
  temperature:
-  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
-  path: examples/miss/temperature.csv
+  script: E:\Code\Packages\hpy_new\src\io\HLM_Binaries.py
+  path: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\2015_2016_temp_daily\2015_2016 # test daily temperature input
+  # path: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\2015_2016_temp_hourly\2015_2016 # test hourly temperature input
  frozen_ground:
-  script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
-  path: examples/miss/frozenground.csv
+  script: E:\Code\Packages\hpy_new\src\io\timeseries1.py
+  path: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\frozen_ground_2_year.csv
 output_file: 
-  path: examples/miss/miss_2008_binary.nc
-
+  folder: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\output
+  file_name: hlm_sim
+  # Output links: a csv file containing a list of link ids
+  output_links: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\output_links_396_gauges.csv
+  # Output states: a csv file containing a list of state names: link id, discharge, groundwater, etc.
+  output_states: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\output_states_14_states.csv
+  output_timestamps: 86400 # save every 216000 seconds
+  # output_timestamps: all # if set to "all", saves every timestamp
+  # output_timestamps: J:\hillslope_link_model_run\model_files\miss_model_hpy_400_2_year\output_timestamps.csv
+  # if set to a file: it will reads a csv and only output timestamps in that file
+  output_file_type: csv
+  # output file type is csv, means it will generate csv file.
+  # csv file is generated at each time step "file_name"_"timestamp".csv
 

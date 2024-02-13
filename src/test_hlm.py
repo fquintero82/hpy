@@ -47,7 +47,17 @@ def test3():
     config_file = 'examples/hydrosheds/conus_example.yaml'
     config_file = 'examples/miss/miss_imac.yaml'
     instance.init_from_file(config_file)
-    instance.advance()   
+    instance.advance()
+
+def test3_yuan():
+    """
+    Test the hlm on my computer.
+    """
+    instance = HLM()
+    # config_file = 'examples/hydrosheds/conus_example.yaml'
+    config_file = r'E:\Code\Packages\hpy_new\examples\miss_2_year\miss_binaryfiles.yaml'
+    instance.init_from_file(config_file)
+    instance.advance()
 
 def test4():
     instance = HLM()
@@ -71,7 +81,7 @@ def test6():
     instance.advance()   
 
 if __name__ == "__main__":
-    test2()
+    test3_yuan()
     #plot1()
 
     
