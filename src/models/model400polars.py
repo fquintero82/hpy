@@ -15,19 +15,26 @@ def model(df:pl.DataFrame,DT,debug=False):
     CF_METER_TO_MM = 1000
     CF_DAYS_TO_MINUTES = 24 * 60
 
+    #IF TEMPERATURE IS EXACTLY 0, THE SNOW MODULE IS DESACTIVATED
+    #ALL PRECIPITATION BECOMES RAINFALL X1
+    #NOTHING GOES TO SWE STORAGE
     df = df.with_columns(
         pl.when(col('temperature')==0)
         .then(col('precipitation')* CF_MMHR_M_MIN * DT)
         .otherwise(0)
         .alias('x1')
     )
-    
+    #IF TEMPERATURE IS GREATER THAN THE TEMPERATURE THRESHOLD
+    #CALCULATES THE SNOWMELT USING THE DEGREE DAY METHOD
+    #AND PUT IT TEMPORARILY ON VAL2
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(col('temperature')*(col('melt_factor')*CF_MELTFACTOR * DT))
         .otherwise(0)
         .alias('val2')
     )
+    #IF TEMPERATURE IS GREATER THAN THE TEMPERATURE THRESHOLD
+    #LIMITS THE AMOUNT OF SNOWMELT TO THE STORED SWE
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(pl.min_horizontal('snow','val2'))
