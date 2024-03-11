@@ -29,9 +29,9 @@ def model(df:pl.DataFrame,DT,debug=False):
     #AND PUT IT TEMPORARILY ON VAL2
     df = df.with_columns(
         pl.when(col('temperature')>=col('temp_threshold'))
-        .then(col('temperature')*(col('melt_factor')*CF_MELTFACTOR * DT))
+        .then(col('temperature')*(col('melt_factor')*CF_MELTFACTOR * DT)) #meters
         .otherwise(0)
-        .alias('val2')
+        .alias('val2') #METERS
     )
     #IF TEMPERATURE IS GREATER THAN THE TEMPERATURE THRESHOLD
     #LIMITS THE AMOUNT OF SNOWMELT TO THE STORED SWE
@@ -39,10 +39,10 @@ def model(df:pl.DataFrame,DT,debug=False):
         pl.when(col('temperature')>=col('temp_threshold'))
         .then(pl.min_horizontal('snow','val2'))
         .otherwise(0)
-        .alias('snowmelt')
+        .alias('snowmelt') #METERS
     )
     df = df.with_columns(
-        (col('snow')-col('snowmelt'))
+        (col('snow')-col('snowmelt')) #METERS
         .alias('snow')
     )
     df = df.with_columns(
@@ -54,7 +54,7 @@ def model(df:pl.DataFrame,DT,debug=False):
 
     df = df.with_columns(
         pl.when((col('temperature')!=0)&(col('temperature')< col('temp_threshold')))
-        .then(col('snow') + CF_MMHR_M_MIN*DT*col('precipitation'))
+        .then(col('snow') + CF_MMHR_M_MIN*DT*col('precipitation')) #METERS
         .otherwise(col('snow'))
         .alias('snow')
     )
@@ -65,11 +65,11 @@ def model(df:pl.DataFrame,DT,debug=False):
         .alias('x1')
     )
     df = df.with_columns(
-        (col('precipitation')*col('area_hillslope'))
+        (col('precipitation')*col('area_hillslope')) #[mm x m2]
         .alias('basin_precipitation')
     )
     df = df.with_columns(
-        (CF_METER_TO_MM*col('snow')*col('area_hillslope'))
+        (CF_METER_TO_MM*col('snow')*col('area_hillslope')) # [mm x m2]
         .alias('basin_swe')
     )
 
@@ -101,11 +101,11 @@ def model(df:pl.DataFrame,DT,debug=False):
 
 
     df = df.with_columns(
-        (CF_METER_TO_MM*col('out1')*col('area_hillslope'))
+        (CF_METER_TO_MM*col('out1')*col('area_hillslope')) #[mm x m2]
         .alias('basin_evapotranspiration')
     )
     df = df.with_columns(
-        (CF_METER_TO_MM*col('static')*col('area_hillslope'))
+        (CF_METER_TO_MM*col('static')*col('area_hillslope')) #[mm x m2]
         .alias('basin_static')
     )
 
@@ -146,7 +146,7 @@ def model(df:pl.DataFrame,DT,debug=False):
         .alias('surface')
     )
     df = df.with_columns(
-        (CF_METER_TO_MM*col('out2') *col('area_hillslope'))
+        (CF_METER_TO_MM*col('out2') *col('area_hillslope')) #[mm x m2]
         .alias('basin_surface')
     )
     df = df.with_columns(
@@ -168,7 +168,7 @@ def model(df:pl.DataFrame,DT,debug=False):
     )
 
     df= df.with_columns(
-        (CF_METER_TO_MM*col('out3') *col('area_hillslope'))
+        (CF_METER_TO_MM*col('out3') *col('area_hillslope')) # [mm x m2]
         .alias('basin_subsurface')
     )
     df= df.with_columns(
@@ -181,7 +181,7 @@ def model(df:pl.DataFrame,DT,debug=False):
         .alias('groundwater')
     )
     df= df.with_columns(
-        (CF_METER_TO_MM*col('out4') *col('area_hillslope'))
+        (CF_METER_TO_MM*col('out4') *col('area_hillslope')) #[mm x m2]
         .alias('basin_groundwater')
     )
     # df= df.with_columns(
