@@ -60,15 +60,15 @@ class NetworkSymbolic(object):
         return _eval4(self.idx,X,self.routing_term,self.indices)
 
 
-def _eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
-    #uneven values of x are the order
-    #even values of x are the index
-    n=len(P)
-    order = np.array(x[0:len(x):2])
-    idx = np.array(x[1:len(x):2])
-    val = 1/(factorial(order-1)) * P[idx-1]**(order-1) * X[idx-1] * T**(order-1) * 2.718 ** (-P[idx-1] * T)
-    out = np.sum(val)
-    return out
+# def _eval_unit(x:list,P:np.ndarray,X:np.ndarray,T:int):
+#     #uneven values of x are the order
+#     #even values of x are the index
+#     n=len(P)
+#     order = np.array(x[0:len(x):2])
+#     idx = np.array(x[1:len(x):2])
+#     val = 1/(factorial(order-1)) * P[idx-1]**(order-1) * X[idx-1] * T**(order-1) * 2.718 ** (-P[idx-1] * T)
+#     out = np.sum(val)
+#     return out
 
 
 def eval_unit(idx:np.int32,expr:np.ndarray,P:np.ndarray,X:np.ndarray,T:int):
@@ -97,6 +97,9 @@ def _eval_onetime(order:np.ndarray,idx:np.ndarray,P:np.ndarray,t_in_hours:np.int
 
     
 def _eval4(idx:np.ndarray,X:np.ndarray,routing_term:np.ndarray,indices:np.ndarray):
+    #ROUTING TERM EXPECTS DISCHARGE IN M3/H
+    # X IS DISCHARGE IN M3/H
+    #OUT IS M3/H
     val = routing_term * X[idx-1]
     # out = np.bincount(indices,weights=val)
     out = np.bincount(indices-1,weights=val)
@@ -130,28 +133,32 @@ def process_all(network:pd.DataFrame)->pd.DataFrame:
     network['expression'] = expression
     return network
     
-def eval_all2(expr,P,X,T):
-    N = len(expr)
-    t=time.time()
-    ncpu = cpu_count() - 1
-    ncpu=2
-    with Pool(processes=ncpu) as pool:
-        out = pool.map(Evaluator(expr,P,X,T),range(N))
-    print('done in %f sec'%(time.time()-t))
-    return np.asarray(out)
+# def eval_all2(expr,P,X,T):
+#     N = len(expr)
+#     t=time.time()
+#     ncpu = cpu_count() - 1
+#     ncpu=2
+#     with Pool(processes=ncpu) as pool:
+#         out = pool.map(Evaluator(expr,P,X,T),range(N))
+#     print('done in %f sec'%(time.time()-t))
+#     return np.asarray(out)
 
-def eval_all(expr,P,X,T):
-    N = len(expr)
-    t=time.time()
-    out = np.zeros(N)
-    for i in np.arange(N):
-        out [i] =_eval_unit(expr[i],P,X,T)
-    print('done in %f sec'%(time.time()-t))
-    return out
+# def eval_all(expr,P,X,T):
+#     N = len(expr)
+#     t=time.time()
+#     out = np.zeros(N)
+#     for i in np.arange(N):
+#         out [i] =_eval_unit(expr[i],P,X,T)
+#     print('done in %f sec'%(time.time()-t))
+#     return out
 
 def _get_routing_term_indices(hlm_object):
     # f = '/Users/felipe/tmp/iowa/iowa_network.pkl'
     # network = pd.read_pickle(f)
+    #THIS FUNCTION IS EXECUTED ONLY ONCE
+    #BEFORE THE MODEL STARTS
+    #CALCULATES A TERM THAT IS REQUIRED AT EVERY TIME STEP FOR THE ROUTING
+
     try:
         network = hlm_object.network
         N = len(network)
@@ -166,15 +173,16 @@ def _get_routing_term_indices(hlm_object):
         source_idx = np.array(x[2:len(x):3])
         # P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
         T = hlm_object.time_step_sec
-        t_in_hours= T / 3600
+        t_in_hours= T / 3600.
         #this term is in meters per hour to help computation    
-        P =  (hlm_object.params['river_velocity'] * T / hlm_object.network['channel_length']).to_numpy() #[m/h]
+        
+        P =  (hlm_object.params['river_velocity'] * T / hlm_object.network['channel_length']).to_numpy() #[m/m]
     except ValueError as e:
         print('problems with network symbolic')
         print(e)
         quit()
     t = time.time()
-    routing_term = _eval_onetime(order,idx,P,t_in_hours) #expects discharge in m3/h
+    routing_term = _eval_onetime(order,idx,P,t_in_hours) #REQUIRES INPUT discharge in m3/h DURING EVAL
     print('onetimeterm done in %f sec'%(time.time()-t))
     return routing_term, idx,source_idx
 
