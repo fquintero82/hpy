@@ -22,8 +22,7 @@ forcings:
  frozen_ground:
   script: /Users/felipe/hpy/hpy/src/io/timeseries1.py
   path: /Users/felipe/hio/hio/examples/timeseries1/frozenground.csv
-output_file: 
-  script: /Users/felipe/hpy/hpy/src/io/out_netcdf1.py
+output: 
   path: /Users/felipe/tmp/conus_2008.nc
 
 
