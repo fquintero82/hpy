@@ -8,13 +8,15 @@ from netCDF4 import Dataset
 #import geopandas as gpd
 import xarray as xr
 import time as time
-
+from utils.forcings.forcing_manager import forcing
 
 #dir = '/Users/felipe/tmp/aorc/'
 #time = 1199145600
 #prefix = 'AORC_APCP_2008'
 prefix = ''
 
+class AORC_conus_hourly(forcing):
+    pass
 
 def get_values(unixtime: int,options=None):
     lid = None
