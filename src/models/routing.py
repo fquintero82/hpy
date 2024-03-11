@@ -8,7 +8,7 @@ import time
 from scipy.linalg import solve
 import threading
 from solver import create_accum_numba_multiple
-from utils.network.network_symbolic import _eval_unit,eval_all2
+#from utils.network.network_symbolic import _eval_unit,eval_all2
 
 # #calculates routing using Mantilla 2005 equation, using lambda1 and lambda 2 parameters
 # #deprecated. uses solve_ivp. very slow
@@ -320,6 +320,7 @@ def transfer5(hlm_object):
     routing_order = routing_order.sort_values(by=['drainage_area'])
     idxd = routing_order['idx_downstream_link'].to_numpy()
     idxu = routing_order['idx'].to_numpy()
+    #AFTER RUNOFF MODEL, this vars are in mm x m2. are aggreagated and divided by drain area in m2 , then final is mm
     var = ['basin_precipitation','basin_evapotranspiration','basin_swe','basin_surface','basin_subsurface','basin_groundwater']
     input = np.zeros(shape=(len(var),nlinks),dtype=np.float32)
     for ii in range(len(var)):
@@ -328,7 +329,7 @@ def transfer5(hlm_object):
     input = create_accum_numba_multiple(nlinks,input,idxd,idxu)
 
     for ii in range(len(var)):
-        hlm_object.states[var[ii]] = input[ii,:] /hlm_object.network['drainage_area']
+        hlm_object.states[var[ii]] = input[ii,:] /hlm_object.network['drainage_area'] # [mm]
     
     x = int(1000*(time.time()-t))
     print('vars routing in {x} msec'.format(x=x))
@@ -486,18 +487,18 @@ def transfer7(hlm_object):
     hlm_object.states['discharge'] = out
     print('discharge routing in %f' % (time.time()-t))
 
-def transfer8(hlm_object):
-    t = time.time()
-    N = hlm_object.network.shape[0]
-    initial_state = hlm_object.states['discharge'].to_numpy()
-    T= hlm_object.time_step_sec
-    out = np.zeros(shape=(N,))
-    expr = hlm_object.network['expression'].to_numpy()
-    P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
-    for i in np.arange(N):
-        out[i] = _eval_unit(expr[i],P,initial_state,T)
-    hlm_object.states['discharge'] = out
-    print('discharge routing in %f' % (time.time()-t))
+# def transfer8(hlm_object):
+#     t = time.time()
+#     N = hlm_object.network.shape[0]
+#     initial_state = hlm_object.states['discharge'].to_numpy()
+#     T= hlm_object.time_step_sec
+#     out = np.zeros(shape=(N,))
+#     expr = hlm_object.network['expression'].to_numpy()
+#     P =  (hlm_object.params['river_velocity'] / hlm_object.network['channel_length']).to_numpy()
+#     for i in np.arange(N):
+#         out[i] = _eval_unit(expr[i],P,initial_state,T)
+#     hlm_object.states['discharge'] = out
+#     print('discharge routing in %f' % (time.time()-t))
 
 def transfer9(hlm_object):
     t = time.time()
@@ -511,8 +512,8 @@ def transfer9(hlm_object):
 def transfer10(hlm_object):
     t = time.time()
     initial_state = hlm_object.states['discharge'].to_numpy()#[m3/s]
-    out = hlm_object.NetworkSymbolic.eval(initial_state*3600) #m3/h
-    hlm_object.states['discharge'] = out/3600
+    out = hlm_object.NetworkSymbolic.eval(initial_state) #m3/s
+    hlm_object.states['discharge'] = out
     # hlm_object.states['discharge'] = out / hlm_object.network['channel_length'] * hlm_object.params['river_velocity']
     x = int(1000*(time.time()-t))
     print('discharge routing in {x} msec'.format(x=x))
