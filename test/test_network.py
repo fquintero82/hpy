@@ -78,6 +78,22 @@ def test12():
     process_all(df)
     df.to_pickle(f2)
 
+def create_binary_network():
+    import numpy as np
+    count_done =0
+    count_links = 0
+    n=2**9
+    n1 = 2**10
+    arr = np.zeros(shape=(n1+1,3),dtype=np.uint)
+    while count_done<n:
+        arr[count_done,0] = count_done
+        arr[count_done,1] = count_links+1
+        arr[count_done,2] = count_links+2
+        count_done +=1
+        count_links+=2
+    a = np.arange(n,n1+1)
+    arr[n:(n1-1),0]=a
+
 if __name__ == "__main__":
     test3()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
