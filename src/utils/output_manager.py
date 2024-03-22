@@ -27,6 +27,9 @@ class OutputManager(object):
         if('path' not in options['output'].keys()):
             print('path for netcdf file not provided')
             quit()
+        if('discharge_only' in options['output'].keys()):
+            self.dischargeonly=options['output']['discharge_only']
+           
         _, extension = os.path.splitext(options['output']['path'])
         if extension =='.nc':
             self.format = FORMAT_NETCDF
