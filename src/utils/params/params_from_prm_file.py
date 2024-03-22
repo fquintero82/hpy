@@ -88,7 +88,9 @@ def df_to_prm(df,f):
     f.write('\n')
     for ii in range(len(df.index)):
       f.write('%d\n' % df['link_id'].iloc[ii])
-      f.write('%.3e %.3e %.3e \n' % (1/1e6*df['drainage_area'].iloc[ii],1/1e3*df['channel_length'].iloc[ii],1/1e6*df['area_hillslope'].iloc[ii]))
+      f.write('%.3e %.3e %.3e \n' % (1/1e6*df['area_hillslope'].iloc[ii],
+                                     1/1e3*df['channel_length'].iloc[ii],
+                                     1/1e6*df['drainage_area'].iloc[ii]))
     f.close()
     print('completed writing ',f)
 
