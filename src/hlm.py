@@ -120,8 +120,8 @@ class HLM(object):
         self.set_forcings()
         runoff1(self.states,self.forcings,self.params,self.network,self.time_step_sec)
         # transfer9(self) # volume, discharge symbolic
-        transfer10(self) # volume, discharge symbolic
-        transfer5(self) #basin vars
+        #transfer10(self) # volume, discharge symbolic
+        #transfer5(self) #basin vars
         self.time += self.time_step_sec
         self.OutputManager.save(self)
         # save_to_netcdf(self.states,self.params,self.time,self.outputfile)
