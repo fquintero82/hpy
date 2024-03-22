@@ -38,8 +38,8 @@ def test2():
     config_file = 'E:/projects/et/hydrology/modis_climatology/iowa_modis_climatology.yaml'
     config_file = 'examples/cedarrapids1/cedar_imac_routing.yaml'
     config_file = 'examples/small/small.yaml'
+    config_file = 'E:/projects/iowa_operational/iowa_operational_mrms_2016.yaml'
     instance.init_from_file(config_file)
-    instance.set_values('parameters.river_velocity',0.15,None)
     instance.advance()
 
 def test3():
