@@ -36,7 +36,7 @@ def get_link_subbasin(network,outlet):
 
 def test_iowa_model400():
     df = pd.read_pickle('/Users/felipe/tmp/iowa_operational/ifis_iowa.pkl')
-    df1 = df.loc[:,['area_hillslope','channel_length','drainage_area']]
+    df1 = df.loc[:,['drainage_area','channel_length','area_hillslope']]
     df1['area_hillslope']=df1['area_hillslope']/1e6
     df1['channel_length']=df1['channel_length']/1e3
     df1['drainage_area']=df1['drainage_area']/1e6
