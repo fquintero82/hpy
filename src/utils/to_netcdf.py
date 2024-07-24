@@ -18,10 +18,11 @@ def save_to_netcdf(states:pd.DataFrame,
                    params:pd.DataFrame,
                    time:int,
                    filename:str,
-                   discharge_only=False):
+                   discharge_only=False,
+                   variables=None):
     t = mytime.time()
     if isfile(filename) == False:
-        create_empty_ncdf(states,params,filename,discharge_only)
+        create_empty_ncdf(states,params,filename,discharge_only,variables)
     try:    
         with Dataset(filename, mode='r+') as root:
             # Access the unlimited dimension
@@ -34,8 +35,13 @@ def save_to_netcdf(states:pd.DataFrame,
             if discharge_only==False:
                 # Add the new data to the existing variable
                 n = np.array(states.columns,dtype=np.str_)
-                for ii in range(1,len(states.columns)):
-                    root['states/'+n[ii]][current_len,:] = states[n[ii]]
+                if variables is None:
+                    for ii in range(1,len(states.columns)):
+                        root['states/'+n[ii]][current_len,:] = states[n[ii]]
+                if variables is not None:
+                    for ii in range(1,len(states.columns)):
+                        if n[ii] in variables:
+                            root['states/'+n[ii]][current_len,:] = states[n[ii]]                            
             if discharge_only==True:
                 root['states/discharge'][current_len,:] = states['discharge']
     except OSError as e:
@@ -58,7 +64,8 @@ def save_to_netcdf(states:pd.DataFrame,
 def create_empty_ncdf(states:pd.DataFrame,
                       params:pd.DataFrame,
                       filename:str,
-                      discharge_only=False):
+                      discharge_only=False,
+                      variables=None):
     try:
         fn = filename
         root = Dataset(fn, 'w', format='NETCDF4')
@@ -85,17 +92,29 @@ def create_empty_ncdf(states:pd.DataFrame,
         
         # state variables
         if discharge_only==False:
-            for ii in range(1,len(states.columns)):
-                var_state = root.createVariable(varname='states/'+n[ii],
-                                            datatype =STATES_NAMES[n[ii]],
-                                            dimensions = ('timedim','linkdim'), #unlimited dimension is leftmost (recommended)
-                                            chunksizes=(1,nlinks),
-                                            fill_value=float('nan'), 
-                                            zlib=True
-                                            )
-                var_state.units = CF_UNITS['states.'+n[ii]]
-                var_state.setncatts({'units':CF_UNITS['states.'+n[ii]]})
-
+            if variables is None:
+                for ii in range(1,len(states.columns)):
+                    var_state = root.createVariable(varname='states/'+n[ii],
+                                                datatype =STATES_NAMES[n[ii]],
+                                                dimensions = ('timedim','linkdim'), #unlimited dimension is leftmost (recommended)
+                                                chunksizes=(1,nlinks),
+                                                fill_value=float('nan'), 
+                                                zlib=True
+                                                )
+                    var_state.units = CF_UNITS['states.'+n[ii]]
+                    var_state.setncatts({'units':CF_UNITS['states.'+n[ii]]})
+            if variables is not None:
+                for ii in range(1,len(states.columns)):
+                    if n[ii] in variables:
+                        var_state = root.createVariable(varname='states/'+n[ii],
+                                                    datatype =STATES_NAMES[n[ii]],
+                                                    dimensions = ('timedim','linkdim'), #unlimited dimension is leftmost (recommended)
+                                                    chunksizes=(1,nlinks),
+                                                    fill_value=float('nan'), 
+                                                    zlib=True
+                                                    )
+                        var_state.units = CF_UNITS['states.'+n[ii]]
+                        var_state.setncatts({'units':CF_UNITS['states.'+n[ii]]})
         if discharge_only==True:
             var_state = root.createVariable(varname='states/discharge',
                                             datatype =STATES_NAMES['discharge'],

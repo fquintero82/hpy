@@ -2,6 +2,8 @@ from utils.network.network import combine_rvr_prm,network_from_rvr_file,get_idx_
 from utils.network.network import get_default_network
 from utils.network.network_symbolic import process_all
 import pandas as pd
+import numpy as np
+
 
 def test1():
     rvr_file ='examples/cedarrapids1/367813.rvr'
@@ -78,6 +80,26 @@ def test12():
     process_all(df)
     df.to_pickle(f2)
 
+def test13():
+    f ='E:/projects/hpy/examples/hydrosheds/conus.pkl'
+    f ='E:/projects/iowa_operational/ifis_iowa.pkl'
+    df = pd.read_pickle(f)
+    df2 = df[['idx','area_hillslope','channel_length','idx_upstream_link','idx_downstream_link','drainage_area']]
+ 
+#    np.save('E:/projects/hpy/examples/hydrosheds/conus_gpu_topo_uplinks.npy',df2['idx_upstream_link'].values)
+    np.save('E:/projects/iowa_operational/iowa_gpu_topo_uplinks.npy',df2['idx_upstream_link'].values)
+
+ 
+    list_up = df2['idx_upstream_link'].to_numpy()
+    nup = np.zeros(len(list_up))
+    for i in range(0,len(list_up)):
+        nup[i] = list_up[i].shape[0] 
+    df2['nup'] = nup
+    import csv
+    #df2.to_csv('E:/projects/hpy/examples/hydrosheds/conus_gpu_topo2.csv',quoting=csv.QUOTE_NONNUMERIC)
+    df2.to_csv('E:/projects/iowa_operational/iowa_gpu_topo2.csv',quoting=csv.QUOTE_NONNUMERIC)
+    #need to add a zero id row
+    #df3 = pd.read_csv('E:/projects/hpy/examples/hydrosheds/conus_gpu_topo.csv')
 def create_binary_network():
     import numpy as np
     count_done =0
@@ -95,6 +117,6 @@ def create_binary_network():
     arr[n:(n1-1),0]=a
 
 if __name__ == "__main__":
-    test3()
+    test13()
     # f ='/Users/felipe/tmp/iowa/iowa_network.pkl'
     # df = pd.read_pickle(f)

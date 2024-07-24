@@ -1,10 +1,13 @@
 import os
 import numpy as np
 import pandas as pd
+from netCDF4 import Dataset
+import math
+
 from datetime import datetime
 import pytz
 from os.path import isfile
-from netCDF4 import Dataset
+
 #import geopandas as gpd
 import xarray as xr
 import time as time
@@ -169,6 +172,33 @@ def test3():
     df.columns = ['lid','x','y']
     df.to_pickle('examples/hydrosheds/conus_centroids.pkl')
    
+def test4():
+    timer = time.time()
+    f = 'E:/projects/hpy/examples/hydrosheds/conus_centroids.csv'
+    df = pd.read_csv(f)
+    df['lid'] = df['HYRIV_ID'].to_numpy(dtype=np.int32) - int(7E7)
+    crd_ix = df.set_index('lid').to_xarray()
+    ncfile = 'E:/projects/aorc/CONUS_APCP/2008/AORC_APCP_200806.nc'
+    nc = xr.open_dataset(ncfile)
+    T = nc['time'].to_numpy()
+    output = np.zeros(dtype=np.float16,shape=(len(df)+1,len(T)))
+    idx=0
+    for i in T:
+        print(i)
+        out = nc.sel(lon=crd_ix.x,lat=crd_ix.y,time= i, method='nearest')
+        aux = out['APCP'].to_numpy()
+        aux = np.nan_to_num(aux,copy=False,posinf=0.0,neginf=0.0)
+        output[:,idx]=aux
+        idx+=1
+    #val = out['APCP'].to_numpy()
+    np.save(file='E:/projects/aorc/CONUS_APCP/2008/AORC_200806_conus.npy',arr=output)
+
+    print(time.time()-timer)
+    print('done')
+
+
+
+
 
 def test():
     import yaml

@@ -1,4 +1,5 @@
 import pandas as pd
+
 import numpy as np
 import sys
 from utils.network.network import get_idx_up_down
@@ -38,10 +39,13 @@ def network_subset(network:pd.DataFrame,outlet:int)->pd.DataFrame:
 
 def test():
     f = 'examples/hydrosheds/conus_win.pkl'
+    f = 'E:/projects/iowa_operational/ifis_iowa.pkl'
     df = pd.read_pickle(f)
     outlet = 70814357
+    outlet = 1925436
     subbasin = network_subset(df,outlet)
     f = 'examples/miss/miss.pkl'
+    f = 'E:/projects/iowa_operational/05482500.pkl'
     subbasin.to_pickle(f)
     df = pd.read_pickle(f)
 

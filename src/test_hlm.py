@@ -39,6 +39,8 @@ def test2():
     config_file = 'examples/cedarrapids1/cedar_imac_routing.yaml'
     config_file = 'examples/small/small.yaml'
     config_file = 'E:/projects/iowa_operational/iowa_operational_mrms_2016.yaml'
+    config_file = 'E:/projects/iowa_operational/iowa_2019.yaml'
+
     instance.init_from_file(config_file)
     instance.advance()
 
